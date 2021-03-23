@@ -7,6 +7,6 @@ let function_test_string name func str1 str2 =
 
 let scraper_tests = []
 
-let suite = "test suite for A2" >::: List.flatten [ scraper_tests ]
+let suite = "DEFINITELY NOT A COPY OF A2 (CamelStonks Test Suite)" >::: List.flatten [ scraper_tests ]
 
 let _ = run_test_tt_main suite
