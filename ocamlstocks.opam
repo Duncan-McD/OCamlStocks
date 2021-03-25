@@ -1,5 +1,5 @@
 opam-version: "2.0"
-maintainer: ["Duncan McDonald" "Peter Bell" "Matthew Chan" "Miguel Roberts"]
+maintainer: "All Authors"
 authors: ["Duncan McDonald" "Peter Bell" "Matthew Chan" "Miguel Roberts"]
 homepage: "https://github.com/Duncan-McD/OCamlStocks"
 dev-repo: "git+https://github.com/Duncan-McD/OCamlStocks.git"
