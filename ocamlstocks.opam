@@ -1,0 +1,13 @@
+opam-version: "2.0"
+authors: ["Duncan McDonald" "Peter Bell" "Matthew Chan" "Miguel Roberts"]
+homepage: "https://github.com/Duncan-McD/OCamlStocks"
+dev-repo: "https://github.com/Duncan-McD/OCamlStocks.git"
+bug-reports: "https://github.com/Duncan-McD/OCamlStocks/issues"
+depends: [
+  "ocaml" {>= "4.11.1"}
+  "mechaml"
+  "ounit"
+  "yojson"
+]
+
+synopsis: "Ocaml Stock Bot"
