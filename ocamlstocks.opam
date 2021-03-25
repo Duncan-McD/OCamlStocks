@@ -1,7 +1,8 @@
 opam-version: "2.0"
+maintainer: ["Duncan McDonald" "Peter Bell" "Matthew Chan" "Miguel Roberts"]
 authors: ["Duncan McDonald" "Peter Bell" "Matthew Chan" "Miguel Roberts"]
 homepage: "https://github.com/Duncan-McD/OCamlStocks"
-dev-repo: "https://github.com/Duncan-McD/OCamlStocks.git"
+dev-repo: "git+https://github.com/Duncan-McD/OCamlStocks.git"
 bug-reports: "https://github.com/Duncan-McD/OCamlStocks/issues"
 depends: [
   "ocaml" {>= "4.11.1"}
