@@ -1,1 +1,1 @@
-true: package(ounit2)
+true: package(ounit2), package(mechaml), package(yojson)
