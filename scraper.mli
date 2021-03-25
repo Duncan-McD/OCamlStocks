@@ -11,4 +11,4 @@ val title : post -> string
 val body : post -> string
 
 (* scrapes subreddit w/ optional cutoff -> t *)
-val scrape_default : amount:int -> string -> t
+val scrape_default : ?amount:int -> string -> t
