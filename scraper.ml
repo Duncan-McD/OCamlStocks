@@ -98,20 +98,20 @@ let get_after_id (subreddit : string) : string =
 let get_json_post_list (subreddit : string) : Yojson.Basic.t list =
   subreddit |> get_json |> member "data" |> member "children" |> U.to_list
 
+let build_post post =
+  {
+    post_name = post |> member "data" |> member "title" |> U.to_string;
+    body = post |> member "data" |> member "selftext" |> U.to_string;
+    score = post |> member "data" |> member "score" |> U.to_int;
+    upvote_ratio = post |> member "data" |> member "upvote_ratio" |> U.to_float;
+  }
+
 let rec scrape_posts (subreddit : string) (amount : int)
     (after_parameter : string) (current_posts : post list)
     (json_post_list : Yojson.Basic.t list) : post list =
   match json_post_list with
   | h :: t ->
-      let post =
-        {
-          post_name = h |> member "data" |> member "title" |> U.to_string;
-          body = h |> member "data" |> member "selftext" |> U.to_string;
-          score = h |> member "data" |> member "score" |> U.to_int;
-          upvote_ratio =
-            h |> member "data" |> member "upvote_ratio" |> U.to_float;
-        }
-      in
+      let post = build_post h in
       let new_posts_list = post :: current_posts in
       if amount = 1 then new_posts_list
       else scrape_posts subreddit (amount - 1) after_parameter new_posts_list t
