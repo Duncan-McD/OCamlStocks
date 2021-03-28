@@ -4,4 +4,5 @@
 #directory "_build";;
 #load "scraper.cmo";;
 #load "parser.cmo";;
+#load "cashset.cmo";;
 let sr = Scraper.scrape "r/wallstreetbets"
