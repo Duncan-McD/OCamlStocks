@@ -1,5 +1,6 @@
 #require "mechaml";;
 #require "yojson";;
+#require "csv";;
 #directory "_build";;
 #load "scraper.cmo";;
 #load "parser.cmo";;
