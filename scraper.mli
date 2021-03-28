@@ -31,7 +31,7 @@ val body : post -> string
 (** [body p] is the body of a post [p] *)
 
 val score : post -> int
-(** [upvotes p] is the score of a post [p] (upvotes - downvotes) *)
+(** [score p] is the score of a post [p] (upvotes - downvotes) *)
 
 val upvote_ratio : post -> float
 (** [upvote_ratio p] is the ratio of upvotes to total votes a post [p] has *)
