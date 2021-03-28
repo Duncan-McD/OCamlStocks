@@ -1,6 +1,6 @@
 (** CS 3110 Final Project - Ocaml Stock Bot
 
-    @authors 
+    @author
     Duncan McDonald (dam342), 
     Peter Bell (pnb36), 
     Matthew Chan (mc2438), 
