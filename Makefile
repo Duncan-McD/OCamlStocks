@@ -1,4 +1,4 @@
-MODULES= scraper authors parser
+MODULES= scraper authors parser cashset
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
