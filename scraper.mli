@@ -43,6 +43,6 @@ val scrape : ?amount:int -> ?ordering:subreddit_ordering -> string -> subreddit
     to the requested [i] posts
     [scrape s ~o] parses the subreddit in the order set by [o]
     Requires: [s] is in the form ["r/subreddit"] and amount is nonnegative
-    Raises [SubredditNotFound s] if there is no subreddit matching the url [s]
+    Raises [SubredditNotFound s] if there is no subreddit matching [s]
     Raises [TooManyPostsRequested i] if there is not enough posts in subreddit 
     to meet request.*)
