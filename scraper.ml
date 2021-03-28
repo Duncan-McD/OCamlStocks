@@ -62,7 +62,7 @@ let get_ordering_url_parameter (ordering : subreddit_ordering) : string =
   | Rising -> "/rising.json?limit=100"
   | Top time -> "/top.json?limit=100" ^ get_time_url_parameter time
 
-let reslove_after_string_option string_option =
+let resolve_after_string_option string_option =
   match string_option with Some str -> str | None -> "null"
 
 let index_of_substring (s : string) (sub : string) : int =
@@ -93,7 +93,7 @@ let scrape_subreddit_name (subreddit : string) : string =
 (** [get_after_id s] is the after paramter from the json *)
 let get_after_id (subreddit : string) : string =
   subreddit |> get_json |> member "data" |> member "after" |> U.to_string_option
-  |> reslove_after_string_option
+  |> resolve_after_string_option
 
 let get_json_post_list (subreddit : string) : Yojson.Basic.t list =
   subreddit |> get_json |> member "data" |> member "children" |> U.to_list
@@ -125,6 +125,7 @@ let rec scrape_posts (subreddit : string) (amount : int)
         current_posts
         (get_json_post_list new_subreddit_link)
 
+(** [subreddit_doesnt_exist s] returns true if a subreddit has no posts*)
 let subreddit_doesnt_exist (subreddit : string) : bool =
   "https://reddit.com/" ^ subreddit ^ ".json"
   |> get_json |> member "data" |> member "dist" |> to_int = 0
@@ -143,15 +144,3 @@ let scrape ?(amount = 100) ?(ordering = New) (subreddit : string) : subreddit =
         []
         (get_json_post_list new_subreddit_link);
   }
-
-let checkthis () = scrape "r/wallstreetbets" ~amount:8
-
-let testYojsonAfter () =
-  "https://www.reddit.com/r/wallstreetbets.json" |> get_json |> member "data"
-  |> member "after" |> U.to_string_option
-
-let testYojsonBefore () =
-  "https://www.reddit.com/r/wallstreetbets.json" |> get_json |> member "data"
-  |> member "before" |> U.to_string_option
-
-let checkEmptyCommunity () = scrape "r/testingEmptyCommunity" ~amount:3
