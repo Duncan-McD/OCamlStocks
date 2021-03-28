@@ -58,7 +58,7 @@ let get_time_url_parameter (time : time) : string =
 let get_ordering_url_parameter (ordering : subreddit_ordering) : string =
   match ordering with
   | Hot -> "/hot.json?limit=100"
-  | New -> "/new.json?limit=2"
+  | New -> "/new.json?limit=100"
   | Rising -> "/rising.json?limit=100"
   | Top time -> "/top.json?limit=100" ^ get_time_url_parameter time
 
