@@ -10,6 +10,7 @@ depends: [
   "ounit"
   "yojson"
   "lwt_ssl"
+  "csv"
 ]
 
 synopsis: "Ocaml Stock Bot"
