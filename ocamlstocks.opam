@@ -9,6 +9,7 @@ depends: [
   "mechaml"
   "ounit"
   "yojson"
+  "csv"
 ]
 
 synopsis: "Ocaml Stock Bot"

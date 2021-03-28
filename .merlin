@@ -2,3 +2,4 @@ B _build
 PKG ounit2
 PKG mechaml
 PKG yojson
+PKG csv
