@@ -1,0 +1,6 @@
+#require "mechaml";;
+#require "yojson";;
+#directory "_build";;
+#load "scraper.cmo";;
+#load "parser.cmo";;
+let sr = Scraper.scrape "r/wallstreetbets"
