@@ -9,6 +9,7 @@ depends: [
   "mechaml"
   "ounit"
   "yojson"
+  "lwt_ssl"
 ]
 
 synopsis: "Ocaml Stock Bot"
