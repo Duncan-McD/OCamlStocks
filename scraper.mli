@@ -6,6 +6,10 @@ type subreddit
 type post
 (** The abstract type of a scraped reddit post *)
 
+type time = Now | Today | ThisWeek | ThisMonth | ThisYear | AllTime
+
+type subreddit_ordering = Hot | New | Rising | Top of time
+
 exception SubredditNotFound of string
 (** Raised when a subreddit is not found matching the url *)
 
@@ -24,7 +28,13 @@ val title : post -> string
 val body : post -> string
 (** [body p] is the body of a post [p] *)
 
-val scrape : ?amount:int -> string -> subreddit
+val score : post -> int
+(** [upvotes p] is the score of a post [p] (upvotes - downvotes) *)
+
+val upvote_ratio : post -> float
+(** [upvote_ratio p] is the ratio of upvotes to total votes a post [p] has *)
+
+val scrape : ?amount:int -> ?ordering:subreddit_ordering -> string -> subreddit
 (** [scrape s] parses the subreddit indicated in string [s] to the 
     default 100 posts. [scrape s ~i] parses the subreddit indicated 
     in the string [s] to the requested [i] posts
