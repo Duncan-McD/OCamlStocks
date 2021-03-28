@@ -1,4 +1,4 @@
-MODULES= scraper authors
+MODULES= scraper authors parser
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
