@@ -1,55 +1,22 @@
-type stock_data = {
-  upvote_ratio : float;
-  upvote_total : int;
-  connotation : int;
-}
+type post = { score : int; upvote_ratio : float; connotation : int }
 
-type stock = { name : string; data : stock_data list }
+type stocks = (string, post list) Hashtbl.t
 
-type post = {
-  title : string;
-  body : string;
-  upvote_ratio : float;
-  upvote_total : int;
-}
+(* [populate_stocks] is the [stocks] hashtable created from the data in [posts] *)
+let rec populate_stocks posts stocks = stocks
 
-(*  [parse_post post_text parsed_data] is an [(n * d) list] obtained by parsing the post where 
-    [n] is the name of a mentioned stock and [d] is the stock_data *)
-let rec parse_post post_text stock_data parsed_data =
-  match post_text with
-  | [] -> parsed_data
-  | word :: remaining_words ->
-      if Cashset.is_stock_name word && List.mem_assoc word parsed_data = false
-      then
-        parse_post remaining_words stock_data ((word, stock_data) :: parsed_data)
-      else parse_post remaining_words stock_data parsed_data
+let parse subreddit =
+  let stocks = Hashtbl.create 500 in
+  let posts = Scraper.posts subreddit in
+  populate_stocks posts stocks
 
-(* [get_stock_data posts] is the [stock_data list] obtained by parsing [posts] *)
-let rec get_stocks_data posts stocks_data =
-  match posts with
-  | [] -> stocks_data
-  | post :: remaining_posts ->
-      let uv_ratio = Scraper.upvote_ratio post in
-      (* score isnt total change later *)
-      let uv_total = Scraper.score post in
-      (* connotation function TBD *)
-      let con = 0 in
-      let stock_data =
-        { upvote_ratio = uv_ratio; upvote_total = uv_total; connotation = con }
-      in
-      let post_title_body = Scraper.title post ^ Scraper.body post in
-      let post_text = post_title_body |> String.split_on_char ' ' in
-      let unfiltered_stocks_data = parse_post post_text stock_data [] in
-      unfiltered_stocks_data
+let name stocks =
+  Hashtbl.fold (fun name posts stock_names -> name :: stock_names) stocks []
 
-let parse subreddit = Scraper.posts subreddit |> get_stocks_data
+let data stocks stock_name = Hashtbl.find
 
-let name stock = stock.name
+let score post = post.upvote_ratio
 
-let data stock = stock.data
+let upvote_ratio post = post.upvote_ratio
 
-let score post = Scraper.score
-
-let ratio post = Scraper.upvote_ratio
-
-let connotation post = failwith "Unimplemented"
+let connotation post = post.connotation
