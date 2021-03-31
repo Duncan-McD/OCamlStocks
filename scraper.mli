@@ -38,11 +38,22 @@ val upvote_ratio : post -> float
 
 (** [scrape s] parses the subreddit indicated in string [s] to the 
     default 100 posts and with the default New ordering on reddit
-    [scrape s ~i] parses the subreddit indicated in the string [s] 
+    [scrape s ~amount:i] parses the subreddit indicated in the string [s] 
     to the requested [i] posts
-    [scrape s ~o] parses the subreddit in the order set by [o]
-    Requires: [s] is in the form ["r/subreddit"] and amount is nonnegative
-    Raises [SubredditNotFound s] if there is no subreddit matching [s]
+    [scrape s ~ordering:o] parses the subreddit in the order set by [o]
+    Requires: [s] is in the form ["r/subreddit"] and amount is nonnegative.
+    Raises [SubredditNotFound s] if there is no subreddit matching [s].
     Raises [TooManyPostsRequested i] if there is not enough posts in subreddit 
     to meet request.*)
 val scrape : ?amount:int -> ?ordering:subreddit_ordering -> string -> subreddit
+
+(** [scrape_json json] parses the [json] representing a subreddit to default all
+    posts contained in [json] and with the default ordering as specified in
+    [json].
+    [scrape_json json ~amount:i] parses the representation of a subreddit [json]
+    to the requested [i] posts
+    Requires: [json] is a valid representation of a subreddit and [i] is
+    nonnegative.
+    Raises [TooManyPostsRequested i] if there is not enough posts in [json] 
+    to meet request.*)
+val scrape_json : ?amount:int -> string -> subreddit
