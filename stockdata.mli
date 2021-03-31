@@ -7,7 +7,10 @@ type t
 val stockdata_from_ticker : string -> t
 
 (** [stockdata_from_stock s] is the current stock data of stock [s]*)
-val stockdata_from_stock : string -> Parser.stock
+val stockdata_from_stock : Parser.stock -> t
 
-(** [value sd] is the current value of the stock data [sd] *)
+(** [value sd] is the current value of the stock represented by [sd] *)
 val value : t -> float
+
+(** [change sd] is the percent change in value of the stock represented by [sd] *)
+val change : t -> float
