@@ -1,6 +1,9 @@
 (** Representation of a Subreddit Parser *)
 
 (** The abstract type of a stock *)
+type stock_data
+
+(** The abstract type of a stock *)
 type stock
 
 (** The abstract type of relevant data about a post *)
@@ -16,7 +19,9 @@ val name : stock -> string
 
 (** [data stock] is the relevant data associated with [stock] for a post it 
     is mentioned in *)
-val data : stock -> post list
+val data : stock -> stock_data list
+
+(* insert getters for stock_data here *)
 
 (** [score post] is the upvotes minus downvotes of [post] *)
 val score : post -> int
@@ -25,5 +30,5 @@ val score : post -> int
 val ratio : post -> float
 
 (** [connotation post] is the connotation of language of [post] 
-    The range of possible connotations is -1 to 1 from worst to best*)
+    The range of possible connotations is -1 to 1 from worst to best *)
 val connotation : post -> float
