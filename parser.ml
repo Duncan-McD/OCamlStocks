@@ -23,7 +23,9 @@ let rec update_stocks text post stocks_seen stocks =
   match text with
   | [] -> stocks
   | w :: t ->
-      if Cashset.is_stock_name w && List.exists (fun p -> p = w) stocks_seen
+      if
+        Cashset.is_stock_name w
+        && Bool.not (List.exists (fun p -> p = w) stocks_seen)
       then
         let stocks' = update_one_stock w post stocks in
         update_stocks t post (w :: stocks_seen) stocks'
