@@ -35,6 +35,8 @@ let scrape_change link =
 
 type t = { value : float; change : float }
 
+(** [yahoo_finance_link t] returns the link to the page on Yahoo Finance for 
+    ticker [t] *)
 let yahoo_finance_link ticker = "https://finance.yahoo.com/quote/" ^ ticker
 
 let stockdata_from_ticker (ticker : string) : t =
