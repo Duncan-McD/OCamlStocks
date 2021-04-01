@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset
+MODULES= scraper authors parser cashset stockdata
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -16,6 +16,9 @@ test:
 
 zip:
 	zip stocks.zip *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
+
+stockdatademo: 
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread stockdatademo.byte && ./stockdatademo.byte -runner sequential
 	
 docs: docs-public docs-private
 	
