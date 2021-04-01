@@ -11,8 +11,8 @@ type stocks
     mentioned in *)
 val parse : Scraper.subreddit -> stocks
 
-(** [name stock] is the list of stock ticker symbols of all stocks in [stocks] *)
-val name : stocks -> string list
+(** [stock_names stocks] is the list of stock ticker symbols of all stocks in [stocks] *)
+val stock_names : stocks -> string list
 
 (** [data stock_name] is the relevant data associated with [stock] *)
 val data : string -> post list
