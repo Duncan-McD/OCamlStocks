@@ -15,3 +15,4 @@ done
 
 $install_prefix pv
 $install_prefix openssl
+$install_prefix libssl-dev
