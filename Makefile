@@ -33,3 +33,6 @@ docs-private: build
 clean:
 	ocamlbuild -clean
 	rm -rf _doc.public _doc.private 
+
+demo:
+	./demo.sh
