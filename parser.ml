@@ -4,6 +4,8 @@ type stocks = (string, post list) Hashtbl.t
 
 let connotation post = 0
 
+(*  [update_one_stock stock_name post stocks] is [stocks] with the new post data 
+    added to the stock [stock_name] *)
 let update_one_stock stock_name post stocks =
   if Hashtbl.mem stocks stock_name then
     let posts = Hashtbl.find stocks stock_name in
@@ -11,7 +13,7 @@ let update_one_stock stock_name post stocks =
   else Hashtbl.add stocks stock_name [ post ];
   stocks
 
-(* [update_stocks text post stocks_seen stocks] is [stocks] 
+(*  [update_stocks text post stocks_seen stocks] is [stocks] 
     updated by reading each word in [text] and, if the word is a stock,
     updating that stock with the post data [post] 
     
