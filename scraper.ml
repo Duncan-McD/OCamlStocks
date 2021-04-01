@@ -129,7 +129,7 @@ let build_post post =
     post_name = post |> member "data" |> member "title" |> U.to_string;
     body = post |> member "data" |> member "selftext" |> U.to_string;
     score = post |> member "data" |> member "score" |> U.to_int;
-    upvote_ratio = post |> member "data" |> member "upvote_ratio" |> U.to_float;
+    upvote_ratio = post |> member "data" |> member "upvote_ratio" |> U.to_number;
   }
 
 (** [scrape_posts sub amount param curr json] is the post list representation of
@@ -177,5 +177,5 @@ let scrape_json ?(amount = 100) (json_file : string) : subreddit =
   let json = Yojson.Basic.from_file json_file in
   {
     subreddit_name = scrape_json_name json;
-    posts = scrape_posts "" amount "" [] (get_post_list json);
+    posts = scrape_posts "" amount "null" [] (get_post_list json);
   }
