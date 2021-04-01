@@ -1,8 +1,8 @@
-type post = { score : int; upvote_ratio : float; connotation : int }
+type post = { score : int; upvote_ratio : float; connotation : float }
 
 type stocks = (string, post list) Hashtbl.t
 
-let connotation post = 0
+let connotation post = 0.0
 
 (*  [update_one_stock stock_name post stocks] is [stocks] with the new post data 
     added to the stock [stock_name] *)
@@ -61,5 +61,3 @@ let data = Hashtbl.find
 let upvote_score post = post.score
 
 let upvote_ratio post = post.upvote_ratio
-
-let connotation post = post.connotation
