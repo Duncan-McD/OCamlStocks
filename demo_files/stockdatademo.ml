@@ -36,7 +36,9 @@ and ask_if_want_new () =
     ask_if_want_new ())
 
 and prompt_and_get_stock_data () =
-  print_endline "Enter a stock ticker to retrieve its data from Yahoo Finance";
+  print_endline
+    "Enter a stock ticker to retrieve its data from Yahoo Finance - Example: \
+     GME not \"GME\"";
   let ticker = read_line () in
   stockdata_from_ticker ticker
 
