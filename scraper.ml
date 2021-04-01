@@ -96,12 +96,17 @@ let replace_after_parameter (subreddit : string) after_parameter : string =
 let get_json (subreddit : string) : Yojson.Basic.t =
   get_full_page_json (get_soup subreddit)
 
-(** [scrape_subreddit_name s] is the name of subreddit [s] *)
-let scrape_subreddit_name (subreddit : string) : string =
-  subreddit |> get_json |> member "data" |> member "children" |> U.to_list
+(** [scrape_json_name json] is the name of the json representation of a
+    subreddit [json] *)
+let scrape_json_name (json : Yojson.Basic.t) : string =
+  json |> member "data" |> member "children" |> U.to_list
   |> List.hd |> member "data"
   |> member "subreddit_name_prefixed"
   |> U.to_string
+
+(** [scrape_subreddit_name s] is the name of subreddit [s] *)
+let scrape_subreddit_name (subreddit : string) : string =
+  subreddit |> get_json |> scrape_json_name
 
 (** [get_after_id s] is the after paramter (for the next batch of posts) of
     subreddit [s] *)
@@ -109,9 +114,14 @@ let get_after_id (subreddit : string) : string =
   subreddit |> get_json |> member "data" |> member "after" |> U.to_string_option
   |> resolve_after_string_option
 
+(** [get_post_list json] is the list of posts in the json representation of a
+    subreddit [json] *)
+let get_post_list (json : Yojson.Basic.t) : Yojson.Basic.t list =
+  json |> member "data" |> member "children" |> U.to_list
+
 (** [get_json_post_list s] is the list of posts of a subreddit [s] *)
 let get_json_post_list (subreddit : string) : Yojson.Basic.t list =
-  subreddit |> get_json |> member "data" |> member "children" |> U.to_list
+  subreddit |> get_json |> get_post_list
 
 (** [build_post p] post is the post representation of json post [p] *)
 let build_post post =
@@ -161,4 +171,11 @@ let scrape ?(amount = 100) ?(ordering = New) (subreddit : string) : subreddit =
         (get_after_id new_subreddit_link)
         []
         (get_json_post_list new_subreddit_link);
+  }
+
+let scrape_json ?(amount = 100) (json_file : string) : subreddit =
+  let json = Yojson.Basic.from_file json_file in
+  {
+    subreddit_name = scrape_json_name json;
+    posts = scrape_posts "" amount "" [] (get_post_list json);
   }
