@@ -56,7 +56,7 @@ let parse subreddit =
 let stock_names stocks =
   Hashtbl.fold (fun name posts stock_names -> name :: stock_names) stocks []
 
-let data stocks stock_name = Hashtbl.find
+let data = Hashtbl.find
 
 let upvote_score post = post.score
 
