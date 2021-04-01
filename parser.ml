@@ -58,7 +58,7 @@ let stock_names stocks =
 
 let data stocks stock_name = Hashtbl.find
 
-let score post = post.upvote_ratio
+let upvote_score post = post.score
 
 let upvote_ratio post = post.upvote_ratio
 

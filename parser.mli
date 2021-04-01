@@ -15,13 +15,13 @@ val parse : Scraper.subreddit -> stocks
 val stock_names : stocks -> string list
 
 (** [data stock_name] is the relevant data associated with [stock] *)
-val data : string -> post list
+val data : stocks -> string -> post list
 
 (** [score post] is the upvotes minus downvotes of [post] *)
-val score : post -> int
+val upvote_score : post -> int
 
-(** [ratio post] is the ratio of upvotes to total votes of [post] *)
-val ratio : post -> float
+(** [upvote_ratio post] is the ratio of upvotes to total votes of [post] *)
+val upvote_ratio : post -> float
 
 (** [connotation post] is the connotation of language of [post] 
     The range of possible connotations is -1 to 1 from worst to best *)
