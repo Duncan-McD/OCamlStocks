@@ -3,7 +3,6 @@
 #require "csv";;
 #directory "_build";;
 #load "scraper.cmo";;
-#load "parser.cmo";;
 #load "cashset.cmo";;
+#load "parser.cmo";;
 #load "stockdata.cmo";;
-let sr = Scraper.scrape "r/wallstreetbets"
