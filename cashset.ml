@@ -1,5 +1,5 @@
 (** [cashtable] is the hashtable that stores the hashed names of stocks as keys with value 0 *)
-let cashtable = Hashtbl.create 7337
+let cashtable = Hashtbl.create 10624
 
 (** [word_hashtable] is the hashtable that stores the hashed names of common words that may be the same as a stock ticker 0 *)
 let word_hashtbl = Hashtbl.create 50
@@ -36,7 +36,7 @@ let () =
   done;
   close_in ic;
   let ic = open_in stock_file in
-  for i = 1 to 7337 do
+  for i = 1 to 10624 do
     try
       let line = input_line ic in
       line |> parse_line |> add_to_stock_hashtbl
