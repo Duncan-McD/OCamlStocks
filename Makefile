@@ -17,15 +17,15 @@ scraperdemo:
 cashsetdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files cashsetdemo.byte && ./cashsetdemo.byte -runner sequential
 
+stockdatademo: 
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files stockdatademo.byte && ./stockdatademo.byte -runner sequential
+
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
 	zip ocamlstocks.zip  README.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit ocamlstocks.opam .gitignore demo_files demo_files/*.ml* demo_files/demo.sh LICENSE Makefile	
 
-stockdatademo: 
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread stockdatademo.byte && ./stockdatademo.byte -runner sequential
-	
 docs: docs-public docs-private
 	
 docs-public: build

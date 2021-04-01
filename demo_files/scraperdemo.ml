@@ -24,8 +24,9 @@ let rec ask_for_pretty_print (subreddit : subreddit) : unit =
 
 let rec get_scrape_time subreddit amount =
   print_endline
-    "what time do u want to request from \"Now\", \"Today\", \"ThisWeek\", \
-     \"ThisMonth\", \"ThisYear\", or \"AllTime\"?";
+    "what time do u want to request from? \"Now\", \"Today\", \"ThisWeek\", \
+     \"ThisMonth\", \"ThisYear\", or \"AllTime\"? Note: do not include the \
+     quotes";
   let time = read_line () in
   if time = "Now" then scrape subreddit ~amount ~ordering:(Top Now)
   else if time = "Today" then scrape subreddit ~amount ~ordering:(Top Today)
@@ -42,8 +43,8 @@ let rec get_scrape_time subreddit amount =
 
 let rec get_scrape subreddit amount =
   print_endline
-    "What order do u want to request from reddit \"Hot\", \"New\", \"Rising\", \
-     or \"Top\"?";
+    "What order do u want to request from reddit? \"Hot\", \"New\", \
+     \"Rising\", or \"Top\"? Note: do not include the quotes";
   let order = read_line () in
   let scraped_subreddit =
     if order = "New" then scrape subreddit ~amount ~ordering:New
@@ -76,7 +77,8 @@ let rec ask_for_another_scrape () =
 
 and do_scrape () =
   print_endline
-    "please enter the name of a subreddit in the form \"r/subreddit\"";
+    "please enter the name of a subreddit in the form r/subreddit - Example: \
+     r/wallstreetbets not \"r/wallstreetbets\"";
   let subreddit = read_line () in
   print_endline "how many posts do u want to scrape?";
   let amount = read_int () in

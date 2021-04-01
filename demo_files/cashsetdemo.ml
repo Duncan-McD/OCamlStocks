@@ -1,7 +1,9 @@
 open Cashset
 
 let rec prompt_for_stock () =
-  print_endline "Enter a string/word to check if it is a stock ticker";
+  print_endline
+    "Enter a string/word to check if it is a stock ticker - Example: GME not \
+     \"GME\"";
   let word = read_line () in
   if is_stock_name word then (
     print_endline (word ^ " is a stock ticker");
