@@ -10,7 +10,7 @@ let get_soup (site : string) : soup node M.m =
   Agent.get site >|= Agent.HttpResponse.page >|= Page.soup
 
 (** [get_full_page_json soup_node] is the json representation of [soup_node] *)
-  let get_one_tag (tag : string) (soup_node : soup node M.m) : string =
+let get_one_tag (tag : string) (soup_node : soup node M.m) : string =
   match M.run (Agent.init ()) soup_node with
   | _, node ->
       node |> (*select_one ".YDC-Lead" |> require |> *) select_one tag
@@ -45,7 +45,7 @@ let scrape_change link =
   let new_change = String.sub change 0 (change_end - 1) in
   float_of_string new_change
 
-type t = { value : float; change : float }
+type t = { value : float; change : float; ticker : string }
 
 (** [yahoo_finance_link t] returns the link to the page on Yahoo Finance for 
     ticker [t] *)
@@ -64,18 +64,21 @@ let contains s sub =
 (** [stock_exists t] is true if the stock with ticker [t] is on Yahoo Finance *)
 let stock_exists ticker =
   let link = yahoo_finance_link ticker in
-  try 
-  let _ = get_one_tag value_selector (get_soup link) in
-  true;
-  with Failure s->  false
+  try
+    let _ = get_one_tag value_selector (get_soup link) in
+    true
+  with Failure s -> false
 
 let stockdata_from_ticker (ticker : string) : t =
   if stock_exists ticker = false then raise (StockNotFound ticker);
   {
     value = scrape_value (yahoo_finance_link ticker);
     change = scrape_change (yahoo_finance_link ticker);
+    ticker;
   }
 
 let value (stock_data : t) : float = stock_data.value
 
 let change (stock_data : t) : float = stock_data.change
+
+let ticker (stock_data : t) : string = stock_data.ticker

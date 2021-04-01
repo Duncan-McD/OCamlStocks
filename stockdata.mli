@@ -16,3 +16,6 @@ val value : t -> float
 
 (** [change sd] is the percent change in value of the stock represented by [sd] *)
 val change : t -> float
+
+(** [ticker sd] is the ticker of the stock represented by [sd] *)
+val ticker : t -> string
