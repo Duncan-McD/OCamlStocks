@@ -9,13 +9,19 @@ default: build
 	OCAMLRUNPARAM=b utop
 
 build:
-	$(OCAMLBUILD) $(OBJECTS)
+	$(OCAMLBUILD) $(OBJECTS) -tag thread
+
+scraperdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files scraperdemo.byte && ./scraperdemo.byte -runner sequential
+
+cashsetdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files cashsetdemo.byte && ./cashsetdemo.byte -runner sequential
 
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
-	zip stocks.zip *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit LICENSE Makefile	
+	zip ocamlstocks.zip  README.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit ocamlstocks.opam .gitignore demo_files demo_files/*.ml* demo_files/demo.sh LICENSE Makefile	
 	
 docs: docs-public docs-private
 	
@@ -35,4 +41,5 @@ clean:
 	rm -rf _doc.public _doc.private 
 
 demo:
-	./demo.sh
+	chmod u+x ./demo_files/demo.sh
+	./demo_files/demo.sh
