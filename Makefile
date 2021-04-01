@@ -33,3 +33,8 @@ docs-private: build
 clean:
 	ocamlbuild -clean
 	rm -rf _doc.public _doc.private 
+
+install:
+	chmod u+x system_dependencies.sh
+	./system_dependencies.sh
+	opam install . --deps-only
