@@ -5,4 +5,5 @@
 #load "scraper.cmo";;
 #load "parser.cmo";;
 #load "cashset.cmo";;
+#load "stockdata.cmo";;
 let sr = Scraper.scrape "r/wallstreetbets"

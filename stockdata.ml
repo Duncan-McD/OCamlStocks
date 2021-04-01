@@ -3,6 +3,8 @@ module M = Agent.Monad
 open M.Infix
 open Soup
 
+exception StockNotFound of string
+
 (** [get_soup site] is the soup node representation of website [site] *)
 let get_soup (site : string) : soup node M.m =
   Agent.get site >|= Agent.HttpResponse.page >|= Page.soup
@@ -18,15 +20,18 @@ let get_soup (site : string) : soup node M.m =
 
 (* css selector for stock day change *)
 let change_selector =
-  "#quote-header-info > div.My\(6px\).Pos\(r\).smartphone_Mt\(6px\) > \
-   div.D\(ib\).Va\(m\).Maw\(65\%\).Ov\(h\) > div > \
-   span.Trsdu\(0\.3s\).Fw\(500\).Pstart\(10px\).Fz\(24px\)"
+  "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
+   div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > \
+   span.Trsdu\\(0\\.3s\\).Fw\\(500\\).Pstart\\(10px\\).Fz\\(24px\\)"
 
 (* css selector for stock value *)
 let value_selector =
-  "#quote-header-info > div.My\(6px\).Pos\(r\).smartphone_Mt\(6px\) > \
-   div.D\(ib\).Va\(m\).Maw\(65\%\).Ov\(h\) > div > \
-   span.Trsdu\(0\.3s\).Fw\(b\).Fz\(36px\).Mb\(-4px\).D\(ib\)"
+  "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
+   div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > \
+   span.Trsdu\\(0\\.3s\\).Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)"
+
+(* css selector to indicate stock existence *)
+let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
 (** [scrape_value l] is the current value of the stock in the link [l] *)
 let scrape_value link =
@@ -46,7 +51,26 @@ type t = { value : float; change : float }
     ticker [t] *)
 let yahoo_finance_link ticker = "https://finance.yahoo.com/quote/" ^ ticker
 
+(** [contains s sub] is true if [sub] is a substring in [s] *)
+let contains s sub =
+  try
+    let sub_length = String.length sub in
+    for i = 0 to String.length s - sub_length do
+      if String.sub s i sub_length = sub then raise Exit
+    done;
+    false
+  with Exit -> true
+
+(** [stock_exists t] is true if the stock with ticker [t] is on Yahoo Finance *)
+let stock_exists ticker =
+  let link = yahoo_finance_link ticker in
+  try 
+  let _ = get_one_tag value_selector (get_soup link) in
+  true;
+  with Failure s->  false
+
 let stockdata_from_ticker (ticker : string) : t =
+  if stock_exists ticker = false then raise (StockNotFound ticker);
   {
     value = scrape_value (yahoo_finance_link ticker);
     change = scrape_change (yahoo_finance_link ticker);
@@ -54,4 +78,4 @@ let stockdata_from_ticker (ticker : string) : t =
 
 let value (stock_data : t) : float = stock_data.value
 
-let change (stock_data : t) : float = stock_data.value
+let change (stock_data : t) : float = stock_data.change
