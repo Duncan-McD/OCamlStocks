@@ -7,3 +7,5 @@
 5. run `make test` to run ounit test cases
 6. run `make clean` to remove the old _build folder and docs
 7. run `make zip` to make a zip file of the project
+8. run `make demo` to start the interactive demo of MS1
+9. run `make install` to be walked through an install process

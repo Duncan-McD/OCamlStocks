@@ -264,6 +264,6 @@ let cashset_tests =
 
 let suite =
   "DEFINITELY NOT A COPY OF A2 (CamelStonks Test Suite)"
-  >::: List.flatten [ scraper_tests; cashset_tests ]
+  >::: List.flatten [ parser_tests; scraper_tests; cashset_tests ]
 
 let _ = run_test_tt_main suite
