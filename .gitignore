@@ -2,6 +2,7 @@
 _doc.public
 _doc.private
 ocamlstocks.zip
+src.zip
 
 # ocaml
 *.cmo
