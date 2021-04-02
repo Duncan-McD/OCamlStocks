@@ -20,6 +20,9 @@ cashsetdemo:
 stockdatademo: 
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files stockdatademo.byte && ./stockdatademo.byte -runner sequential
 
+parserdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files parserdemo.byte && ./parserdemo.byte -runner sequential
+
 test:
 	$(OCAMLBUILD) -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
