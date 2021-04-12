@@ -1,4 +1,7 @@
 # Installation Instructions
+
+Prerequisite: Working opam, ocamlbuild, and ocaml enviorment
+
 ```
 make install
 ```
@@ -13,7 +16,7 @@ openssl
 libssl-dev
 ```
 
-2. Run this command (assuming you have `opam` installed already):
+2. Run this command (assuming you have `opam` installed already if not install opam using your package installer):
 ```
 opam install . --deps-only
 ```
