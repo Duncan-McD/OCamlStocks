@@ -31,7 +31,7 @@ val upvote_score : post -> int
 val upvote_ratio : post -> float
 (** [upvote_ratio post] is the ratio of upvotes to total votes of [post] *)
 
-val connotations : post -> float
+val connotation : post -> float
 (** [connotation post] is the connotation of language of [post] 
     The range of possible connotations is -1 to 1 from worst to best *)
 

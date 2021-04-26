@@ -2,7 +2,7 @@ type post = { score : int; upvote_ratio : float; connotation : float }
 
 type stocks = (string, post list) Hashtbl.t
 
-let connotations post = 0.0
+let connotation post = 0.0
 
 (*  [update_one_stock stock_name post stocks] is [stocks] with the new post data 
     added to the stock [stock_name] *)
@@ -41,7 +41,7 @@ let rec populate_stocks posts stocks =
         {
           score = Scraper.score p;
           upvote_ratio = Scraper.upvote_ratio p;
-          connotation = connotations p;
+          connotation = connotation p;
         }
       in
       let title = Scraper.title p in
