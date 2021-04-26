@@ -4,5 +4,5 @@
 #directory "_build";;
 #load "scraper.cmo";;
 #load "cashset.cmo";;
-#load "parser.cmo";;
 #load "stockdata.cmo";;
+#load "parser.cmo";;

@@ -27,3 +27,6 @@ val change : t -> float
 
 val ticker : t -> string
 (** [ticker sd] is the ticker of the stock represented by [sd] *)
+
+val rating : t -> float
+(** [rating sd] is the rating of the stock represented by [sd] from Yahoo Finance *)
