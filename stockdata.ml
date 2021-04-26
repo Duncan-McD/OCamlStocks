@@ -43,11 +43,6 @@ let value_selector =
 
 let rating_selector = "body > div + div + script"
 
-(*"[data-test=\"rec-rating-txt\"]"*)
-(*
-  "#Col2-4-QuoteModule-Proxy > div > section > div > div > \
-   div.B\\(8px\\).Pos\\(a\\).C\\(white\\).Py\\(2px\\).Px\\(0\\).Ta\\(c\\).Bdrs\\(3px\\).Trstf\\(eio\\).Trsde\\(0\\.5\\).Arrow.South.Bdtc\\(i\\)\\:\\:a.Fw\\(b\\).Bgc\\(\\$hold\\).Bdtc\\(\\$hold\\)"*)
-
 (* css selector to indicate stock existence *)
 let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
