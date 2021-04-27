@@ -20,7 +20,7 @@ val parse : Scraper.subreddit -> stocks
 val stock_names : stocks -> string list
 (** [stock_names stocks] is the list of stock ticker symbols of all stocks in [stocks] *)
 
-val data : stocks -> string -> post list
+val data : stocks -> string -> float * post list
 (** [data stocks_data stock_name] is the relevant data associated with [stock_name] in [stock_data]*)
 
 (** {2 Functions on post type} *)

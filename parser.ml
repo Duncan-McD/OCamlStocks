@@ -1,16 +1,24 @@
 type post = { score : int; upvote_ratio : float; connotation : float }
 
-type stocks = (string, post list) Hashtbl.t
+type stocks = (string, float * post list) Hashtbl.t
 
 let connotation post = 0.0
+
+let history_score stock_data =
+  -1. *. tan (Float.pi /. 4. *. (Stockdata.rating stock_data -. 3.))
+
+let convert_to_ticker s =
+  if String.get s 0 = '$' then String.sub s 1 (String.length s - 1) else s
 
 (*  [update_one_stock stock_name post stocks] is [stocks] with the new post data 
     added to the stock [stock_name] *)
 let update_one_stock stock_name post stocks =
   if Hashtbl.mem stocks stock_name then
-    let posts = Hashtbl.find stocks stock_name in
-    Hashtbl.replace stocks stock_name (post :: posts)
-  else Hashtbl.add stocks stock_name [ post ];
+    let data = Hashtbl.find stocks stock_name in
+    match data with h, p -> Hashtbl.replace stocks stock_name (h, post :: p)
+  else
+    Hashtbl.add stocks stock_name
+      (history_score (Stockdata.stockdata_from_ticker stock_name), [ post ]);
   stocks
 
 (*  [update_stocks text post stocks_seen stocks] is [stocks] 
@@ -23,6 +31,7 @@ let rec update_stocks text post stocks_seen stocks =
   match text with
   | [] -> stocks
   | w :: t ->
+      let w = convert_to_ticker w in
       if
         Cashset.is_stock_name w
         && Bool.not (List.exists (fun p -> p = w) stocks_seen)
@@ -31,7 +40,6 @@ let rec update_stocks text post stocks_seen stocks =
         update_stocks t post (w :: stocks_seen) stocks'
       else update_stocks t post stocks_seen stocks
 
-(* TODO: stocks $GME and GME will be put treated as separate stocks with their own post data fix *)
 (* [populate_stocks] is the [stocks] hashtable created from the data in [posts] *)
 let rec populate_stocks posts stocks =
   match posts with
@@ -63,6 +71,3 @@ let data = Hashtbl.find
 let upvote_score post = post.score
 
 let upvote_ratio post = post.upvote_ratio
-
-let history_score stock_data =
-  -1. *. tan (Float.pi /. 4. *. (Stockdata.rating stock_data -. 3.))
