@@ -35,4 +35,5 @@ val connotation : post -> float
 (** [connotation post] is the connotation of language of [post] 
     The range of possible connotations is -1 to 1 from worst to best *)
 
-val history_score : Stockdata.t -> float
+val history_score : Stockdata.t option -> float
+(** [history-score stockdata]*)

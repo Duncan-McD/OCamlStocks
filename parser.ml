@@ -5,7 +5,10 @@ type stocks = (string, float * post list) Hashtbl.t
 let connotation post = 0.0
 
 let history_score stock_data =
-  -1. *. tan (Float.pi /. 4. *. (Stockdata.rating stock_data -. 3.))
+  let rating =
+    match stock_data with Some sd -> Stockdata.rating sd | None -> 3.
+  in
+  -1. *. tan (Float.pi /. 4. *. (rating -. 3.))
 
 let convert_to_ticker s =
   if String.get s 0 = '$' then String.sub s 1 (String.length s - 1) else s
@@ -31,13 +34,12 @@ let rec update_stocks text post stocks_seen stocks =
   match text with
   | [] -> stocks
   | w :: t ->
-      let w = convert_to_ticker w in
       if
         Cashset.is_stock_name w
-        && Bool.not (List.exists (fun p -> p = w) stocks_seen)
+        && Bool.not (List.exists (fun p -> p = convert_to_ticker w) stocks_seen)
       then
-        let stocks' = update_one_stock w post stocks in
-        update_stocks t post (w :: stocks_seen) stocks'
+        let stocks' = update_one_stock (convert_to_ticker w) post stocks in
+        update_stocks t post (convert_to_ticker w :: stocks_seen) stocks'
       else update_stocks t post stocks_seen stocks
 
 (* [populate_stocks] is the [stocks] hashtable created from the data in [posts] *)

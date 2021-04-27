@@ -197,12 +197,10 @@ let parser_tests =
         "SI";
         "AM";
         "PE";
-        "CEO";
         "SEE";
         "ANY";
         "GME";
         "SO";
-        "LINK";
         "$UWMC";
         "AMC";
         "CBS";
