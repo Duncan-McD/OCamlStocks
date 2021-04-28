@@ -1,14 +1,24 @@
 # Installation Instructions
 
-Prerequisite: Working opam, ocamlbuild, and ocaml enviorment
+**Prerequisites:**
+- Working opam, ocamlbuild, and ocaml environment
+- Working python installation (accessible in PATH with `python` command)
 
+---
+
+**First**:
+```
+pip install vaderSentiment
+```
+
+**Second**:
 ```
 make install
 ```
 This will automatically walk you through installing the required dependencies.
 
 
-If for some reason this fails, follow the steps below:
+_If for some reason the second step fails, follow the steps below:_
 1. Install these required packages using your relevant package manager:
 ```
 pv
