@@ -48,20 +48,17 @@ let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
 (** [scrape_value l] is the current value of the stock in the link [l] *)
 let scrape_value link =
-  let () = print_endline "scraped value" in
   float_of_string (get_one_tag value_selector (get_soup link))
 
 (** [scrape_value l] is the current change of the stock in the link [l] 
     since open *)
 let scrape_change link =
-  let () = print_endline "scraped change" in
   let change = get_one_tag change_selector (get_soup link) in
   let change_end = String.index change '(' in
   let new_change = String.sub change 0 (change_end - 1) in
   float_of_string new_change
 
 let scrape_rating link =
-  let () = print_endline "scraped rating" in
   let rating_script = get_one_tag rating_selector (get_soup link) in
   let recommendation_key = "\"recommendationMean\":{\"raw\":" in
   let recommendation_value_location =
@@ -78,9 +75,8 @@ let scrape_rating link =
     + String.length formatted_key
   in
   let recommendation_value =
-    String.sub remaining_things formatted_value_location 3
-  in
-  float_of_string recommendation_value
+    String.sub remaining_things formatted_value_location 3 in
+  try float_of_string recommendation_value with e -> 3.
 
 type t = { value : float; change : float; ticker : string; rating : float }
 
@@ -109,7 +105,6 @@ let stock_exists ticker =
 let stockdata_from_ticker (ticker : string) : t option =
   let () = print_endline ticker in
   if stock_exists ticker = false then
-    let () = print_endline "not found" in
     None
   else
     Some
