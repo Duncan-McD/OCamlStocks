@@ -2,7 +2,19 @@ type post = { score : int; upvote_ratio : float; connotation : float }
 
 type stocks = (string, float * post list) Hashtbl.t
 
-let connotation post = 0.0
+let vader_sent post = 
+  Py.initialize ();
+  let postText = Scraper.title post ^ "\n" ^ Scraper.body post in
+  let vader = Py.import "vaderSentiment.vaderSentiment" in
+  let sentAnalyzer = Py.Module.get_function vader "SentimentIntensityAnalyzer" [||] in
+  let polarityScore = Py.Module.get_function sentAnalyzer "polarity_scores" in
+  let resultDict = polarityScore [| Py.String.of_string postText |] in
+  let compound = Py.Dict.get_item resultDict (Py.String.of_string "compound") in
+  let result = match compound with
+  | None -> failwith "impossible"
+  | Some x -> Py.Float.to_float x in
+  Py.finalize ();
+  result
 
 let history_score stock_data =
   let rating =
@@ -51,7 +63,7 @@ let rec populate_stocks posts stocks =
         {
           score = Scraper.score p;
           upvote_ratio = Scraper.upvote_ratio p;
-          connotation = connotation p;
+          connotation = vader_sent p;
         }
       in
       let title = Scraper.title p in
@@ -73,3 +85,5 @@ let data = Hashtbl.find
 let upvote_score post = post.score
 
 let upvote_ratio post = post.upvote_ratio
+
+let connotation post = post.connotation
