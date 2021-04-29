@@ -18,6 +18,17 @@ let get_one_tag (tag : string) (soup_node : soup node M.m) : string =
       |> require
       |> leaf_text |> require
 
+exception ExitLoop of int
+
+let index_of_substring (s : string) (sub : string) : int =
+  try
+    let sub_length = String.length sub in
+    for i = 0 to String.length s - sub_length do
+      if String.sub s i sub_length = sub then raise (ExitLoop i)
+    done;
+    -1
+  with ExitLoop i -> i
+
 (* css selector for stock day change *)
 let change_selector =
   "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
@@ -29,6 +40,8 @@ let value_selector =
   "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
    div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > \
    span.Trsdu\\(0\\.3s\\).Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)"
+
+let rating_selector = "body > div + div + script"
 
 (* css selector to indicate stock existence *)
 let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
@@ -45,7 +58,28 @@ let scrape_change link =
   let new_change = String.sub change 0 (change_end - 1) in
   float_of_string new_change
 
-type t = { value : float; change : float; ticker : string }
+let scrape_rating link =
+  try begin
+  let rating_script = get_one_tag rating_selector (get_soup link) in
+  let recommendation_key = "\"recommendationMean\":{\"raw\":" in
+  let recommendation_value_location =
+    index_of_substring rating_script recommendation_key
+    + String.length recommendation_key
+  in
+  let remaining_things =
+    String.sub rating_script recommendation_value_location
+      (String.length rating_script - recommendation_value_location)
+  in
+  let formatted_key = "\"fmt\":\"" in
+  let formatted_value_location =
+    index_of_substring remaining_things formatted_key
+    + String.length formatted_key
+  in
+  let recommendation_value =
+    String.sub remaining_things formatted_value_location 3 in
+  float_of_string recommendation_value end with e -> 3.
+
+type t = { value : float; change : float; ticker : string; rating : float }
 
 (** [yahoo_finance_link t] returns the link to the page on Yahoo Finance for 
     ticker [t] *)
@@ -69,16 +103,25 @@ let stock_exists ticker =
     true
   with Failure s -> false
 
-let stockdata_from_ticker (ticker : string) : t =
-  if stock_exists ticker = false then raise (StockNotFound ticker);
-  {
-    value = scrape_value (yahoo_finance_link ticker);
-    change = scrape_change (yahoo_finance_link ticker);
-    ticker;
-  }
+let stockdata_from_ticker (ticker : string) : t option =
+  if stock_exists ticker = false then
+    None
+  else
+    Some
+      {
+        value = scrape_value (yahoo_finance_link ticker);
+        change = scrape_change (yahoo_finance_link ticker);
+        ticker;
+        rating = scrape_rating (yahoo_finance_link ticker);
+      }
 
 let value (stock_data : t) : float = stock_data.value
 
 let change (stock_data : t) : float = stock_data.change
 
 let ticker (stock_data : t) : string = stock_data.ticker
+
+let rating (stock_data : t) : float = stock_data.rating
+
+let require (stock_data : t option) : t =
+  match stock_data with None -> raise (StockNotFound "") | Some sd -> sd
