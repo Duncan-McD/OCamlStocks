@@ -21,7 +21,7 @@ let update_one_stock stock_name post stocks =
     match data with h, p -> Hashtbl.replace stocks stock_name (h, post :: p)
   else
     Hashtbl.add stocks stock_name
-      (history_score (Stockdata.stockdata_from_ticker stock_name), [ post ]);
+      (history_score (stock_name |> Stockdata.stockdata_from_ticker), [ post ]);
   stocks
 
 (*  [update_stocks text post stocks_seen stocks] is [stocks] 

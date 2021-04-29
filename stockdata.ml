@@ -59,6 +59,7 @@ let scrape_change link =
   float_of_string new_change
 
 let scrape_rating link =
+  try begin
   let rating_script = get_one_tag rating_selector (get_soup link) in
   let recommendation_key = "\"recommendationMean\":{\"raw\":" in
   let recommendation_value_location =
@@ -76,7 +77,7 @@ let scrape_rating link =
   in
   let recommendation_value =
     String.sub remaining_things formatted_value_location 3 in
-  try float_of_string recommendation_value with e -> 3.
+  float_of_string recommendation_value end with e -> 3.
 
 type t = { value : float; change : float; ticker : string; rating : float }
 
@@ -125,14 +126,3 @@ let rating (stock_data : t) : float = stock_data.rating
 
 let require (stock_data : t option) : t =
   match stock_data with None -> raise (StockNotFound "") | Some sd -> sd
-
-let rec find_script soup selector num_script =
-  try
-    let returned_script = get_one_tag selector soup in
-    let () = print_endline returned_script in
-    if
-      String.length returned_script >= 18
-      && String.sub returned_script 0 18 = "(function (root) {"
-    then num_script
-    else find_script soup (selector ^ " + script") (num_script + 1)
-  with e -> -1
