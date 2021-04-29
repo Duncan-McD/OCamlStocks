@@ -201,7 +201,6 @@ let parser_tests =
         "ANY";
         "GME";
         "SO";
-        "$UWMC";
         "AMC";
         "CBS";
         "DD";

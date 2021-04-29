@@ -104,7 +104,6 @@ let stock_exists ticker =
   with Failure s -> false
 
 let stockdata_from_ticker (ticker : string) : t option =
-  let () = print_endline ticker in
   if stock_exists ticker = false then
     None
   else

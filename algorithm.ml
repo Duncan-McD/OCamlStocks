@@ -8,7 +8,7 @@ let rec process_posts (post_list : Parser.post list) x y acc =
   | h :: t -> process_posts t x y (acc +. do_thing h x y)
 
 let get_data list_of_stocks x y q w stock_name =
-  let post_list = Parser.data list_of_stocks stock_name in
+  let post_list = snd(Parser.data list_of_stocks stock_name) in
   let num_posts = float_of_int (List.length post_list) in
   (process_posts post_list x y 0. /. num_posts)
   +. (q *. num_posts)
