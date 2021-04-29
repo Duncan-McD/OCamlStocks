@@ -7,3 +7,4 @@
 #load "cashset.cmo";;
 #load "parser.cmo";;
 #load "stockdata.cmo";;
+#load "algorithm.cmo";;
