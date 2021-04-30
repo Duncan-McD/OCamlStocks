@@ -11,6 +11,15 @@ default: build
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
 
+algorithmdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential
+
+connotationdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files connotationdemo.byte && ./connotationdemo.byte -runner sequential
+
+historydemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files historydemo.byte && ./historydemo.byte -runner sequential
+
 scraperdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files scraperdemo.byte && ./scraperdemo.byte -runner sequential
 
@@ -51,6 +60,15 @@ install:
 	./system_dependencies.sh
 	opam install . --deps-only
 
-demo:
+demo1:
 	chmod u+x ./demo_files/demo.sh
 	./demo_files/demo.sh
+
+demo2:
+	chmod u+x ./demo_files/demo2.sh
+	./demo_files/demo2.sh
+
+demo:
+	make demo1
+	sleep 5
+	make demo2
