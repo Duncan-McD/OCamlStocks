@@ -2,7 +2,7 @@
 
 **Prerequisites:**
 - Working opam, ocamlbuild, and ocaml environment
-- Working python installation (accessible in PATH with `python` command)
+- Working python 2.7 installation (accessible in PATH with `python` command)
 
 ---
 
@@ -10,6 +10,20 @@
 ```
 pip install vaderSentiment
 ```
+
+pip uses whatever version that is tied to the `python` command. 
+
+so uses the version of pip tied to the python command
+
+---
+
+if this doesn't work you can install pip2 using the following instructions
+
+```
+curl https://bootstrap.pypa.io/pip/2.7/get-pip.py --output get-pip.py
+sudo python2 get-pip.py
+```
+
 
 **Second**:
 ```

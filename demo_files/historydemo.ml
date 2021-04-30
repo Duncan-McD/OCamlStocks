@@ -5,7 +5,7 @@ let ask_for_stock () =
   (ticker, ticker |> Stockdata.stockdata_from_ticker)
 
 let rec ask_if_want_another_check () =
-  print_endline "Do you want to check another string? [Y/N]";
+  print_endline "Do you want to check another stock ticker? [Y/N]";
   let response = read_line () in
   if response = "Y" then true
   else if response = "N" then false

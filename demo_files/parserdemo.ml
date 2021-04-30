@@ -76,7 +76,7 @@ and ask_for_stock subreddit =
   print_endline "Enter the name of one of the stocks to get its data: ";
   let response = read_line () in
   if List.mem response (Parser.stock_names subreddit) then (
-    ask_for_pretty_print_data_parse_list (Parser.data subreddit response);
+    ask_for_pretty_print_data_parse_list (snd (Parser.data subreddit response));
     ask_for_look_ups subreddit)
   else (
     print_endline "This was not a stock option. Try again.";

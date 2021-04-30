@@ -1,8 +1,6 @@
-let ask_for_subreddit () = 
-  print_endline "Please enter the name of a subreddit in the form r/subreddit - Example: \
-  r/wallstreetbets not \"r/wallstreetbets\"";
-  let ticker = read_line () in
-  (ticker, ticker |> Stockdata.stockdata_from_ticker)
+let ask_for_string () = 
+  print_endline "Enter a string to check its connotation";
+  read_line () 
 
 let rec ask_if_want_another_check () =
   print_endline "Do you want to check another string? [Y/N]";
@@ -14,16 +12,10 @@ let rec ask_if_want_another_check () =
     ask_if_want_another_check ())
 
 let rec main () =
-  let scraped = ask_for_subreddit() in 
-  let stock_is_none = match stock with 
-  | None -> true
-  | _ -> false in
-  print_endline(ticker ^ " Recommendation Rating: ");
-  print_float (if stock_is_none then 3. else stock |> Stockdata.require |> Stockdata.rating);
-  print_endline("");
-  print_endline(ticker ^ " History Score: ");
-  print_float(if stock_is_none then Parser.history_score None else Parser.history_score stock);
-  print_endline("");
+  let words = ask_for_string() in
+  print_endline "Connotation: ";
+  print_float (Parser.connotation_str words);
+  print_endline "";
   let go_again = ask_if_want_another_check() in
   if go_again then main () else ()
 
