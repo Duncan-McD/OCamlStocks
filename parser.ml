@@ -66,7 +66,7 @@ let rec populate_stocks posts stocks =
         {
           score = Scraper.score p;
           upvote_ratio = Scraper.upvote_ratio p;
-          connotation = vader_sent p;
+          connotation = connotation_post p;
         }
       in
       let title = Scraper.title p in
