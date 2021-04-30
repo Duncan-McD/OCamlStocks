@@ -11,6 +11,9 @@ default: build
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
 
+historydemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files historydemo.byte && ./historydemo.byte -runner sequential
+
 scraperdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files scraperdemo.byte && ./scraperdemo.byte -runner sequential
 

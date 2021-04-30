@@ -24,6 +24,7 @@ _If for some reason the second step fails, follow the steps below:_
 pv
 openssl
 libssl-dev
+w3m
 ```
 
 2. Run this command (assuming you have `opam` installed already if not install opam using your package installer):
