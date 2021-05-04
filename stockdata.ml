@@ -56,6 +56,12 @@ let rating_selector = "body > div + div + script"
 (* css selector to indicate stock existence *)
 let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
+let does_not_exist_selector2 =
+  "#quote-summary > \
+   div.D\\(ib\\).W\\(1\\/2\\).Bxz\\(bb\\).Pend\\(12px\\).Va\\(t\\).ie-7_D\\(i\\).smartphone_D\\(b\\).smartphone_W\\(100\\%\\).smartphone_Pend\\(0px\\).smartphone_BdY.smartphone_Bdc\\(\\$seperatorColor\\) \
+   > table > tbody > tr:nth-child(1) > td.Ta\\(end\\).Fw\\(600\\).Lh\\(14px\\) \
+   > span"
+
 (** [scrape_value l] is the current value of the stock in the link [l] *)
 let scrape_value link =
   let value =
@@ -117,7 +123,9 @@ let stock_exists ticker =
   let link = yahoo_finance_link ticker in
   try
     let _ = get_one_tag value_selector (get_soup link) in
-    true && Cashset.is_stock_name ticker
+    true
+    && Cashset.is_stock_name ticker
+    && get_one_tag does_not_exist_selector2 (get_soup link) <> "N/A"
   with Failure s -> false
 
 let stockdata_from_ticker (ticker : string) : t option =
