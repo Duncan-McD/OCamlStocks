@@ -25,6 +25,9 @@ val liquidity : t -> float
 val shares : stock -> int
 (** [shares s] is the amount of shares of a given stock *)
 
+val ticker : stock -> string
+(** [ticker s] is the stock ticker of stock [s]*)
+
 val stock_gain_loss : stock -> float
 (** [stock_gain_loss s] is the net gain or loss of a stock [s] since being bought*)
 
@@ -38,6 +41,9 @@ val list_of_tickers : t -> string list
 
 val list_of_stocks : t -> stock list
 (** [list_of_stocks p] is a list of stocks in portfolio [p]*)
+
+val stock_from_ticker : t -> string -> stock
+(** [stock_from_ticker p t] is the stock in portfolio [p] with stock ticker [t] *)
 
 (** {2 Actions}*)
 
