@@ -59,25 +59,27 @@ let scrape_change link =
   float_of_string new_change
 
 let scrape_rating link =
-  try begin
-  let rating_script = get_one_tag rating_selector (get_soup link) in
-  let recommendation_key = "\"recommendationMean\":{\"raw\":" in
-  let recommendation_value_location =
-    index_of_substring rating_script recommendation_key
-    + String.length recommendation_key
-  in
-  let remaining_things =
-    String.sub rating_script recommendation_value_location
-      (String.length rating_script - recommendation_value_location)
-  in
-  let formatted_key = "\"fmt\":\"" in
-  let formatted_value_location =
-    index_of_substring remaining_things formatted_key
-    + String.length formatted_key
-  in
-  let recommendation_value =
-    String.sub remaining_things formatted_value_location 3 in
-  float_of_string recommendation_value end with e -> 3.
+  try
+    let rating_script = get_one_tag rating_selector (get_soup link) in
+    let recommendation_key = "\"recommendationMean\":{\"raw\":" in
+    let recommendation_value_location =
+      index_of_substring rating_script recommendation_key
+      + String.length recommendation_key
+    in
+    let remaining_things =
+      String.sub rating_script recommendation_value_location
+        (String.length rating_script - recommendation_value_location)
+    in
+    let formatted_key = "\"fmt\":\"" in
+    let formatted_value_location =
+      index_of_substring remaining_things formatted_key
+      + String.length formatted_key
+    in
+    let recommendation_value =
+      String.sub remaining_things formatted_value_location 3
+    in
+    float_of_string recommendation_value
+  with e -> 3.
 
 type t = { value : float; change : float; ticker : string; rating : float }
 
@@ -100,12 +102,11 @@ let stock_exists ticker =
   let link = yahoo_finance_link ticker in
   try
     let _ = get_one_tag value_selector (get_soup link) in
-    true
+    true && Cashset.is_stock_name ticker
   with Failure s -> false
 
 let stockdata_from_ticker (ticker : string) : t option =
-  if stock_exists ticker = false then
-    None
+  if stock_exists ticker = false then None
   else
     Some
       {
