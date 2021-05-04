@@ -1,5 +1,5 @@
 open OUnit2
-open Printf
+(*open Printf
 open Cashset
 open Scraper
 
@@ -196,7 +196,7 @@ let parser_tests =
       (Parser.stock_names stocks_1)
       [ "NP"; "TIL" ];
     check_post_props "1st Post of stock \"NP\""
-      (List.hd (snd(Parser.data stocks_1 "NP")))
+      (List.hd (snd (Parser.data stocks_1 "NP")))
       1. 3;
     check_stock_names "Stock Names for 10 posts"
       (Parser.stock_names stocks_10)
@@ -217,7 +217,7 @@ let parser_tests =
         "DD";
       ];
     check_post_props "Third Post of stock \"GME\""
-      (List.hd (snd(Parser.data stocks_10 "GME")))
+      (List.hd (snd (Parser.data stocks_10 "GME")))
       1. 1;
   ]
 
@@ -268,10 +268,34 @@ let cashset_tests =
     function_test_bool "3236 Stock Names return true HOME"
       (Cashset.is_stock_name "HOME")
       true;
-  ]
+  ]*)
+
+let in_range r = r <= 5. && r >= 1.
+
+let stockdata_test name ticker =
+  name >:: fun _ ->
+  assert_equal
+    (ticker |> Stockdata.stockdata_from_ticker |> Stockdata.require
+   |> Stockdata.rating |> in_range)
+    true ~printer:string_of_bool
+
+let l = Hashtbl.fold (fun k v acc -> k :: acc) Cashset.cashtable []
+
+let rec stockdata_tests cashtbl acc num =
+  match cashtbl with
+  | [] -> acc
+  | h :: t ->
+      stockdata_tests t
+        (stockdata_test ("Cashtable test" ^ string_of_int num ^ ": " ^ h) h
+         :: acc)
+        (num + 1)
 
 let suite =
   "DEFINITELY NOT A COPY OF A2 (CamelStonks Test Suite)"
-  >::: List.flatten [ parser_tests; scraper_tests; cashset_tests ]
+  >::: List.flatten
+         [
+           (*parser_tests; scraper_tests; cashset_tests;*)
+           stockdata_tests l [] 1;
+         ]
 
 let _ = run_test_tt_main suite

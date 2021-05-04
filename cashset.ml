@@ -15,13 +15,13 @@ let rec parse_line str =
 
 (** [build_word_hashtable csv_line] adds [csv_line] to [word_hashtable]*)
 let build_word_hashtable (csv_line : string) =
-  Hashtbl.add word_hashtbl (Hashtbl.hash csv_line) 0
+  Hashtbl.add word_hashtbl csv_line 0
 
 (** [add_to_stock_hashtbl csv_line] adds [csv_line] to [cashtable] and adds ($ ^ [csv_line]) to [cashtable] if [csv_line] is not in [word_hashtl] *)
 let add_to_stock_hashtbl (csv_line : string) =
-  if Hashtbl.mem word_hashtbl (Hashtbl.hash csv_line) = false then
-    Hashtbl.add cashtable (Hashtbl.hash csv_line) 0;
-  Hashtbl.add cashtable (Hashtbl.hash ("$" ^ csv_line)) 0
+  if Hashtbl.mem word_hashtbl csv_line = false then
+    Hashtbl.add cashtable csv_line 0;
+  Hashtbl.add cashtable ("$" ^ csv_line) 0
 
 (** constructs [word_hashtbl] from commonwords.csv; constructs [cashtable]*)
 let () =
@@ -47,4 +47,4 @@ let () =
   close_in ic
 
 (** [is_stock_name s] is true if [s] is the name of a stock on the stock market *)
-let is_stock_name (name : string) = Hashtbl.mem cashtable (Hashtbl.hash name)
+let is_stock_name (name : string) = Hashtbl.mem cashtable name
