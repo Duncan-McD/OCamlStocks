@@ -20,6 +20,16 @@ let get_one_tag (tag : string) (soup_node : soup node M.m) : string =
 
 exception ExitLoop of int
 
+let rec remove_commas o s =
+  if String.length s <> 0 then
+    if String.get s 0 = ',' then
+      remove_commas o (String.sub s 1 (String.length s - 1))
+    else
+      remove_commas
+        (o ^ Char.escaped (String.get s 0))
+        (String.sub s 1 (String.length s - 1))
+  else o
+
 let index_of_substring (s : string) (sub : string) : int =
   try
     let sub_length = String.length sub in
@@ -48,7 +58,10 @@ let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
 (** [scrape_value l] is the current value of the stock in the link [l] *)
 let scrape_value link =
-  float_of_string (get_one_tag value_selector (get_soup link))
+  let value =
+    link |> get_soup |> get_one_tag value_selector |> remove_commas ""
+  in
+  float_of_string value
 
 (** [scrape_value l] is the current change of the stock in the link [l] 
     since open *)
@@ -56,7 +69,8 @@ let scrape_change link =
   let change = get_one_tag change_selector (get_soup link) in
   let change_end = String.index change '(' in
   let new_change = String.sub change 0 (change_end - 1) in
-  float_of_string new_change
+  let value = new_change |> remove_commas "" in
+  float_of_string value
 
 let scrape_rating link =
   try
@@ -78,7 +92,8 @@ let scrape_rating link =
     let recommendation_value =
       String.sub remaining_things formatted_value_location 3
     in
-    float_of_string recommendation_value
+    let value = recommendation_value |> remove_commas "" in
+    float_of_string value
   with e -> 3.
 
 type t = { value : float; change : float; ticker : string; rating : float }
