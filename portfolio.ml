@@ -17,13 +17,13 @@ let portfolio_gain_loss (portfolio : t) : float = portfolio.net_change
 
 let portfolio_gain_loss_day (portfolio : t) : float = portfolio.day_change
 
-let net_worth (portfolio : t) : float = portfolio.net_worth
+let get_net_worth (portfolio : t) : float = portfolio.net_worth
 
-let liquidity (portfolio : t) : float = portfolio.liquidity
+let get_liquidity (portfolio : t) : float = portfolio.liquidity
 
-let shares (stock : stock) : int = stock.shares
+let get_shares (stock : stock) : int = stock.shares
 
-let ticker (stock : stock) : string = stock.ticker
+let get_ticker (stock : stock) : string = stock.ticker
 
 let stock_gain_loss (stock : stock) : float = stock.net_change
 
@@ -44,7 +44,7 @@ let change_ticker_shares (portfolio : t) (ticker : string) (shares : int)
     | None -> portfolio
     | Some s -> begin
       let new_stocks = Hashtbl.remove portfolio.stocks ticker in 
-      let stock = {ticker: ticker s; shares: (shares s + shares); net_change: stock_gain_loss s; day_change: stock_gain_loss_day s} in 
+      let stock = {ticker= (get_ticker s); shares=((get_shares s) + shares); net_change: stock_gain_loss s; day_change: stock_gain_loss_day s} in 
       {t.liquidity}
 
     end
