@@ -97,7 +97,7 @@ let rec ask_if_want_another_check () =
 
 let rec main () =
   let scraped = ask_for_scrape () in
-  let algoed = Algorithm.get_processed_stock_list 1. 1. 1. 1. scraped in
+  let algoed = fst @@ Algorithm.get_stocks scraped in
   let () = print_endline (pp_assoc_list pp_string pp_float algoed) in
   let go_again = ask_if_want_another_check() in
   if go_again then main () else ()

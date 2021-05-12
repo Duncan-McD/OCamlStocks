@@ -33,18 +33,29 @@ let stock_score list_of_stocks x y q w stock_name =
   +. (q *. num_posts)
   +. (w *. fst data)
 
-(** [process_scores stocks parsed x y q w acc] is [acc] and the stock scores of
-    all the stocks in [stocks] with constants [x], [y], [q], and [w]. *)
+(** [process_scores stocks parsed x y q w acc sum] is a pair with the first
+    element being [acc] and the stock scores of all the stocks in [stocks] with
+    constants [x], [y], [q], and [w] and the second element being [sum] plus the
+    total sum of all postive stock scores. *)
 let rec process_scores (list_of_stocks : string list)
-    (parsed_subreddit : Parser.stocks) x y q w (acc : float list) =
+    (parsed_subreddit : Parser.stocks) x y q w (acc : float list) sum =
   match list_of_stocks with
-  | [] -> acc
-  | h :: t ->
-      process_scores t parsed_subreddit x y q w
-        (stock_score parsed_subreddit x y q w h :: acc)
+  | [] -> (acc, sum)
+  | h :: t -> let curr_score = stock_score parsed_subreddit x y q w h in
+    process_scores t parsed_subreddit x y q w (curr_score :: acc)
+      (sum +. if curr_score > 0. then curr_score else 0.)
 
-let get_processed_stock_list x y q w subreddit =
+let get_stocks_consts x y q w subreddit =
   let parsed_subreddit = Parser.parse subreddit in
-  let list_of_stocks = Parser.stock_names parsed_subreddit in
-  List.combine list_of_stocks
-    (process_scores list_of_stocks parsed_subreddit x y q w [])
+  let stocks_list = Parser.stock_names parsed_subreddit in
+  let processed = process_scores stocks_list parsed_subreddit x y q w [] 0. in
+  let pos_score_sum = snd processed in
+  let decision_func = fun (buy, sell) (stock, score) -> 
+    if score > 0. then ((stock, score /. pos_score_sum) :: buy, sell)
+    else (buy, stock :: sell) in
+  List.fold_left decision_func ([], []) 
+    (List.combine stocks_list (fst processed))
+
+let get_stocks subreddit =
+  let (x, y, q, w) = Optimizer.constants () in
+  get_stocks_consts x y q w subreddit
