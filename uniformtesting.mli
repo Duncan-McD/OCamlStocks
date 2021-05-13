@@ -1,0 +1,2 @@
+(*test different values of [x], [y], [w1], and [w2] on the output of algorithm to see which one results in the "best" weighted list*)
+val test_n_per_var : int -> unit

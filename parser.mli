@@ -20,7 +20,7 @@ val parse : Scraper.subreddit -> stocks
 val stock_names : stocks -> string list
 (** [stock_names stocks] is the list of stock ticker symbols of all stocks in [stocks] *)
 
-val data : stocks -> string -> post list
+val data : stocks -> string -> float * post list
 (** [data stocks_data stock_name] is the relevant data associated with [stock_name] in [stock_data]*)
 
 (** {2 Functions on post type} *)
@@ -33,4 +33,13 @@ val upvote_ratio : post -> float
 
 val connotation : post -> float
 (** [connotation post] is the connotation of language of [post] 
+    The range of possible connotations is -1 to 1 from worst to best *)
+
+val history_score : Stockdata.t option -> float
+(** [history-score stockdata]*)
+
+(** {2 Alternate function forms} *)
+
+val connotation_str : string -> float
+(** [connotation str] is the connotation of string [str] 
     The range of possible connotations is -1 to 1 from worst to best *)

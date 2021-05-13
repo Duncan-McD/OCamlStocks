@@ -20,3 +20,5 @@ _build
 \#*\#
 .DS_Store
 
+venv
+env

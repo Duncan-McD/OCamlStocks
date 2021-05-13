@@ -5,6 +5,19 @@ open Scraper
 
 let pp_string s = "\"" ^ s ^ "\""
 
+let pp_list pp_elt lst =
+  let pp_elts lst =
+    let rec loop n acc = function
+      | [] -> acc
+      | [ h ] -> acc ^ pp_elt h
+      | h1 :: (h2 :: t as t') ->
+          if n = 100 then acc ^ "..." (* stop printing long list *)
+          else loop (n + 1) (acc ^ pp_elt h1 ^ "; ") t'
+    in
+    loop 0 "" lst
+  in
+  "[" ^ pp_elts lst ^ "]"
+
 let function_test_string name str1 str2 =
   name >:: fun _ -> assert_equal ~printer:pp_string str1 str2
 
@@ -162,14 +175,12 @@ let check_stock_names name exp_stock_names stock_names =
   assert_equal
     (List.sort_uniq compare exp_stock_names)
     (List.sort_uniq compare stock_names)
+    ~printer:(pp_list pp_string)
 
-let check_post_props name post exp_upvote_ratio exp_upvote_score exp_connotation
-    =
+let check_post_props name post exp_upvote_ratio exp_upvote_score =
   let correct_uvr = Parser.upvote_ratio post = exp_upvote_ratio in
   let correct_uvs = Parser.upvote_score post = exp_upvote_score in
-  let correct_con = Parser.connotation post = exp_connotation in
-  name >:: fun _ ->
-  assert_equal (correct_uvr && correct_uvs && correct_con) true
+  name >:: fun _ -> assert_equal (correct_uvr && correct_uvs) true
 
 let parser_tests =
   let subreddit_1 =
@@ -185,8 +196,8 @@ let parser_tests =
       (Parser.stock_names stocks_1)
       [ "NP"; "TIL" ];
     check_post_props "1st Post of stock \"NP\""
-      (List.hd (Parser.data stocks_1 "NP"))
-      1. 3 0.;
+      (List.hd (snd (Parser.data stocks_1 "NP")))
+      1. 3;
     check_stock_names "Stock Names for 10 posts"
       (Parser.stock_names stocks_10)
       [
@@ -197,20 +208,17 @@ let parser_tests =
         "SI";
         "AM";
         "PE";
-        "CEO";
         "SEE";
         "ANY";
         "GME";
         "SO";
-        "LINK";
-        "$UWMC";
         "AMC";
         "CBS";
         "DD";
       ];
     check_post_props "Third Post of stock \"GME\""
-      (List.hd (Parser.data stocks_10 "GME"))
-      1. 1 0.;
+      (List.hd (snd (Parser.data stocks_10 "GME")))
+      1. 1;
   ]
 
 let cashset_tests =
