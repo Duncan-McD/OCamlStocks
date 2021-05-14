@@ -3,6 +3,7 @@ OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
+MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 default: build
@@ -10,6 +11,9 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
+
+bot: 
+	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
 algorithmdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential

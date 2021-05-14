@@ -2,11 +2,12 @@
 #require "yojson";;
 #require "csv";;
 #require "pyml";;
+#require "ANSITerminal";;
 #directory "_build";;
 #load "scraper.cmo";;
 #load "cashset.cmo";;
 #load "stockdata.cmo";;
 #load "parser.cmo";;
+#load "optimizer.cmo";;
 #load "algorithm.cmo";;
 #load "portfolio.cmo";;
-#load "optimizer.cmo";;
