@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset stockdata
+MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -10,6 +10,15 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
+
+algorithmdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential
+
+connotationdemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files connotationdemo.byte && ./connotationdemo.byte -runner sequential
+
+historydemo:
+	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files historydemo.byte && ./historydemo.byte -runner sequential
 
 scraperdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files scraperdemo.byte && ./scraperdemo.byte -runner sequential
@@ -27,7 +36,7 @@ test:
 	$(OCAMLBUILD) -tag thread -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
-	zip src.zip  README.md INSTALL.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat .ocamlinit ocamlstocks.opam testing_files testing_files/stocksnew.json .gitignore demo_files demo_files/*.ml* demo_files/demo.sh LICENSE Makefile	
+	zip src.zip  README.md INSTALL.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat *.png .ocamlinit ocamlstocks.opam testing_files testing_files/stocksnew.json .gitignore demo_files demo_files/*.ml* demo_files/demo.sh demo_files/demo2.sh LICENSE Makefile	
 
 docs: docs-public docs-private
 	
@@ -51,6 +60,15 @@ install:
 	./system_dependencies.sh
 	opam install . --deps-only
 
-demo:
+demo1:
 	chmod u+x ./demo_files/demo.sh
 	./demo_files/demo.sh
+
+demo2:
+	chmod u+x ./demo_files/demo2.sh
+	./demo_files/demo2.sh
+
+demo:
+	make demo1
+	sleep 5
+	make demo2

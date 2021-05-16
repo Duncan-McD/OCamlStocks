@@ -6,7 +6,9 @@
 4. run `make test` to run ounit test cases
 5. run `make clean` to remove the old _build folder and docs
 6. run `make zip` to make a zip file of the project
-7. run `make demo` to start the interactive demo of MS1
+7. run `make demo` to start the interactive demo of MS1 and MS2
+  - run `make demo1` to start the interactive demo of MS1
+  - run `make demo2` to start the interactive demo of MS2
 8. run `make install` to be walked through an install process
 9. run `make docs` to make the documentation
   - After making docs:
