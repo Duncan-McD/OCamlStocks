@@ -104,8 +104,28 @@ let p n x max= match n with
 | i -> float_of_int x *. (max /. float_of_int (n - 1))
 
 (*let scraped1 = ask_for_scrape ()*)
+let test_var : ((string * float) list * string list * (float * float * float * float)) = ([], [], (0., 0., 0., 0.))
 
-let const_and_stocks_to_buy_hshtbl = Hashtbl.create 200000
+let int_arr_test : int array = Array.make 20 0
+
+let const_and_stocks_to_buy_array : ((string * float) list * string list * (float * float * float * float)) array = Array.make 20 test_var
+
+let current_poss = ref 0
+
+let add_to_array (arr : ((string * float) list * string list * (float * float * float * float)) array) list_and_constants = 
+  arr.(!current_poss) <- list_and_constants; current_poss := !current_poss + 1
+  
+
+(*Notes about how to fix: 
+  TODO: make array of type (((string * float list) * string list) * (float * float * float * float))
+  figure out what is calling test_n_per_var, for example if user calls "optimize constants"
+  possible way of functionality:
+  test_n_per_var 
+
+*)
+
+let compare_array_spots (a1 : ((string * float) list * string list * (float * float * float * float)) (a2 : (((string * float) list * string list) * (float * float * float * float)) = 
+  let a1_gains = Portfolio.get_
 
 let test_n_per_var n =
   let scraped2 = Scraper.scrape_json ~amount:25 "testing_files/stocksnew.json" in
@@ -114,14 +134,18 @@ let test_n_per_var n =
     for con_const = 1 to n do
       for  num_posts_const= 1 to n do
         for hist_const = 1 to n do
+          let score_con' = (p n score_con 2.) in 
+          let con_const' = (p n con_const 2.) in 
+          let num_posts_const' = (p n num_posts_const 2.) in 
+          let hist_const' = (p n hist_const 2.) in 
           let algoed =
-            Algorithm.get_stocks_to_buy_list (p n score_con 2.) (p n con_const 2.) (p n num_posts_const 2.) (p n hist_const 2.)
-              parsed
+            Algorithm.get_stocks_consts score_con' con_const' num_posts_const' hist_const' parsed
           in
-          Hashtbl.add const_and_stocks_to_buy_hshtbl (score_con, con_const, num_posts_const, hist_const) algoed; 
-          print_endline (pp_assoc_list pp_string pp_float algoed)
+          add_to_array const_and_stocks_to_buy_array (algoed, (score_con, con_const, num_posts_const, hist_const)); 
+          print_endline (pp_assoc_list pp_string pp_float (fst algoed))
         done
       done
     done
-  done
+  done;
+  Array.sort const_and_stocks_to_buy_array
 

@@ -10,3 +10,5 @@
 #load "algorithm.cmo";;
 #load "uniformtesting.cmo";;
 #load "testreadwrite.cmo";;
+#load "portfolio.cmo";;
+#load "optimizer.cmo";;
