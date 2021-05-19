@@ -200,7 +200,33 @@ let refresh_portfolio portfolio =
   portfolio |> portfolio_swap_first
   |> rec_refresh_portfolio (list_of_tickers portfolio)
 
-let process_list portfolio algo_list = failwith "unimplemented"
+let rec rec_sell ticker_names portfolio =
+  match ticker_names with
+  | [] -> portfolio
+  | h :: t ->
+      rec_sell t
+        (let needed_stock = stock_from_ticker portfolio h in
+         match needed_stock with
+         | None -> portfolio
+         | Some s -> change_ticker_shares portfolio h s.shares (current_cost h))
+
+let sell_stocks portfolio stocks =
+  portfolio |> portfolio_swap_first |> rec_sell stocks
+
+let rec rec_buy ticker_names portfolio liquidity =
+  match ticker_names with
+  | [] -> if portfolio.first then portfolio_swap_first portfolio else portfolio
+  | (s, f) :: t ->
+      rec_buy t (change_ticker_money portfolio s (liquidity *. f)) liquidity
+
+let buy_stocks portfolio stocks =
+  let initial_liquidity = portfolio.liquidity in
+  rec_buy stocks portfolio initial_liquidity
+
+let process_list portfolio = function
+  | buy, sell ->
+      let post_sell_portfolio = sell_stocks portfolio sell in
+      buy_stocks post_sell_portfolio buy
 
 let compare_portfolios portfolio1 portfolio2 =
   if portfolio1.value > portfolio2.value then 1.
