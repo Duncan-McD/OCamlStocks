@@ -21,13 +21,13 @@ let current_cost ticker =
 
 let portfolio_gain_loss (portfolio : t) : float = portfolio.change
 
-let get_net_worth (portfolio : t) : float = portfolio.net_worth
+let net_worth (portfolio : t) : float = portfolio.net_worth
 
-let get_liquidity (portfolio : t) : float = portfolio.liquidity
+let liquidity (portfolio : t) : float = portfolio.liquidity
 
-let get_shares (stock : stock) : float = stock.shares
+let shares (stock : stock) : float = stock.shares
 
-let get_ticker (stock : stock) : string = stock.ticker
+let ticker (stock : stock) : string = stock.ticker
 
 let stock_gain_loss (stock : stock) : float = stock.change
 
@@ -196,8 +196,17 @@ let rec rec_refresh_portfolio ticker_names portfolio =
   | [] -> portfolio
   | h :: t -> rec_refresh_portfolio t (refresh_stock portfolio h)
 
-let refresh_portfolio portfolio =
-  portfolio |> portfolio_swap_first
+let copy portfolio =
+  {
+    liquidity = portfolio.liquidity;
+    stocks = Hashtbl.copy portfolio.stocks;
+    net_worth = portfolio.net_worth;
+    change = portfolio.change;
+    first = portfolio.first;
+  }
+
+let refresh portfolio =
+  portfolio |> copy |> portfolio_swap_first
   |> rec_refresh_portfolio (list_of_tickers portfolio)
 
 let rec rec_sell ticker_names portfolio =
@@ -223,21 +232,13 @@ let buy_stocks portfolio stocks =
   let initial_liquidity = portfolio.liquidity in
   rec_buy stocks portfolio initial_liquidity
 
-let process_list portfolio = function
+let process portfolio = function
   | buy, sell ->
+      let portfolio = copy portfolio in
       let post_sell_portfolio = sell_stocks portfolio sell in
       buy_stocks post_sell_portfolio buy
 
-let compare_portfolios portfolio1 portfolio2 =
+let compare portfolio1 portfolio2 =
   if portfolio1.value > portfolio2.value then 1.
   else if portfolio1.value < portfolio2.value then -1.
   else 0.
-
-let copy_portfolio portfolio =
-  {
-    liquidity = portfolio.liquidity;
-    stocks = Hashtbl.copy portfolio.stocks;
-    net_worth = portfolio.net_worth;
-    change = portfolio.change;
-    first = portfolio.first;
-  }
