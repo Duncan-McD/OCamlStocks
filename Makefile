@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio
+MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
