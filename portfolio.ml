@@ -12,6 +12,7 @@ type t = {
   stocks : (string, stock) Hashtbl.t;
   net_worth : float;
   change : float;
+  first : bool;
 }
 
 let current_cost ticker =
@@ -30,18 +31,30 @@ let get_ticker (stock : stock) : string = stock.ticker
 
 let stock_gain_loss (stock : stock) : float = stock.change
 
-let list_of_tickers (portfolio : t) : string list =
-  Hashtbl.fold (fun name stocks stock_names -> name :: stock_names) stocks []
+let empty_portfolio =
+  {
+    liquidity = 0.;
+    stocks = Hashtbl.create 50;
+    net_worth = 0.;
+    change = 0.;
+    first = false;
+  }
 
-let list_of_stocks (portfolio : t) : stock list = failwith "unimplemented"
+let list_of_tickers (portfolio : t) : string list =
+  Hashtbl.fold
+    (fun name stock stock_names -> name :: stock_names)
+    portfolio.stocks []
+
+let list_of_stocks (portfolio : t) : stock list =
+  Hashtbl.fold (fun name stock stocks -> stock :: stocks) portfolio.stocks []
 
 let stock_from_ticker (portfolio : t) (ticker : string) : stock option =
   if Hashtbl.mem portfolio.stocks ticker then None
   else Some (Hashtbl.find portfolio.stocks ticker)
 
-let buy_shares portfolio ticker shares =
+let buy_shares portfolio ticker shares cost =
   let liquidity = portfolio.liquidity in
-  let cost_per_share = current_cost ticker in
+  let cost_per_share = cost in
   let diff = (cost_per_share *. shares) -. liquidity in
   let new_liquidity = if diff > 0. then 0. else -1. *. diff in
   let new_shares = if diff > 0. then liquidity /. cost_per_share else shares in
@@ -70,12 +83,16 @@ let buy_shares portfolio ticker shares =
         liquidity = new_liquidity;
         stocks = portfolio.stocks;
         net_worth = portfolio.net_worth +. recent_change;
+        change =
+          (if portfolio.first then 0. +. recent_change
+          else portfolio.change +. recent_change);
+        first = false;
       }
     in
     new_portfolio)
   else
-    let recent_change = 0. in
     let initial_value = cost_per_share *. new_shares in
+    let recent_change = initial_value in
     let value = initial_value in
     let new_stock =
       {
@@ -93,22 +110,25 @@ let buy_shares portfolio ticker shares =
         liquidity = new_liquidity;
         stocks = portfolio.stocks;
         net_worth = portfolio.net_worth +. recent_change;
+        change =
+          (if portfolio.first then 0. +. recent_change
+          else portfolio.change +. recent_change);
+        first = false;
       }
     in
     new_portfolio
 
-let sell_shares portfolio ticker shares =
+let sell_shares portfolio ticker shares cost =
   let liquidity = portfolio.liquidity in
-  let cost_per_share = current_cost ticker in
-  let diff = (cost_per_share *. shares) -. liquidity in
-  let new_liquidity = if diff > 0. then 0. else -1. *. diff in
-  let new_shares = if diff > 0. then liquidity /. cost_per_share else shares in
-
+  let cost_per_share = cost in
   let stock_exists = Hashtbl.mem portfolio.stocks ticker in
   if stock_exists then (
     let past_stock = Hashtbl.find portfolio.stocks ticker in
-
-    let new_shares = past_stock.shares +. new_shares in
+    let past_val = past_stock.value in
+    let diff = (cost_per_share *. shares) -. past_val in
+    let new_shares = if diff > 0. then past_val /. cost_per_share else shares in
+    let new_liquidity = liquidity +. (new_shares *. cost_per_share) in
+    let new_shares = shares -. new_shares in
     let value = cost_per_share *. new_shares in
     let recent_change = value -. past_stock.value in
     let new_stock =
@@ -122,45 +142,76 @@ let sell_shares portfolio ticker shares =
       }
     in
     Hashtbl.remove portfolio.stocks ticker;
-    Hashtbl.add portfolio.stocks ticker new_stock;
+    if value > 0. then Hashtbl.add portfolio.stocks ticker new_stock else ();
+
     let new_portfolio =
       {
         liquidity = new_liquidity;
         stocks = portfolio.stocks;
         net_worth = portfolio.net_worth +. recent_change;
+        change =
+          (if portfolio.first then 0. +. recent_change
+          else portfolio.change +. recent_change);
+        first = false;
       }
     in
+
     new_portfolio)
   else
-    let recent_change = 0. in
-    let initial_value = cost_per_share *. new_shares in
-    let value = initial_value in
-    let new_stock =
-      {
-        ticker;
-        shares = new_shares;
-        price_per_share = cost_per_share;
-        initial_value;
-        value;
-        change = recent_change;
-      }
-    in
-    Hashtbl.add portfolio.stocks ticker new_stock;
     let new_portfolio =
       {
-        liquidity = new_liquidity;
+        liquidity = portfolio.liquidity;
         stocks = portfolio.stocks;
-        net_worth = portfolio.net_worth +. recent_change;
+        net_worth = portfolio.net_worth;
+        change = (if portfolio.first then 0. else portfolio.change);
+        first = false;
       }
     in
     new_portfolio
 
 let change_ticker_shares (portfolio : t) (ticker : string) (shares : float)
-    (liquidity : float) : t =
-  if shares > 0. then buy_shares portfolio ticker shares
-  else if shares < 0. then sell_shares ()
-  else portfolio
+    (cost : float) : t =
+  if shares > 0. then buy_shares portfolio ticker shares cost
+  else if shares < 0. then sell_shares portfolio ticker (-1. *. shares) cost
+  else buy_shares portfolio ticker 0. cost
 
-let change_stock_shares (portfolio : t) (stock : stock) (shares : int)
-    (liquidity : float) : t =
-  failwith "unimplemented"
+let change_ticker_money (portfolio : t) (ticker : string) (money : float) : t =
+  let cost_per_share = current_cost ticker in
+  let shares = money /. cost_per_share in
+  change_ticker_shares portfolio ticker shares cost_per_share
+
+let portfolio_swap_first portfolio =
+  {
+    liquidity = portfolio.liquidity;
+    stocks = portfolio.stocks;
+    net_worth = portfolio.net_worth;
+    change = portfolio.change;
+    first = Bool.not portfolio.first;
+  }
+
+let refresh_stock portfolio ticker = change_ticker_money portfolio ticker 0.
+
+let rec rec_refresh_portfolio ticker_names portfolio =
+  match ticker_names with
+  | [] -> portfolio
+  | h :: t -> rec_refresh_portfolio t (refresh_stock portfolio h)
+
+let refresh_portfolio portfolio =
+  portfolio |> portfolio_swap_first
+  |> rec_refresh_portfolio (list_of_tickers portfolio)
+
+let process_list portfolio algo_list = failwith "unimplemented"
+
+let compare_portfolios portfolio1 portfolio2 =
+  if portfolio1.value > portfolio2.value then 1.
+  else if portfolio1.value < portfolio2.value then -1.
+  else 0.
+
+let copy_portfolio portfolio =
+  {
+    liquidity = portfolio.liquidity;
+    stocks = Hashtbl.copy portfolio.stocks;
+    net_worth = portfolio.net_worth;
+    change = portfolio.change;
+    first = portfolio.first;
+  }
