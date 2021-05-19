@@ -8,5 +8,5 @@
 #load "stockdata.cmo";;
 #load "parser.cmo";;
 #load "algorithm.cmo";;
-#load "portfolio.cmo";;
 #load "optimizer.cmo";;
+#load "portfolio.cmo";;
