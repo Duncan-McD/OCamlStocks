@@ -20,9 +20,12 @@ val net_worth : t -> float
 val liquidity : t -> float
 (** [liquidity p] is the amount of free liquidity the portfolio [p] has*)
 
+val change_liquidity : t -> float -> t
+(** [change_liquidity p f] is portfolio p with f added to your current liquidity*)
+
 (** {2 Stock Functions}*)
 
-val shares : stock -> int
+val shares : stock -> float
 (** [shares s] is the amount of shares of a given stock *)
 
 val ticker : stock -> string

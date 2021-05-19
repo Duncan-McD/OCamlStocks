@@ -239,6 +239,15 @@ let process portfolio = function
       buy_stocks post_sell_portfolio buy
 
 let compare portfolio1 portfolio2 =
-  if portfolio1.value > portfolio2.value then 1.
-  else if portfolio1.value < portfolio2.value then -1.
+  if portfolio1.net_worth > portfolio2.net_worth then 1.
+  else if portfolio1.net_worth < portfolio2.net_worth then -1.
   else 0.
+
+let change_liquidity portfolio liquid =
+  {
+    liquidity = portfolio.liquidity +. liquid;
+    stocks = Hashtbl.copy portfolio.stocks;
+    net_worth = portfolio.net_worth;
+    change = portfolio.change;
+    first = portfolio.first;
+  }
