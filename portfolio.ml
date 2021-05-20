@@ -49,7 +49,7 @@ let list_of_stocks (portfolio : t) : stock list =
   Hashtbl.fold (fun name stock stocks -> stock :: stocks) portfolio.stocks []
 
 let stock_from_ticker (portfolio : t) (ticker : string) : stock option =
-  if Hashtbl.mem portfolio.stocks ticker then None
+  if Bool.not (Hashtbl.mem portfolio.stocks ticker) then None
   else Some (Hashtbl.find portfolio.stocks ticker)
 
 let buy_shares portfolio ticker shares cost =
@@ -217,7 +217,8 @@ let rec rec_sell ticker_names portfolio =
         (let needed_stock = stock_from_ticker portfolio h in
          match needed_stock with
          | None -> portfolio
-         | Some s -> change_ticker_shares portfolio h s.shares (current_cost h))
+         | Some s ->
+             change_ticker_shares portfolio h (-1. *. s.shares) (current_cost h))
 
 let sell_stocks portfolio stocks =
   portfolio |> portfolio_swap_first |> rec_sell stocks
