@@ -76,3 +76,6 @@ demo:
 	make demo1
 	sleep 5
 	make demo2
+
+lines:
+	cloc --by-file --exclude-dir=demo_files,_build --include-lang=OCaml .

@@ -29,18 +29,19 @@ let rec get_scrape_time subreddit amount =
      quotes";
   let time = read_line () in
   if time = "Now" then Scraper.scrape subreddit ~amount ~ordering:(Top Now)
-  else if time = "Today" then Scraper.scrape subreddit ~amount ~ordering:(Top Today)
+  else if time = "Today" then
+    Scraper.scrape subreddit ~amount ~ordering:(Top Today)
   else if time = "ThisWeek" then
     Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.ThisWeek)
   else if time = "ThisMonth" then
     Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.ThisMonth)
   else if time = "ThisYear" then
     Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.ThisYear)
-  else if time = "AllTime" then Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.AllTime)
+  else if time = "AllTime" then
+    Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.AllTime)
   else (
     print_endline "Invalid input";
-    get_scrape_time subreddit amount)
-
+    get_scrape_time subreddit amount )
 
 let rec get_scrape subreddit amount =
   print_endline
@@ -49,25 +50,26 @@ let rec get_scrape subreddit amount =
   let order = read_line () in
   let scraped_subreddit =
     if order = "New" then Scraper.scrape subreddit ~amount ~ordering:New
-    else if order = "Rising" then Scraper.scrape subreddit ~amount ~ordering:Rising
+    else if order = "Rising" then
+      Scraper.scrape subreddit ~amount ~ordering:Rising
     else if order = "Hot" then Scraper.scrape subreddit ~amount ~ordering:Hot
     else if order = "Top" then get_scrape_time subreddit amount
     else (
       print_endline "Invalid input";
-      get_scrape subreddit amount)
+      get_scrape subreddit amount )
   in
   scraped_subreddit
 
 let rec ask_for_scrape () =
-    try do_scrape () with
-    | Scraper.TooManyPostsRequested i ->
-        print_endline ("You requested " ^ string_of_int i ^ " too many posts");
-        print_endline "Trying again";
-        do_scrape ()
-    | Scraper.SubredditNotFound s ->
-        print_endline "You requested a subreddit that does not exist";
-        print_endline "Trying again";
-        do_scrape ()
+  try do_scrape () with
+  | Scraper.TooManyPostsRequested i ->
+      print_endline ("You requested " ^ string_of_int i ^ " too many posts");
+      print_endline "Trying again";
+      do_scrape ()
+  | Scraper.SubredditNotFound s ->
+      print_endline "You requested a subreddit that does not exist";
+      print_endline "Trying again";
+      do_scrape ()
 
 and do_scrape () =
   print_endline
@@ -85,7 +87,6 @@ and do_scrape () =
 
   get_scrape subreddit amount
 
-
 let rec ask_if_want_another_check () =
   print_endline "Do you want to check another subreddit? [Y/N]";
   let response = read_line () in
@@ -93,15 +94,13 @@ let rec ask_if_want_another_check () =
   else if response = "N" then false
   else (
     print_endline "Invalid Input";
-    ask_if_want_another_check ())
+    ask_if_want_another_check () )
 
 let rec main () =
   let scraped = ask_for_scrape () in
-  let algoed = fst @@ Algorithm.get_stocks scraped in
+  let algoed = fst @@ Algorithm.get_stocks [ scraped ] in
   let () = print_endline (pp_assoc_list pp_string pp_float algoed) in
-  let go_again = ask_if_want_another_check() in
+  let go_again = ask_if_want_another_check () in
   if go_again then main () else ()
-
-
 
 let () = main ()
