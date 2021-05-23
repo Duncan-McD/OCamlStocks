@@ -1,9 +1,16 @@
-type action = Configure | Run_Algoirthm | Sell_All | Refresh_and_Show | Graph
+type action =
+  | Configure
+  | Run_Algoirthm
+  | Sell_All
+  | Refresh_and_Show
+  | Graph
+  | Account
+  | Logout
 
 type t = {
-  mutable test : string;
   mutable config : Config.t;
   mutable portfolio : Portfolio.t;
+  mutable test : string;
 }
 
 exception InvalidAction of string

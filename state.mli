@@ -28,8 +28,6 @@ val action_of_string : string -> action
 val init : t
 (** [init] is the initial state *)
 
-(** {2 State Functions}*)
-
 val update : t -> action -> unit
 (** [update state action] updates [state] based on [action] *)
 

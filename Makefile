@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer config state
+MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer config state auth
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -13,7 +13,7 @@ build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
 
 bot: 
-	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
+	$(OCAMLBUILD) -tag 'debug' -tag thread $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
 algorithmdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential
