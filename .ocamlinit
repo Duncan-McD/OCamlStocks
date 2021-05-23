@@ -2,6 +2,10 @@
 #require "yojson";;
 #require "csv";;
 #require "pyml";;
+#require "owl";;
+#require "graphics";;
+#require "ocamlimages.graphics";;
+#require "camlimages.png";;
 #directory "_build";;
 #load "scraper.cmo";;
 #load "cashset.cmo";;

@@ -4,3 +4,8 @@ PKG mechaml
 PKG yojson
 PKG csv
 PKG pyml
+PKG owl
+PKG owl-plplot
+PKG graphics
+PKG camlimages.graphics
+PKG camlimages.png
