@@ -1,0 +1,515 @@
+{
+  "users": [
+    {
+      "email": "duncan@duncan.com",
+      "name": "duncan",
+      "password": "1234",
+      "config": {
+        "number_of_tests": "1000",
+        "subreddit_list": [
+          "r/stocks",
+          "r/investing"
+        ],
+        "posts_per_scrape": "100"
+      },
+      "current_portfolio": {
+        "liquidity": "0.0",
+        "stocks": [
+          {
+            "ticker": "GME",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          },
+          {
+            "ticker": "AMC",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          },
+          {
+            "ticker": "AAPL",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          }
+        ],
+        "net_worth": "420.67",
+        "change": "50.2",
+        "first": "true",
+        "vars": [
+          {
+            "x": "1.0"
+          },
+          {
+            "y": "1.0"
+          },
+          {
+            "w1": "1.0"
+          },
+          {
+            "w2": "1.0"
+          }
+        ]
+      },
+      "past_portfolios": [
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        },
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        }
+      ],
+      "test_portfolios": [
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        },
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "email": "superduncan@duncan.com",
+      "name": "superduncan",
+      "password": "super1234",
+      "config": {
+        "number_of_tests": "100000",
+        "subreddit_list": [
+          "r/stocks",
+          "r/investing",
+          "r/wallstreetbets"
+        ],
+        "posts_per_scrape": "100"
+      },
+      "current_portfolio": {
+        "liquidity": "0.0",
+        "stocks": [
+          {
+            "ticker": "GME",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          },
+          {
+            "ticker": "AMC",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          },
+          {
+            "ticker": "AAPL",
+            "shares": "2.8",
+            "price_per_share": "20.4",
+            "initial_value": "5.0",
+            "value": "50.3",
+            "change": "45.3"
+          }
+        ],
+        "net_worth": "420.67",
+        "change": "50.2",
+        "first": "true",
+        "vars": [
+          {
+            "x": "1.0"
+          },
+          {
+            "y": "1.0"
+          },
+          {
+            "w1": "1.0"
+          },
+          {
+            "w2": "1.0"
+          }
+        ]
+      },
+      "past_portfolios": [
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        },
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        }
+      ],
+      "test_portfolios": [
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        },
+        {
+          "portfolio": {
+            "liquidity": "0.0",
+            "stocks": [
+              {
+                "ticker": "GME",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AMC",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              },
+              {
+                "ticker": "AAPL",
+                "shares": "2.8",
+                "price_per_share": "20.4",
+                "initial_value": "5.0",
+                "value": "50.3",
+                "change": "45.3"
+              }
+            ],
+            "net_worth": "420.67",
+            "change": "50.2",
+            "first": "true",
+            "vars": [
+              {
+                "x": "1.0"
+              },
+              {
+                "y": "1.0"
+              },
+              {
+                "w1": "1.0"
+              },
+              {
+                "w2": "1.0"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -13,10 +13,7 @@ type t = {
   net_worth : float;
   change : float;
   first : bool;
-<<<<<<< HEAD
   vars : float * float * float * float;
-=======
->>>>>>> bot_runner
 }
 
 let current_cost ticker =
@@ -42,6 +39,7 @@ let empty_portfolio =
     net_worth = 0.;
     change = 0.;
     first = false;
+    vars = (0., 0., 0., 0.);
   }
 
 let list_of_tickers (portfolio : t) : string list =
@@ -63,81 +61,8 @@ let buy_shares portfolio ticker shares cost =
   let new_liquidity = if diff > 0. then 0. else -1. *. diff in
   let new_shares = if diff > 0. then liquidity /. cost_per_share else shares in
 
-<<<<<<< HEAD
-let change_stock_shares (portfolio : t) (stock : stock) (shares : int)
-    (liquidity : float) : t =
-  failwith "unimplemented"
-
-let liquidity_stocklist_break = ",,"
-
-let stocklist_networth_break = ",,"
-
-let networth_change_break = ",,"
-
-let change_first_break = ",,"
-
-let ticker_shares_break = ",,"
-
-let shares_pricepershare_break = ",,"
-
-let pricepershare_initialvalue_break = ",,"
-
-let initialvalue_value_break = ",,"
-
-let value_change_break = ",,"
-
-let ocomma_of_stock stock =
-  stock.ticker ^ ticker_shares_break
-  ^ string_of_float stock.shares
-  ^ shares_pricepershare_break
-  ^ string_of_float stock.price_per_share
-  ^ pricepershare_initialvalue_break
-  ^ string_of_float stock.initial_value
-  ^ initialvalue_value_break
-
-let ocomma_of_tuple tup = failwith "unimplimented"
-
-let rec ocomma_of_stocklist stocklist acc =
-  match stocklist with
-  | [] -> acc
-  | h :: t -> ocomma_of_stocklist t (acc ^ ocomma_of_stock h)
-
-let ocomma_of_portfolio t =
-  "," ^ "Portfolio" ^ ":" ^ ","
-  ^ string_of_float t.liquidity
-  ^ ","
-  ^ ocomma_of_stocklist (list_of_stocks t) ""
-  ^ ","
-  ^ string_of_float t.net_worth
-  ^ "," ^ string_of_float t.change ^ "," ^ string_of_bool t.first ^ ","
-  ^ ocomma_of_tuple t.vars
-
-let file = "portfolio_history.txt"
-
-let save_current_portfolio portfolio =
-  let str = ocomma_of_portfolio portfolio in
-  let oc = open_out file in
-  Printf.fprintf oc "%s\n" str;
-  close_out oc
-
-(* Read file and display the first line *)
-let load_last_portfolio =
-  let read_message_of_file = open_in file in
-  try
-    let line = input_line read_message_of_file in
-    (* read line, discard \n *)
-    print_endline line;
-    (* write the result to stdout *)
-    flush stdout;
-    (* write on the underlying device now *)
-    close_in read_message_of_file
-    (* close the input channel *)
-  with e ->
-    (* some unexpected exception occurs *)
-    close_in_noerr read_message_of_file;
-    (* emergency closing *)
-    raise e
-=======
+  (*let change_stock_shares (portfolio : t) (stock : stock) (shares : int)
+    (liquidity : float) : t = failwith "unimplemented"*)
   let stock_exists = Hashtbl.mem portfolio.stocks ticker in
   if stock_exists then (
     let past_stock = Hashtbl.find portfolio.stocks ticker in
@@ -166,6 +91,7 @@ let load_last_portfolio =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
       }
     in
     new_portfolio)
@@ -193,6 +119,7 @@ let load_last_portfolio =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
       }
     in
     new_portfolio
@@ -232,6 +159,7 @@ let sell_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
       }
     in
 
@@ -244,6 +172,7 @@ let sell_shares portfolio ticker shares cost =
         net_worth = portfolio.net_worth;
         change = (if portfolio.first then 0. else portfolio.change);
         first = false;
+        vars = portfolio.vars;
       }
     in
     new_portfolio
@@ -266,6 +195,7 @@ let portfolio_swap_first portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = Bool.not portfolio.first;
+    vars = portfolio.vars;
   }
 
 let refresh_stock portfolio ticker = change_ticker_money portfolio ticker 0.
@@ -282,6 +212,7 @@ let copy portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = portfolio.first;
+    vars = portfolio.vars;
   }
 
 let refresh portfolio =
@@ -330,5 +261,131 @@ let change_liquidity portfolio liquid =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = portfolio.first;
+    vars = portfolio.vars;
   }
->>>>>>> bot_runner
+
+let string_of_stock stock =
+  "{" ^ "\"ticker: \"" ^ stock.ticker ^ ", " ^ "\"shares: \""
+  ^ string_of_float stock.shares
+  ^ "," ^ "\"price_per_share: \""
+  ^ string_of_float stock.price_per_share
+  ^ "," ^ "\"initial_value: \""
+  ^ string_of_float stock.initial_value
+  ^ "," ^ "\"value: \""
+  ^ string_of_float stock.value
+  ^ "," ^ "\"change: \""
+  ^ string_of_float stock.change
+  ^ "}"
+
+let rec string_of_stocklist stocklist acc =
+  match stocklist with
+  | [] -> acc
+  | h :: t -> string_of_stocklist t (acc ^ string_of_stock h)
+
+open Yojson.Basic.Util
+
+let test_file = "test.json"
+
+let fst4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> a
+
+let snd4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> b
+
+let trd4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> c
+
+let fth4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> d
+
+let string_of_vars t =
+  "[" ^ "\"x: \""
+  ^ string_of_float (fst4 t.vars)
+  ^ "," ^ "\"y: \""
+  ^ string_of_float (snd4 t.vars)
+  ^ "," ^ "\"w1: \""
+  ^ string_of_float (trd4 t.vars)
+  ^ "," ^ "\"w2: \""
+  ^ string_of_float (trd4 t.vars)
+  ^ "]"
+
+(*[to_json_string t] is the json representation of a portfolio as a string *)
+
+let to_json_string t =
+  "{" ^ "\"liquidity: \""
+  ^ string_of_float t.liquidity
+  ^ ", " ^ "{" ^ "\"stocks: \"" ^ "["
+  ^ string_of_stocklist (list_of_stocks t) ""
+  ^ "]" ^ ", " ^ "\"net_worth: \""
+  ^ string_of_float t.net_worth
+  ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
+  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ "}"
+
+open Yojson.Basic
+
+let build_stock j =
+  {
+    ticker = to_string (member "ticker" j);
+    shares = float_of_string (to_string (member "shares" j));
+    price_per_share = float_of_string (to_string (member "price_per_share" j));
+    initial_value = float_of_string (to_string (member "initial_value" j));
+    value = float_of_string (to_string (member "value" j));
+    change = float_of_string (to_string (member "change" j));
+  }
+
+let build_stock_name j = to_string (member "ticker" j)
+
+let rec stocks_of_json_stocklist (j : Yojson.Basic.t) list_of_stocks htbl =
+  match list_of_stocks with
+  | [] -> htbl
+  | h :: t ->
+      stocks_of_json_stocklist j t
+        (Hashtbl.add htbl (build_stock_name h) (build_stock h);
+         htbl)
+
+let stocks_of_json (j : Yojson.Basic.t) =
+  let list_of_stocks = to_list (member "stocks" j) in
+  stocks_of_json_stocklist j list_of_stocks (Hashtbl.create 50)
+
+let vars_of_json (j : Yojson.Basic.t) =
+  ( float_of_string (to_string (member "x" j)),
+    float_of_string (to_string (member "y" j)),
+    float_of_string (to_string (member "w1" j)),
+    float_of_string (to_string (member "w2" j)) )
+
+let portfolio_of_json (j : Yojson.Basic.t) =
+  {
+    liquidity = float_of_string (to_string (member "liquidity" j));
+    stocks = stocks_of_json j;
+    net_worth = float_of_string (to_string (member "net_worth" j));
+    change = float_of_string (to_string (member "change" j));
+    first = bool_of_string (to_string (member "first" j));
+    vars = vars_of_json j;
+  }
+
+let file = "portfolio_history.txt"
+
+(*let save_current_portfolio portfolio =
+    let str = ocomma_of_portfolio portfolio in
+    let oc = open_out file in
+    Printf.fprintf oc "%s\n" str;
+    close_out oc
+
+  (* Read file and display the first line *)
+  let load_last_portfolio =
+    let read_message_of_file = open_in file in
+    try
+      let line = input_line read_message_of_file in
+      (* read line, discard \n *)
+      print_endline line;
+      (* write the result to stdout *)
+      flush stdout;
+      (* write on the underlying device now *)
+      close_in read_message_of_file
+      (* close the input channel *)
+    with e ->
+      (* some unexpected exception occurs *)
+      close_in_noerr read_message_of_file;
+      (* emergency closing *)
+      raise e
+*)

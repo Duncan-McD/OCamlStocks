@@ -65,3 +65,7 @@ val compare : t -> t -> float
 (** [compare p1 p2] will return a positive float if p1 has a larger net worth than p2, 
     a negative float if p1 has a smaller net worth than p2, 
     and 0 if they have the same net worth*)
+
+val portfolio_of_json : Yojson.Basic.t -> t
+
+val to_json_string : t -> string

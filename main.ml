@@ -1,8 +1,10 @@
+let get_user = "user1"
+
 (** [load] is a [State.t] with saved data or [State.init] if none exists *)
-let load () = State.init
+let load () = Saveload.load_user_state get_user
 
 (** [save] saves [state] *)
-let save sate = ()
+let save sate = Saveload.save_user_state get_user
 
 (** [main ()] is the program that allows the user to interact with the bot. *)
 let main () =
@@ -27,7 +29,7 @@ let main () =
         with
         | State.InvalidAction s ->
             print_endline ("Invalid action: \"" ^ s ^ "\"")
-        | State.QuitAction -> quit_loop := true )
+        | State.QuitAction -> quit_loop := true)
   done
 
 (* once user quits, run exit code and quit *)

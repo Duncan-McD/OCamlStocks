@@ -124,12 +124,18 @@ let add_to_array (arr : ((string * float) list * string list * (float * float * 
 
 *)
 
-let compare_array_spots (a1 : ((string * float) list * string list * (float * float * float * float)) (a2 : (((string * float) list * string list) * (float * float * float * float)) = 
-  let a1_gains = Portfolio.get_
+(*let compare_array_spots (a1 : ((string * float) list * string list * (float * float * float * float))) (a2 : (((string * float) list * string list) * (float * float * float * float))) = 
+  let a1_gains = Portfolio.get_ *)
 
-let test_n_per_var n =
-  let scraped2 = Scraper.scrape_json ~amount:25 "testing_files/stocksnew.json" in
-  let parsed = Parser.parse scraped2 in
+let rec get_scraped_list (config : Config.t) (subreddit_list: string list) (acc : Scraper.subreddit list) = 
+  match subreddit_list with 
+  | [] -> acc
+  | h :: t -> get_scraped_list config t (Scraper.scrape ~amount:(Config.posts_per_scrape (config)) h :: acc)
+
+let initialize_testing_portfolios =
+  let config = State.config State.init in
+  let n = int_of_float (Float.sqrt (Float.sqrt (float_of_int(Config.number_of_tests config)))) in
+  let scraped_list = get_scraped_list config (Config.subreddit_list config) [] in
   for score_con = 1 to n do
     for con_const = 1 to n do
       for  num_posts_const= 1 to n do
@@ -139,13 +145,12 @@ let test_n_per_var n =
           let num_posts_const' = (p n num_posts_const 2.) in 
           let hist_const' = (p n hist_const 2.) in 
           let algoed =
-            Algorithm.get_stocks_consts score_con' con_const' num_posts_const' hist_const' parsed
+            Algorithm.get_stocks_consts score_con' con_const' num_posts_const' hist_const' scraped_list
           in
-          add_to_array const_and_stocks_to_buy_array (algoed, (score_con, con_const, num_posts_const, hist_const)); 
-          print_endline (pp_assoc_list pp_string pp_float (fst algoed))
+          let portfolio = Portfolio.process Portfolio.empty_portfolio algoed in
+          Saveload.save_testing_portfolio Portfolio.to_json_string portfolio 
         done
       done
     done
   done;
-  Array.sort const_and_stocks_to_buy_array
 

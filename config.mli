@@ -17,3 +17,9 @@ val default : t
 (** {2 Getter Functions}*)
 
 (* Add get config values function *)
+
+val number_of_tests : t -> int
+
+val subreddit_list : t -> string list
+
+val posts_per_scrape : t -> int
