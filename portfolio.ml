@@ -362,30 +362,3 @@ let portfolio_of_json (j : Yojson.Basic.t) =
     first = bool_of_string (to_string (member "first" j));
     vars = vars_of_json j;
   }
-
-let file = "portfolio_history.txt"
-
-(*let save_current_portfolio portfolio =
-    let str = ocomma_of_portfolio portfolio in
-    let oc = open_out file in
-    Printf.fprintf oc "%s\n" str;
-    close_out oc
-
-  (* Read file and display the first line *)
-  let load_last_portfolio =
-    let read_message_of_file = open_in file in
-    try
-      let line = input_line read_message_of_file in
-      (* read line, discard \n *)
-      print_endline line;
-      (* write the result to stdout *)
-      flush stdout;
-      (* write on the underlying device now *)
-      close_in read_message_of_file
-      (* close the input channel *)
-    with e ->
-      (* some unexpected exception occurs *)
-      close_in_noerr read_message_of_file;
-      (* emergency closing *)
-      raise e
-*)
