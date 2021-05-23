@@ -15,7 +15,7 @@ val parse : Scraper.subreddit -> stocks
     find mentioned stocks and  gets relevant data from each post it is 
     mentioned in *)
 
-(** {3 Functions on stocks type} *)
+(** {2 Functions on stocks type} *)
 
 val stock_names : stocks -> string list
 (** [stock_names stocks] is the list of stock ticker symbols of all stocks in [stocks] *)

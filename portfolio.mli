@@ -1,3 +1,5 @@
+(** Representation of a portfolio  *)
+
 (** {2 Types}*)
 
 type t
