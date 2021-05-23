@@ -29,6 +29,8 @@ let history_score stock_data =
   in
   -1. *. tan (Float.pi /. 4. *. (rating -. 3.))
 
+(* [convert_to_ticker stock_ticker] is [stock_ticker] if [stock_ticker] 
+    begins with "$" else it is $ ^ [stock_ticker] *)
 let convert_to_ticker s =
   if s.[0] = '$' then String.sub s 1 (String.length s - 1) else s
 
@@ -86,6 +88,35 @@ let parse subreddit =
 
 let stock_names stocks =
   Hashtbl.fold (fun name posts stock_names -> name :: stock_names) stocks []
+
+(* [join_two_stocks stocks_1 stocks_2 stock_2_names] is a type stocks where the 
+  data in [stocks_1] and [stocks_2] have been combined *)
+let rec join_two_stocks stocks_1 stocks_2 = function
+  | [] -> stocks_1
+  | s :: t -> (
+      let s2_s_data = Hashtbl.find stocks_2 s in
+      match Hashtbl.find_opt stocks_1 s with
+      | Some s1_s_data ->
+          let s_data = (fst s1_s_data, snd s1_s_data @ snd s2_s_data) in
+          Hashtbl.remove stocks_1 s;
+          Hashtbl.add stocks_1 s s_data;
+          stocks_1
+      | None ->
+          Hashtbl.add stocks_1 s s2_s_data;
+          stocks_1 )
+
+(* [join_stocks_helper joined_stocks remaining_stocks_list] is [joined_stocks] 
+  where [joined_stocks] is the combined data from [joined_stocks] and 
+  [reminaing_stocks_list] *)
+let rec join_stocks_helper joined_stocks = function
+  | [] -> joined_stocks
+  | s :: t ->
+      let s_stock_names = stock_names s in
+      join_stocks_helper (join_two_stocks joined_stocks s s_stock_names) t
+
+let join_stocks = function
+  | [] -> failwith "[join_stocks stocks_list] cannot take in empty list"
+  | s :: t -> join_stocks_helper s t
 
 let data = Hashtbl.find
 

@@ -41,7 +41,11 @@ let rec get_scrape_time subreddit amount =
     Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.AllTime)
   else (
     print_endline "Invalid input";
+<<<<<<< HEAD
     get_scrape_time subreddit amount)
+=======
+    get_scrape_time subreddit amount )
+>>>>>>> bot_runner
 
 let rec get_scrape subreddit amount =
   print_endline
@@ -56,7 +60,7 @@ let rec get_scrape subreddit amount =
     else if order = "Top" then get_scrape_time subreddit amount
     else (
       print_endline "Invalid input";
-      get_scrape subreddit amount)
+      get_scrape subreddit amount )
   in
   scraped_subreddit
 
@@ -94,11 +98,11 @@ let rec ask_if_want_another_check () =
   else if response = "N" then false
   else (
     print_endline "Invalid Input";
-    ask_if_want_another_check ())
+    ask_if_want_another_check () )
 
 let rec main () =
   let scraped = ask_for_scrape () in
-  let algoed = fst @@ Algorithm.get_stocks scraped in
+  let algoed = fst @@ Algorithm.get_stocks [ scraped ] in
   let () = print_endline (pp_assoc_list pp_string pp_float algoed) in
   let go_again = ask_if_want_another_check () in
   if go_again then main () else ()

@@ -4,3 +4,4 @@ PKG mechaml
 PKG yojson
 PKG csv
 PKG pyml
+PKG ANSITerminal

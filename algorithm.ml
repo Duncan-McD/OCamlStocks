@@ -46,9 +46,21 @@ let rec process_scores (list_of_stocks : string list)
       process_scores t parsed_subreddit x y q w (curr_score :: acc)
         (sum +. if curr_score > 0. then curr_score else 0.)
 
+<<<<<<< HEAD
 let get_stocks_consts x y q w parsed_subreddit =
   let stocks_list = Parser.stock_names parsed_subreddit in
   let processed = process_scores stocks_list parsed_subreddit x y q w [] 0. in
+=======
+let rec sr_list_to_stocks_list stocks_list = function
+  | [] -> stocks_list
+  | sr :: t -> sr_list_to_stocks_list (Parser.parse sr :: stocks_list) t
+
+let get_stocks_consts x y q w subreddit_list =
+  let stocks_list = sr_list_to_stocks_list [] subreddit_list in
+  let parsed_subreddits = Parser.join_stocks stocks_list in
+  let stocks_list = Parser.stock_names parsed_subreddits in
+  let processed = process_scores stocks_list parsed_subreddits x y q w [] 0. in
+>>>>>>> bot_runner
   let pos_score_sum = snd processed in
   let decision_func (buy, sell) (stock, score) =
     if score > 0. then ((stock, score /. pos_score_sum) :: buy, sell)
@@ -57,7 +69,13 @@ let get_stocks_consts x y q w parsed_subreddit =
   List.fold_left decision_func ([], [])
     (List.combine stocks_list (fst processed))
 
+<<<<<<< HEAD
 let get_stocks subreddit =
   let x, y, q, w = Optimizer.constants () in
   let parsed_subreddit = Parser.parse subreddit in
   get_stocks_consts x y q w parsed_subreddit
+=======
+let get_stocks subreddit_list =
+  let x, y, q, w = Optimizer.constants () in
+  get_stocks_consts x y q w subreddit_list
+>>>>>>> bot_runner

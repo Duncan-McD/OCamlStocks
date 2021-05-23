@@ -23,6 +23,10 @@ val stock_names : stocks -> string list
 val data : stocks -> string -> float * post list
 (** [data stocks_data stock_name] is the relevant data associated with [stock_name] in [stock_data]*)
 
+val join_stocks : stocks list -> stocks
+(** [join_stocks stocks_list] is a type [stocks] created by joining the data 
+    from each [stocks] in [stocks_list]  *)
+
 (** {2 Functions on post type} *)
 
 val upvote_score : post -> int

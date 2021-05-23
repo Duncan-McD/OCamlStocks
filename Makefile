@@ -1,8 +1,9 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer uniformtesting testreadwrite
+MODULES= scraper authors parser cashset stockdata algorithm portfolio optimizer config state uniformtesting testreadwrite
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
+MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 
 default: build
@@ -10,6 +11,9 @@ default: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
+
+bot: 
+	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
 algorithmdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential
@@ -72,3 +76,6 @@ demo:
 	make demo1
 	sleep 5
 	make demo2
+
+lines:
+	cloc --by-file --exclude-dir=demo_files,_build --include-lang=OCaml .
