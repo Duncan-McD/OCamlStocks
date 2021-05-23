@@ -5,7 +5,12 @@
         - Functions on post types developed with black box testing
         - Manual testing used for live scraping from web and different orderings
       Cashset (OUnit)
-      Stockdata ()
+        - OUnit testing ran on stock tickers
+        - Tested both real and fake ticker names
+        - Tested common words factored out
+      Stockdata (manual)
+        - Manually tested retrieval of stock data since stockdata is all present
+        based values that change constantly
       Parser (OUnit)
       Optimizer (OUnit + manually)
       Algorithm (OUnit + manually)
@@ -21,6 +26,7 @@
     black box) were used whenever possible to gain maximum testing exposure and
     bisect coverage.
 
+    Rubric: (TODO: remove rubric when completed test plan)
     -4: The test plan is missing.
     -1: The test plan does not explain which parts of the system were automatically tested by OUnit vs. manually tested.
     -1: The test plan does not explain what modules were tested by OUnit and how test cases were developed (black box, glass box, randomized, etc.).
