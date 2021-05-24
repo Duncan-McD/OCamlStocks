@@ -9,17 +9,9 @@ type subreddit = int * Scraper.subreddit_ordering * string
 (** The abstract data type for an unscraped subreddit 
     (num_posts * ordering * url) *)
 
-<<<<<<< HEAD
 (** {2 Config Functions}*)
 
 val default : t
-=======
-(** {2 Exceptions} *)
-
-(** {2 Config Functions}*)
-
-val default : unit -> t
->>>>>>> main
 (** [default] is the bot's default program configuration *)
 
 val add_subreddit : t -> subreddit -> t
