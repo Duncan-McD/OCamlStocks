@@ -50,7 +50,7 @@ val set_last_daily_task_timestamp : t -> float -> t
 (** [set_last_daily_task_timestamp u t] sets the time of the last daily tasks 
     timestamp of user u to time *)
 
-val set_last_daily_task_timestamp : t -> float
+val last_daily_task_timestamp : t -> float
 (** [last_daily_task_timestamp u] is the last time the user u did daily
     tasks. This time is the amount of seconds since 00:00:00 GMT, Jan. 1, 1970*)
 
