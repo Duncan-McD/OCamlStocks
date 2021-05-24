@@ -177,7 +177,7 @@ let menu ?(initial = false) state =
     ANSITerminal.print_string [ ANSITerminal.magenta ]
       ("\nWelcome, " ^ User.name state.user
      ^ "! Below you can see all of the options available to you.\n\n");
-
+  print_endline ("Email: " ^ User.email state.user);
   print_endline
     "\"help\" : walk you through how I works and how to use me\n\
      \"configure\" : configure my subreddit and optimization settings\n\
@@ -442,6 +442,7 @@ let rec optimize state =
      to get the best effects from our algorithm when buying";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
     "Are you sure you would like to optimize? It takes a while (Y/N)\n";
+  print_endline "> ";
   let result = read_line () in
   if result = "Y" then run_optimize state
   else if result = "N" then ()
@@ -449,6 +450,63 @@ let rec optimize state =
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
     optimize state)
+
+let rec change_username state =
+  ANSITerminal.print_string [ ANSITerminal.blue ] "\n Name Change: \n";
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    "Are you sure you would like to change your name? (Y/N)\n";
+  print_string "> ";
+  let result = read_line () in
+  if result = "Y" then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      "\n Please enter your new name \n";
+    print_string "> ";
+    let new_username = read_line () in
+    let new_user = User.set_username state.user new_username in
+    state.user <- new_user)
+  else if result = "N" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\n Invalid Input use Y or N...\n";
+    change_username state)
+
+let rec change_email state =
+  ANSITerminal.print_string [ ANSITerminal.blue ] "\n Email Change: \n";
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    "Are you sure you would like to change your email? (Y/N)\n";
+  print_string "> ";
+  let result = read_line () in
+  if result = "Y" then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      "\n Please enter your new email \n";
+    print_string "> ";
+    let new_email = read_line () in
+    let new_user = User.set_email state.user new_email in
+    state.user <- new_user)
+  else if result = "N" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\n Invalid Input use Y or N...\n";
+    change_email state)
+
+let rec change_password state =
+  ANSITerminal.print_string [ ANSITerminal.blue ] "\n Password Change: \n";
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    "Are you sure you would like to change your password? (Y/N)\n";
+  print_string "> ";
+  let result = read_line () in
+  if result = "Y" then (
+    ANSITerminal.print_string [ ANSITerminal.blue ]
+      "\n Please enter your new password \n";
+    print_string "> ";
+    let new_password = read_line () in
+    let new_user = User.set_password state.user new_password in
+    state.user <- new_user)
+  else if result = "N" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\n Invalid Input use Y or N...\n";
+    change_username state)
 
 let update state action =
   match action with
@@ -466,13 +524,14 @@ let update state action =
   | Refresh_and_Show -> run_refresh_and_show state
   | Configure_Liquidity -> configure_liquidity state
   | Optimize -> optimize state
+  | Account_Change_Username -> change_username state
+  | Account_Change_Email -> change_email state
+  | Account_Change_Password -> change_password state
   | Configure_SR_Subreddits | Configure_SR_Posts | Configure_SR_Ordering
   | Configure_OP_Use | Configure_OP_Consts | Configure_OP_Tests | Graph_Networth
   | Graph_Liquidity | Graph_Networth_Liquidity | Graph_Stock
-  | Account_Change_Username | Account_Change_Email | Account_Change_Password
   | Account_Notification_On | Account_Notification_Off | Account_Delete ->
       failwith ""
-  | _ -> ()
 
 let user state = state.user
 

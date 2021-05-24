@@ -4,7 +4,7 @@
 
 type action
 
-type t
+type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 (** The abstract data type for a state *)
 
 (** {2 Exceptions} *)

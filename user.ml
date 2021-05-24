@@ -149,3 +149,42 @@ let user_of_json (j : Yojson.Basic.t) =
 
 let time_for_daily_tasks user timestamp =
   timestamp -. last_daily_task_timestamp user >= 86400.
+
+let set_email user email_input =
+  {
+    email = email_input;
+    name = name user;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }
+
+let set_username user username_input =
+  {
+    email = email user;
+    name = username_input;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }
+
+let set_password user password_input =
+  {
+    email = email user;
+    name = name user;
+    password = password_input;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }

@@ -2,7 +2,7 @@
 let load auth_type user = State.init auth_type user
 
 (** [save] saves [state] with given [user] *)
-let save (user : User.t) (state : State.t) = Saveload.save_user user
+let save (state : State.t) = Saveload.save_user state.user
 
 (** [main ()] is the program that allows the user to interact with the bot. *)
 let rec main prompt =
@@ -44,12 +44,12 @@ let rec main prompt =
                   ("\n\"" ^ s ^ "\" cannot be used here. You can type \""
                  ^ string_state ^ "\" to see your options.\n")
             | State.LogoutAction ->
-                save user state;
+                save state;
                 main Auth.Logged_Out
             | State.QuitAction -> quit_loop := true)
     done;
 
-    save user state;
+    save state;
     ANSITerminal.print_string [ ANSITerminal.blue ]
       "\n\
        Thanks for using OCamlStocks! I look forward to working with you again.\n"
