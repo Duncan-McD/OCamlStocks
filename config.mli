@@ -42,9 +42,6 @@ val set_liquidity : t -> float -> t
 
 (** {2 Getter Functions}*)
 
-<<<<<<< HEAD
-(* Add get config values function *)
-=======
 val subreddit_info : t -> subreddit list
 (** [subreddits_info config] is the user's [subreddit] list *)
 
@@ -63,4 +60,3 @@ val liquidity : t -> float
 val to_json_string : t -> string
 
 val config_of_json : Yojson.Basic.t -> t
->>>>>>> main
