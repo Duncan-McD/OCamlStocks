@@ -35,8 +35,9 @@
 
 open OUnit2
 open Printf
-open Cashset
 open Scraper
+open Cashset
+open Parser
 
 let pp_string s = "\"" ^ s ^ "\""
 
@@ -60,28 +61,28 @@ let scraper_name_test name json_file expec_name =
     assert_equal expec_name name ~printer:pp_string
 
 let scraper_posts_test name ?(amount = 24) json_file attr_func expec_attr printer =
-  let scraped_body =
+  let scraped_post =
     match posts (scrape_json ~amount ("testing_files/" ^ json_file)) with
     | last_post :: t -> attr_func last_post
     | [] -> failwith "No posts scraped"
   in
-  name >:: fun _ -> assert_equal expec_attr scraped_body ~printer:printer
+  name >:: fun _ -> assert_equal expec_attr scraped_post ~printer:printer
 
-let scraper_title_test name ?(amount = 24) json_file expec_attr =
+let scraper_title_test name ?(amount = 24) json_file expec_title =
   scraper_posts_test ("subreddit post title: " ^ name) ~amount json_file 
-    Scraper.title expec_attr pp_string
+    Scraper.title expec_title pp_string
     
-let scraper_body_test name ?(amount = 24) json_file expec_attr =
+let scraper_body_test name ?(amount = 24) json_file expec_body =
   scraper_posts_test ("subreddit post body: " ^ name) ~amount json_file 
-    Scraper.body expec_attr pp_string
+    Scraper.body expec_body pp_string
 
-let scraper_score_test name ?(amount = 24) json_file expec_attr =
+let scraper_score_test name ?(amount = 24) json_file expec_score =
   scraper_posts_test ("subreddit post score: " ^ name) ~amount json_file 
-    Scraper.score expec_attr string_of_int
+    Scraper.score expec_score string_of_int
 
-let scraper_ratio_test name ?(amount = 24) json_file expec_attr =
+let scraper_ratio_test name ?(amount = 24) json_file expec_ratio =
   scraper_posts_test ("subreddit post upvote ratio: " ^ name) ~amount json_file 
-    Scraper.upvote_ratio expec_attr string_of_float
+    Scraper.upvote_ratio expec_ratio string_of_float
 
 let scraper_excep_test name ?(amount = 25) json_file =
   "scraper exception: " ^ name >:: fun _ -> assert_raises 
@@ -226,10 +227,73 @@ let cashset_tests = [
   cashset_test "IF" false;
   cashset_test "WHAT" false;
   cashset_test "TIL" false;
+  (* TODO: add cashset tests *)
 ]
 
+let parser_stocks_test name ?(amount = 24) json_file expec_stocks = 
+  let subreddit = scrape_json ~amount ("testing_files/" ^ json_file) in
+  let stocks = List.sort String.compare (stock_names @@ parse subreddit) in
+  let sort_expec = List.sort String.compare expec_stocks in
+  "parser stocks test: " ^ name >:: fun _ -> 
+    assert_equal sort_expec stocks ~printer:(pp_list pp_string)
+
+type conn = POS | NEG | NEU
+
+let parser_conn_test name str expec_conn = 
+  let conn = connotation_str str in
+  let conn_range = match expec_conn with
+  | POS -> conn >= 0.05 
+  | NEG -> conn <= -0.05
+  | NEU -> conn > -0.05 && conn < 0.05
+  in
+  "parser connotation test: " ^ name >:: fun _ -> 
+    assert_bool "Connotation does not match expected range" conn_range
+
 let parser_tests = [
-  
+  parser_stocks_test "1 post in r/stocks hot" ~amount:1 "stocks-hot.json" [];
+  parser_stocks_test "2 posts in r/stocks hot" ~amount:2 "stocks-hot.json" ["PEG"];
+  parser_stocks_test "7 posts in r/stocks hot" ~amount:7 "stocks-hot.json" ["PEG"];
+  parser_stocks_test "24 posts in r/stocks hot" ~amount:24 "stocks-hot.json" ["ABBV"; "ALTO"; "ATI"; "CTXR"; "CVX"; "GO"; "NIO"; "PEG"; "REGN"; "RH"; "SPG"; "T"; "TOO"];
+  parser_stocks_test "1 post in r/stocks new" ~amount:1 "stocks-new.json" [];
+  parser_stocks_test "2 posts in r/stocks new" ~amount:2 "stocks-new.json" [];
+  parser_stocks_test "11 posts in r/stocks new" ~amount:11 "stocks-new.json" ["ATI"; "TOO"];
+  parser_stocks_test "24 posts in r/stocks new" ~amount:24 "stocks-new.json" ["ABBV"; "ALTO"; "ATI"; "B"; "CTXR"; "CVX"; "DISCA"; "DISCB"; "DISCK"; "K"; "NIO"; "PLAY"; "REGN"; "RH"; "SPG"; "SPLK"; "SUMO"; "TOO"; "TSE"];
+  parser_stocks_test "1 post in r/stocks rising" ~amount:1 "stocks-rising.json" [];
+  parser_stocks_test "2 posts in r/stocks rising" ~amount:2 "stocks-rising.json" [];
+  parser_stocks_test "15 posts in r/stocks rising" ~amount:15 "stocks-rising.json" ["ABBV"; "CVX"; "GO"; "REGN"; "RH"; "T"];
+  parser_stocks_test "24 posts in r/stocks rising" ~amount:24 "stocks-rising.json" ["ABBV"; "ALTO"; "CTXR"; "CVX"; "GO"; "NIO"; "RDFN"; "REGN"; "RH"; "T"; "UK"; "YETI"];
+  parser_stocks_test "1 post in r/stocks top alltime" ~amount:1 "stocks-top-alltime.json" [];
+  parser_stocks_test "2 posts in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" ["AMC"; "GME"];
+  parser_stocks_test "18 posts in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" ["AMC"; "ATH"; "CTO"; "DATA"; "DD"; "EV"; "GME"; "L"; "MORE"; "MY"; "RH"; "TD"; "VERY"; "WELL"];
+  parser_stocks_test "24 posts in r/stocks top alltime" ~amount:24 "stocks-top-alltime.json" ["AMC"; "ATH"; "B"; "C"; "CTO"; "DATA"; "DD"; "DM"; "EV"; "GME"; "L"; "MORE"; "MY"; "RH"; "TD"; "TV"; "VERY"; "WELL"];
+  parser_stocks_test "1 post in r/stocks top today" ~amount:1 "stocks-top-today.json" [];
+  parser_stocks_test "2 posts in r/stocks top today" ~amount:2 "stocks-top-today.json" [];
+  parser_stocks_test "9 posts in r/stocks top today" ~amount:9 "stocks-top-today.json" ["GO"; "T"];
+  parser_stocks_test "24 posts in r/stocks top today" ~amount:24 "stocks-top-today.json" ["ABBV"; "ALTO"; "ATI"; "CVX"; "DD"; "GO"; "RDFN"; "REGN"; "RH"; "SPG"; "T"; "TOO"; "TV"; "UK"; "YETI"];
+  parser_stocks_test "1 post in r/investing hot" ~amount:1 "investing-hot.json" [];
+  parser_stocks_test "2 posts in r/investing hot" ~amount:2 "investing-hot.json" [];
+  parser_stocks_test "20 posts in r/investing hot" ~amount:20 "investing-hot.json" ["AI"; "AMC"; "BABA"; "CTV"; "DCA"; "DCF"; "DD"; "DISH"; "FUND"; "GME"; "GOOGL"; "ID"; "JD"; "LMT"; "M"; "MSCI"; "NIO"; "ONE"; "Q"; "RTX"; "T"; "TKC"; "TTD"; "TV"; "UBER"; "UPS"];
+  parser_stocks_test "24 posts in r/investing hot" ~amount:24 "investing-hot.json" ["AI"; "AMC"; "BABA"; "CTV"; "DCA"; "DCF"; "DD"; "DISH"; "FUND"; "GME"; "GOOGL"; "HUGE"; "ID"; "JD"; "LMT"; "M"; "MSCI"; "NIO"; "ONE"; "Q"; "RTX"; "T"; "TKC"; "TTD"; "TV"; "UBER"; "UPS"; "X"];
+  parser_stocks_test "1 post in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" [];
+  parser_stocks_test "2 posts in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" [];
+  parser_stocks_test "14 posts in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "OC"; "ONE"; "PE"; "PLTR"; "SE"; "UWMC"];
+  parser_stocks_test "24 posts in r/wallstreetbets hot" ~amount:24 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "HD"; "OC"; "ONE"; "PE"; "PLTR"; "RIOT"; "SE"; "UWMC"];
+  (* parser_conn_test "postive" "VADER is smart, handsome, and funny." POS;
+  parser_conn_test "postive punctuation" "VADER is smart, handsome, and funny!" POS;
+  parser_conn_test "postive enhancer" "VADER is very smart, handsome, and funny." POS;
+  parser_conn_test "postive captials" "VADER is VERY SMART, handsome, and FUNNY." POS;
+  parser_conn_test "postive capitals and punctuation" "VADER is VERY SMART, handsome, and FUNNY!!!" POS;
+  parser_conn_test "postive emphasis" "VADER is VERY SMART, uber handsome, and FRIGGIN FUNNY!!!" POS;
+  parser_conn_test "positive negation" "VADER is not smart, handsome, nor funny." NEG;
+  parser_conn_test "positive simple" "The book was good." POS;
+  parser_conn_test "complex positive" "At least it isn't a horrible book." POS;
+  parser_conn_test "postive diminisher" "The book was only kind of good." POS;
+  parser_conn_test "longer sentence" "The plot was good, but the characters are uncompelling and the dialog is not great." NEG;
+  parser_conn_test "negative mispelling" "Today SUX!" NEG;
+  parser_conn_test "social media slang" "Today only kinda sux! But I'll get by, lol" POS;
+  parser_conn_test "emoticons" "Make sure you :) or :D today!" POS;
+  parser_conn_test "negative negation" "Not bad at all" POS; *)
+  (* TODO: add connotation tests *)
 ]
 
 
@@ -294,6 +358,6 @@ let parser_tests =
 
 let suite =
   "CamelStonks Test Suite"
-  >::: List.flatten [ scraper_tests; cashset_tests; (*parser_tests; cashset_tests*) ]
+  >::: List.flatten [ (*scraper_tests; cashset_tests;*) parser_tests; ]
 
 let _ = run_test_tt_main suite
