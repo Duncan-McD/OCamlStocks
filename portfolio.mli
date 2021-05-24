@@ -1,3 +1,5 @@
+(** Representation of a portfolio  *)
+
 (** {2 Types}*)
 
 type t
@@ -63,3 +65,6 @@ val compare : t -> t -> float
 (** [compare p1 p2] will return a positive float if p1 has a larger net worth than p2, 
     a negative float if p1 has a smaller net worth than p2, 
     and 0 if they have the same net worth*)
+
+val sell_all : t -> t
+(** [sell_all p] sells all the stocks in portfolio p*)
