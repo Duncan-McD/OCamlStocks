@@ -54,19 +54,20 @@ let rec main prompt =
       match read_line () with
       | exception End_of_file -> ()
       | input -> (
-          try
-            let action = State.action_of_string input in
-            State.update state action
-          with
-          | State.MenuAction -> display_menu ~requested:true auth_type
-          | State.InvalidAction s ->
-              ANSITerminal.print_string [ ANSITerminal.red ]
-                ( "\nInvalid action: \"" ^ s
-                ^ "\". You can type \"menu\" to see your options.\n" )
-          | State.LogoutAction ->
-              save email state;
-              main Auth.Logged_Out
-          | State.QuitAction -> quit_loop := true )
+          if input != "" then
+            try
+              let action = State.action_of_string input in
+              State.update state action
+            with
+            | State.MenuAction -> display_menu ~requested:true auth_type
+            | State.InvalidAction s ->
+                ANSITerminal.print_string [ ANSITerminal.red ]
+                  ( "\nInvalid action: \"" ^ s
+                  ^ "\". You can type \"menu\" to see your options.\n" )
+            | State.LogoutAction ->
+                save email state;
+                main Auth.Logged_Out
+            | State.QuitAction -> quit_loop := true )
     done;
 
     save email state;

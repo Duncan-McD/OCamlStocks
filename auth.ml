@@ -2,6 +2,7 @@ type prompt =
   | Initial_Prompt
   | Logged_Out
   | Invalid_Input
+  | Empty_Input
   | Already_Taken
   | Changed
 
@@ -19,7 +20,7 @@ let email user = fst user
 let auth_type user = snd user
 
 let rec prompt_user prompt =
-  if prompt = Initial_Prompt then
+  if prompt = Initial_Prompt || prompt = Empty_Input then
     print_endline
       "\n\
        Type \"login\" or \"signup\", to get started. If you would like to \
@@ -50,7 +51,8 @@ let rec prompt_user prompt =
   | exception End_of_file -> failwith "Error reading input"
   | input ->
       let input = String.lowercase_ascii input in
-      if input = "login" then login Initial_Prompt
+      if input = "" then prompt_user Empty_Input
+      else if input = "login" then login Initial_Prompt
       else if input = "signup" then signup Initial_Prompt
       else if input = "quit" then raise QuitException
       else prompt_user Invalid_Input

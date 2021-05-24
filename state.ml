@@ -24,8 +24,7 @@ exception LogoutAction
 
 exception MenuAction
 
-let init =
-  { test = ""; config = Config.default; portfolio = Portfolio.empty_portfolio }
+let init = { config = Config.default; portfolio = Portfolio.empty_portfolio }
 
 let action_of_string s =
   let s' = String.lowercase_ascii s in

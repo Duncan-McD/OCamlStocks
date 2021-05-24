@@ -9,6 +9,7 @@ type prompt =
   | Initial_Prompt
   | Logged_Out
   | Invalid_Input
+  | Empty_Input
   | Already_Taken
   | Changed  (** The type of prompts *)
 
