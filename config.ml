@@ -1,3 +1,5 @@
+open Yojson.Basic.Util
+
 type t = {
   number_of_tests : int;
   subreddit_list : string list;
@@ -17,8 +19,7 @@ let subreddit_list (config : t) : string list = config.subreddit_list
 
 let posts_per_scrape (config : t) : int = config.posts_per_scrape
 
-open Yojson.Basic.Util
-
+(**[string_of_subreddit_list s] is the json formatted string of string list [s]*)
 let rec string_of_subreddit_list (subreddit_list : string list) acc =
   match subreddit_list with
   | [] -> acc
@@ -33,6 +34,7 @@ let to_json_string t =
   ^ string_of_int t.posts_per_scrape
   ^ ", "
 
+(**[subreddit_list_of_json j] is the subreddit list representation of json [j]*)
 let rec subreddit_list_of_json (j : Yojson.Basic.t list) acc =
   match j with
   | [] -> acc

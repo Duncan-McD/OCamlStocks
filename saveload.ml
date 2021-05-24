@@ -1,10 +1,6 @@
 open Yojson.Basic.Util
 
-let j = Yojson.Basic.from_file "data.json"
-
 let file = "data.json"
-
-let save_to_file = failwith "unimplimented"
 
 let save_testing_portfolio (portfolio : Portfolio.t) : unit =
   failwith "unimplimented"

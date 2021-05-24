@@ -1,3 +1,6 @@
+open Yojson.Basic
+open Yojson.Basic.Util
+
 type stock = {
   ticker : string;
   shares : float;
@@ -250,9 +253,9 @@ let process portfolio = function
       buy_stocks post_sell_portfolio buy
 
 let compare portfolio1 portfolio2 =
-  if portfolio1.net_worth > portfolio2.net_worth then 1.
-  else if portfolio1.net_worth < portfolio2.net_worth then -1.
-  else 0.
+  if portfolio1.net_worth > portfolio2.net_worth then 1
+  else if portfolio1.net_worth < portfolio2.net_worth then -1
+  else 0
 
 let change_liquidity portfolio liquid =
   {
@@ -264,6 +267,9 @@ let change_liquidity portfolio liquid =
     vars = portfolio.vars;
   }
 
+let vars portfolio = portfolio.vars
+
+(**[string_of_stock s] is the string in json format of stock [s]*)
 let string_of_stock stock =
   "{" ^ "\"ticker: \"" ^ stock.ticker ^ ", " ^ "\"shares: \""
   ^ string_of_float stock.shares
@@ -277,27 +283,29 @@ let string_of_stock stock =
   ^ string_of_float stock.change
   ^ "}"
 
+(**[string_of_stocklist s] is the string in json format of stocklist [s]*)
 let rec string_of_stocklist stocklist acc =
   match stocklist with
   | [] -> acc
   | h :: t -> string_of_stocklist t (acc ^ string_of_stock h)
 
-open Yojson.Basic.Util
-
-let test_file = "test.json"
-
+(**[fst4 t] is the first element in 4-tuple [t]*)
 let fst4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> a
 
+(**[snd4 t] is the second element in 4-tuple [t]*)
 let snd4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> b
 
+(**[trd4 t] is the third element in 4-tuple [t]*)
 let trd4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> c
 
+(**[fth4 t] is the fourth element in 4-tuple [t]*)
 let fth4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> d
 
+(**[string_of_vars t] is the string in json format of vars [t]*)
 let string_of_vars t =
   "[" ^ "\"x: \""
   ^ string_of_float (fst4 t.vars)
@@ -309,8 +317,6 @@ let string_of_vars t =
   ^ string_of_float (trd4 t.vars)
   ^ "]"
 
-(*[to_json_string t] is the json representation of a portfolio as a string *)
-
 let to_json_string t =
   "{" ^ "\"liquidity: \""
   ^ string_of_float t.liquidity
@@ -321,7 +327,7 @@ let to_json_string t =
   ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
   ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ "}"
 
-open Yojson.Basic
+(**[stock_of_json j] is the stock representation of json [j]*)
 
 let stock_of_json j =
   {
@@ -333,8 +339,10 @@ let stock_of_json j =
     change = float_of_string (to_string (member "change" j));
   }
 
+(**[stock_name_of_json j] is the ticker of the stock of json [j] *)
 let stock_name_of_json j = to_string (member "ticker" j)
 
+(**[stocks_of_json_stocklist j l htbl] is  representation of json [j] *)
 let rec stocks_of_json_stocklist (j : Yojson.Basic.t) list_of_stocks htbl =
   match list_of_stocks with
   | [] -> htbl
@@ -343,10 +351,12 @@ let rec stocks_of_json_stocklist (j : Yojson.Basic.t) list_of_stocks htbl =
         (Hashtbl.add htbl (stock_name_of_json h) (stock_of_json h);
          htbl)
 
+(**[stocks_of_json j] is the stocks representation of json [j]*)
 let stocks_of_json (j : Yojson.Basic.t) =
   let list_of_stocks = to_list (member "stocks" j) in
   stocks_of_json_stocklist j list_of_stocks (Hashtbl.create 50)
 
+(**[stocks_of_json j] is the vars representation of json [j]*)
 let vars_of_json (j : Yojson.Basic.t) =
   ( float_of_string (to_string (member "x" j)),
     float_of_string (to_string (member "y" j)),

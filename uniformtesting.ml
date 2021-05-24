@@ -39,3 +39,7 @@ let initialize_testing_portfolios =
       done
     done
   done
+
+let optimized_constants (user : User.t) =
+  Portfolio.vars
+    (List.hd (List.sort Portfolio.compare (User.test_portfolios user)))
