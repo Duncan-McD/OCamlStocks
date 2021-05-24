@@ -99,8 +99,8 @@ let get_json (subreddit : string) : Yojson.Basic.t =
 (** [scrape_json_name json] is the name of the json representation of a
     subreddit [json] *)
 let scrape_json_name (json : Yojson.Basic.t) : string =
-  json |> member "data" |> member "children" |> U.to_list
-  |> List.hd |> member "data"
+  json |> member "data" |> member "children" |> U.to_list |> List.hd
+  |> member "data"
   |> member "subreddit_name_prefixed"
   |> U.to_string
 
@@ -137,6 +137,7 @@ let build_post post =
 let rec scrape_posts (subreddit : string) (amount : int)
     (after_parameter : string) (current_posts : post list)
     (json_post_list : Yojson.Basic.t list) : post list =
+  print_string "#";
   match json_post_list with
   | h :: t ->
       let post = build_post h in
@@ -159,6 +160,7 @@ let subreddit_doesnt_exist (subreddit : string) : bool =
   |> get_json |> member "data" |> member "dist" |> to_int = 0
 
 let scrape ?(amount = 100) ?(ordering = New) (subreddit : string) : subreddit =
+  print_string "\nScraping Subreddit ";
   if subreddit_doesnt_exist subreddit then raise (SubredditNotFound subreddit);
   let new_subreddit_link =
     "https://www.reddit.com/" ^ subreddit ^ get_ordering_url_parameter ordering

@@ -9,8 +9,12 @@ type t
 
 (** {2 Exceptions} *)
 
-exception InvalidAction of string
+exception InvalidAction of (string * string)
 (** Raised when an string cannot be converted to an [action]*)
+
+exception InapplicableAction of (string * string)
+(** Raised when a string's coorisponding action cannot be called from the 
+    location you are in*)
 
 exception QuitAction
 (** Raised when a user wants to quit the program *)
@@ -23,9 +27,10 @@ exception HelpAction
 
 (** {2 Action Functions} *)
 
-val action_of_string : string -> action
-(** [action_of_string s] is an [action] according to [s] 
+val action_of_string : t -> string -> action
+(** [action_of_string st s] is an [action] according to [s] and [st]
     Raises [InvalidAction s] if [s] cannot be converted into an [action].
+    Raises [InapplicableAction] if [s] cannot be called in the given [st].
     Raises [QuitAction] if [s] is "quit".
 *)
 

@@ -30,10 +30,10 @@ type action =
 
 (* when performing any actions on user portfolio that return a new portfolio,
     save old portfolio to past_portfolios and set returned portfolio as current *)
-    (* when going into configure specific settings | print current settings  *)
-type t = { auth : Auth.auth; mutable user : User.t; state : action }
+(* when going into configure specific settings | print current settings  *)
+type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 
-exception InvalidAction of string
+exception InvalidAction of (string * string)
 
 exception InapplicableAction of (string * string)
 
@@ -50,6 +50,7 @@ let get_available_actions = function
       [
         Help;
         Menu;
+        Menu_Initial;
         Configure;
         Run_Algorithm;
         Sell_All;
@@ -67,9 +68,22 @@ let get_available_actions = function
         Configure_OP_Use;
         Configure_OP_Consts;
         Configure_OP_Tests;
+        Menu;
+        Configure;
+        Logout;
+        Quit;
       ]
   | Graph ->
-      [ Graph_Networth; Graph_Liquidity; Graph_Networth_Liquidity; Graph_Stock ]
+      [
+        Graph_Networth;
+        Graph_Liquidity;
+        Graph_Networth_Liquidity;
+        Graph_Stock;
+        Graph;
+        Menu;
+        Logout;
+        Quit;
+      ]
   | Account ->
       [
         Account_Change_Username;
@@ -78,38 +92,73 @@ let get_available_actions = function
         Account_Notification_On;
         Account_Notification_Off;
         Account_Delete;
+        Account;
+        Menu;
+        Logout;
+        Quit;
       ]
   | _ -> []
 
-let action_of_string s =
-  let s' = String.lowercase_ascii s in
-  if s' = "menu" then Menu
-  else if s' = "menu inital" then Menu_Initial
-  else if s' = "help" then Help
-  else if s' = "optimize" then Optimize
-  else if s' = "quit" then Quit
-  else if s' = "logout" then Logout
-  else if s' = "configure" then Configure
-  else if s' = "run" then Run_Algorithm
-  else if s' = "sell all" then Sell_All
-  else if s' = "show data" then Refresh_and_Show
-  else if s' = "graph data" then Graph
-  else raise (InvalidAction s)
+let is_valid_action current_action action =
+  List.mem action (get_available_actions current_action)
 
-  let string_of_action a =
-    let a' = String.lowercase_ascii s in
-    if a' = "menu" then Menu
-    else if a' = "menu inital" then Menu_Initial
-    else if a' = "help" then Help
-    else if a' = "optimize" then Optimize
-    else if a' = "quit" then Quit
-    else if a' = "logout" then Logout
-    else if a' = "configure" then Configure
-    else if a' = "run" then Run_Algorithm
-    else if a' = "sell all" then Sell_All
-    else if a' = "show data" then Refresh_and_Show
-    else if a' = "graph data" then Graph
-    else raise (InvalidAction s)
+let string_of_action a =
+  match a with
+  | Menu | Menu_Initial -> "menu"
+  | Configure -> "configure"
+  | Graph -> "graph data"
+  | Account -> "account"
+  | _ -> failwith "not a *state* action"
+
+let action_of_string_menu state s =
+  if s = "help" then Help
+  else if s = "menu initial" then Menu_Initial
+  else if s = "menu" then Menu
+  else if s = "configure" then Configure
+  else if s = "run" then Run_Algorithm
+  else if s = "sell all" then Sell_All
+  else if s = "show data" then Refresh_and_Show
+  else if s = "graph data" then Graph
+  else if s = "account" then Account
+  else if s = "logout" then Logout
+  else if s = "quit" then Quit
+  else raise (InvalidAction (s, string_of_action state.state))
+
+let action_of_string_configure state s =
+  if s = "runner subreddits" then Configure_SR_Subreddits
+  else if s = "runner posts" then Configure_SR_Posts
+  else if s = "runner ordering" then Configure_SR_Ordering
+  else if s = "optimizer use" then Configure_OP_Use
+  else if s = "optimizer tests" then Configure_OP_Tests
+  else if s = "optimizer constants" then Configure_OP_Consts
+  else raise (InvalidAction (s, string_of_action state.state))
+
+let action_of_string_graph state s =
+  if s = "graph net worth" then Graph_Networth
+  else if s = "graph net worth and liquidity" then Graph_Networth_Liquidity
+  else if s = "graph stock" then Graph_Stock
+  else raise (InvalidAction (s, string_of_action state.state))
+
+let action_of_string_account state s =
+  if s = "change email" then Account_Change_Email
+  else if s = "change password" then Account_Change_Password
+  else if s = "change name" then Account_Change_Username
+  else if s = "delete" then Account_Delete
+  else if s = "toggle notifications" then Account_Notification_Off
+  else raise (InvalidAction (s, string_of_action state.state))
+
+let action_of_string state s =
+  let s' = String.lowercase_ascii s in
+  let result =
+    try action_of_string_menu state s'
+    with InvalidAction s -> (
+      try action_of_string_configure state s'
+      with InvalidAction s -> (
+        try action_of_string_graph state s'
+        with InvalidAction s -> action_of_string_account state s'))
+  in
+  if is_valid_action state.state result then result
+  else raise (InapplicableAction (s, string_of_action state.state))
 
 let menu ?(initial = false) state =
   if initial = false then
@@ -117,12 +166,12 @@ let menu ?(initial = false) state =
       "\nOStocker Actions Menu:\n\n"
   else if state.auth = Login then
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ( "\nWelcome back " ^ User.name state.user
-      ^ "! In case you forgot, here are your options:\n\n" )
+      ("\nWelcome back " ^ User.name state.user
+     ^ "! In case you forgot, here are your options:\n\n")
   else
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ( "\nWelcome, " ^ User.name state.user
-      ^ "! Below you can see all of the options available to you.\n\n" );
+      ("\nWelcome, " ^ User.name state.user
+     ^ "! Below you can see all of the options available to you.\n\n");
 
   print_endline
     "\"help\" : walk you through how I works and how to use me\n\
@@ -131,9 +180,62 @@ let menu ?(initial = false) state =
      \"sell all\" : sell all of your owned stocks\n\
      \"show data\" : show text data about your portfolio\n\
      \"graph data\" : graph data about your portfolio\n\
+     \"account\" : view and change account settings\n\
      \"menu\" : show this menu\n\
      \"logout\" : logout\n\
      \"quit\" : quit\n";
+  state.state <- Menu;
+  ()
+
+let configure state =
+  ANSITerminal.print_string [ ANSITerminal.magenta ]
+    "\nOStocker Configurations Menu:\n\n";
+  print_endline
+    "\"runner subreddits\" : lets you configure what subreddits you want the \
+     runner to scrape\n\
+     \"runner posts\" : lets you configure how many posts are scraped by a \
+     certain subreddit\n\
+     \"runner ordering\" : lets you configure the subreddit scaping order of a \
+     certain subreddit  \n\
+     \"optimizer use\" : lets you configure whether or not the optimizer is \
+     enabled\n\
+     \"optimizer tests\" : lets you configure the amount of tests you want to \
+     do one each constant in optimization\n\
+     \"optimizer constants\" : lets you configure the optimizer constants.\n\
+     \"menu\" : return to main menu\n\
+     \"logout\" : logout\n\
+     \"quit\" : quit\n";
+  state.state <- Configure;
+  ()
+
+let graph state =
+  ANSITerminal.print_string [ ANSITerminal.magenta ]
+    "\nOStocker Grapher and Data Visualization Menu:\n\n";
+  print_endline
+    "\"graph net worth\" : graphs your net worth on side by side graphs\n\
+     \"graph net worth and liquidity\" : graphs your net worth added to your \
+     liquidity on side by side graphs\n\
+     \"graph stock\" : lets you graph the evaluation of your holding in a \
+     stock  \n\
+     \"menu\" : return to main menu\n\
+     \"logout\" : logout\n\
+     \"quit\" : quit\n";
+  state.state <- Graph;
+  ()
+
+let account state =
+  ANSITerminal.print_string [ ANSITerminal.magenta ]
+    "\nOStocker Account Settings Menu:\n\n";
+  print_endline
+    "\"change email\" : lets you change your email\n\
+     \"change name\" : lets you change your name\n\
+     \"change password\" : lets you change your password\n\
+     \"delete\" : lets you delete your account  \n\
+     \"toggle notifications\" : lets you toggle on/off email notifications  \n\
+     \"menu\" : return to main menu\n\
+     \"logout\" : logout\n\
+     \"quit\" : quit\n";
+  state.state <- Account;
   ()
 
 let help () =
@@ -176,37 +278,55 @@ let help () =
   | Failure _ -> ()
   | _ -> ()
 
-let update state = function
+let fst4 (x, _, _, _) = x
+
+let snd4 (_, x, _, _) = x
+
+let thd4 (_, _, x, _) = x
+
+let fth4 (_, _, _, x) = x
+
+let run_algorithm state =
+  let porfolio = User.current_portfolio state.user in
+  let config = User.config state.user in
+  let constants = Config.consts config in
+  let subreddit_list = Config.subreddit_info config in
+  print_endline "starting scrape";
+  let scraped_subreddit_list =
+    List.map
+      (fun (amount, order, subreddit) ->
+        Scraper.scrape subreddit ~amount ~ordering:order)
+      subreddit_list
+  in
+  let weighted =
+    Algorithm.get_stocks_consts (fst4 constants) (snd4 constants)
+      (thd4 constants) (fth4 constants) scraped_subreddit_list
+  in
+  let new_portfolio = Portfolio.process porfolio weighted in
+  state.user <- User.update_portfolio state.user new_portfolio;
+  ()
+
+let update state action =
+  match action with
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
   | Sell_All -> () (* call set portfolio to result of portfolio.sell_all *)
-  | _ -> ()
   | Help -> help ()
   | Menu_Initial -> menu state ~initial:true
   | Menu -> menu state
-  | Run_Algorithm 
-  | Sell_All
-  | Refresh_and_Show
   | Logout -> raise LogoutAction
   | Quit -> raise QuitAction
-  | Configure
-  | Configure_SR_Subreddits
-  | Configure_SR_Posts
-  | Configure_SR_Ordering
-  | Configure_OP_Use
-  | Configure_OP_Consts
-  | Configure_OP_Tests
-  | Graph -> "open menu"
-  | Graph_Networth -> 
-  | Graph_Liquidity -> 
-  | Graph_Networth_Liquidity ->
-  | Graph_Stock
-  | Account
-  | Account_Change_Username
-  | Account_Change_Email
-  | Account_Change_Password
-  | Account_Notification_On
-  | Account_Notification_Off
-  | Account_Delete
+  | Configure -> configure state
+  | Graph -> graph state
+  | Account -> account state
+  | Run_Algorithm -> run_algorithm state
+  | Refresh_and_Show | Configure_SR_Subreddits | Configure_SR_Posts
+  | Configure_SR_Ordering | Configure_OP_Use | Configure_OP_Consts
+  | Configure_OP_Tests | Graph_Networth | Graph_Liquidity
+  | Graph_Networth_Liquidity | Graph_Stock | Account_Change_Username
+  | Account_Change_Email | Account_Change_Password | Account_Notification_On
+  | Account_Notification_Off | Account_Delete ->
+      failwith ""
+  | _ -> ()
 
 let user state = state.user
 

@@ -32,6 +32,6 @@ val rating : t -> float
 (** [rating sd] is the rating of the stock represented by [sd] from Yahoo 
     Finance *)
 
-val require : t option -> t
-(** [require t] returns t' if t is Some t' and raised StockNotFound error if 
-    t is None *)
+val require : string -> t option -> t
+(** [require s t] returns t' if t is Some t' and raised StockNotFound error if 
+    t is None for ticker s*)

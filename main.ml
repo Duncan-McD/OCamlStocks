@@ -21,7 +21,7 @@ let rec main prompt =
     let state = load auth_type user in
 
     (* display menu *)
-    let () = State.update state (State.action_of_string "menu inital") in
+    let () = State.update state (State.action_of_string state "menu initial") in
 
     (* while user does not type "quit" or "q" keep runing *)
     let quit_loop = ref false in
@@ -32,22 +32,22 @@ let rec main prompt =
       | input -> (
           if input <> "" then
             try
-              let action = State.action_of_string input in
+              let action = State.action_of_string state input in
+              print_endline "HI";
               State.update state action
             with
-            | State.InvalidAction s ->
+            | State.InvalidAction (s, string_state) ->
                 ANSITerminal.print_string [ ANSITerminal.red ]
-                  ( "\nInvalid action: \"" ^ s
-                  ^ "\". You can type \"menu\" to see your options.\n" )
-            | State.InapplicableAction s, string_state ->
+                  ("\nInvalid action: \"" ^ s ^ "\". You can type \""
+                 ^ string_state ^ "\" to see your options.\n")
+            | State.InapplicableAction (s, string_state) ->
                 ANSITerminal.print_string [ ANSITerminal.red ]
-                  ( "\n\"" ^ s
-                  ^ "\" cannot be used here. You can type \"" ^ string_state ^ "\" to see your \
-                     options.\n" )
+                  ("\n\"" ^ s ^ "\" cannot be used here. You can type \""
+                 ^ string_state ^ "\" to see your options.\n")
             | State.LogoutAction ->
                 save user state;
                 main Auth.Logged_Out
-            | State.QuitAction -> quit_loop := true )
+            | State.QuitAction -> quit_loop := true)
     done;
 
     save user state;

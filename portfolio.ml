@@ -17,7 +17,7 @@ type t = {
 }
 
 let current_cost ticker =
-  ticker |> Stockdata.stockdata_from_ticker |> Stockdata.require
+  ticker |> Stockdata.stockdata_from_ticker |> Stockdata.require ticker
   |> Stockdata.value
 
 let portfolio_gain_loss (portfolio : t) : float = portfolio.change

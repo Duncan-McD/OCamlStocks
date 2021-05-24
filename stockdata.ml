@@ -147,5 +147,5 @@ let ticker (stock_data : t) : string = stock_data.ticker
 
 let rating (stock_data : t) : float = stock_data.rating
 
-let require (stock_data : t option) : t =
-  match stock_data with None -> raise (StockNotFound "") | Some sd -> sd
+let require ticker (stock_data : t option) : t =
+  match stock_data with None -> raise (StockNotFound ticker) | Some sd -> sd
