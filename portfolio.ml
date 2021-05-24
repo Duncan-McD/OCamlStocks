@@ -274,7 +274,7 @@ let buy_stocks portfolio stocks =
   let initial_liquidity = portfolio.liquidity in
   rec_buy stocks portfolio initial_liquidity
 
-let process portfolio vars= function (**TODO add vars*)
+let process portfolio = function (**TODO add vars*)
   | buy, sell ->
       let portfolio = copy portfolio in
       let post_sell_portfolio = sell_stocks portfolio sell in

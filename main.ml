@@ -43,8 +43,8 @@ let rec main prompt =
                 ANSITerminal.print_string [ ANSITerminal.red ]
                   ("\n\"" ^ s ^ "\" cannot be used here. You can type \""
                  ^ string_state ^ "\" to see your options.\n")
-            | State.LogoutAction ->
-                save state;
+            | State.LogoutAction s ->
+                if s <> "delete" then save state else ();
                 main Auth.Logged_Out
             | State.QuitAction -> quit_loop := true)
     done;

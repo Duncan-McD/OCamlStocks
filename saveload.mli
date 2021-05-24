@@ -10,3 +10,6 @@ val is_valid_email_password : string -> string -> bool
 
 val load_user : string -> User.t
 (**[load_user e] is user with email [e]. Precondition: [e] must be an email of a user*)
+
+val delete_user : User.t -> unit
+(**[delete_user u] deletes the data of user [u] from [file]*)

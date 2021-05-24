@@ -40,7 +40,7 @@ exception InapplicableAction of (string * string)
 
 exception QuitAction
 
-exception LogoutAction
+exception LogoutAction of string
 
 exception HelpAction
 
@@ -92,8 +92,6 @@ let get_available_actions = function
         Account_Change_Username;
         Account_Change_Email;
         Account_Change_Password;
-        Account_Notification_On;
-        Account_Notification_Off;
         Account_Delete;
         Account;
         Menu;
@@ -149,7 +147,6 @@ let action_of_string_account state s =
   else if s = "change password" then Account_Change_Password
   else if s = "change name" then Account_Change_Username
   else if s = "delete" then Account_Delete
-  else if s = "toggle notifications" then Account_Notification_Off
   else raise (InvalidAction (s, string_of_action state.state))
 
 let action_of_string state s =
@@ -238,7 +235,6 @@ let account state =
      \"change name\" : lets you change your name\n\
      \"change password\" : lets you change your password\n\
      \"delete\" : lets you delete your account  \n\
-     \"toggle notifications\" : lets you toggle on/off email notifications  \n\
      \"menu\" : return to main menu\n\
      \"logout\" : logout\n\
      \"quit\" : quit\n";
@@ -514,7 +510,7 @@ let update state action =
   | Help -> help ()
   | Menu_Initial -> menu state ~initial:true
   | Menu -> menu state
-  | Logout -> raise LogoutAction
+  | Logout -> raise (LogoutAction "logout")
   | Quit -> raise QuitAction
   | Configure -> configure state
   | Graph -> graph state
@@ -527,10 +523,12 @@ let update state action =
   | Account_Change_Username -> change_username state
   | Account_Change_Email -> change_email state
   | Account_Change_Password -> change_password state
+  | Account_Delete ->
+      Saveload.delete_user state.user;
+      raise (LogoutAction "delete")
   | Configure_SR_Subreddits | Configure_SR_Posts | Configure_SR_Ordering
   | Configure_OP_Use | Configure_OP_Consts | Configure_OP_Tests | Graph_Networth
-  | Graph_Liquidity | Graph_Networth_Liquidity | Graph_Stock
-  | Account_Notification_On | Account_Notification_Off | Account_Delete ->
+  | Graph_Liquidity | Graph_Networth_Liquidity | Graph_Stock | _ ->
       failwith ""
 
 let user state = state.user

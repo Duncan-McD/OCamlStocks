@@ -19,7 +19,7 @@ exception InapplicableAction of (string * string)
 exception QuitAction
 (** Raised when a user wants to quit the program *)
 
-exception LogoutAction
+exception LogoutAction of string
 (** Raised when a user wants to logout of their account *)
 
 exception HelpAction
