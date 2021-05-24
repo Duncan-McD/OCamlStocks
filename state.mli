@@ -23,6 +23,9 @@ exception MenuAction
 -- WILL BE DELETED ONCE STATE CAN ACCESS USER DATA 
 -- STATE WILL THEN PRINT OUT MENU ITSELF *)
 
+exception HelpAction
+(** Raised when a user wants to see program help information *)
+
 (** {2 Action Functions} *)
 
 val action_of_string : string -> action

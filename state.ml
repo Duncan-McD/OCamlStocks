@@ -20,6 +20,8 @@ exception LogoutAction
 
 exception MenuAction
 
+exception HelpAction
+
 let init = { config = Config.default (); portfolio = Portfolio.empty_portfolio }
 
 let action_of_string s =
@@ -37,6 +39,7 @@ let action_of_string s =
 
 let update state = function
   | Menu -> raise MenuAction
+  | Help -> raise HelpAction
   | Quit -> raise QuitAction
   | Logout -> raise LogoutAction
   | _ -> ()
