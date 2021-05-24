@@ -17,6 +17,7 @@ type t = {
   change : float;
   first : bool;
   vars : float * float * float * float;
+  timestamp : float;
 }
 
 let current_cost ticker =
@@ -43,6 +44,7 @@ let empty_portfolio =
     change = 0.;
     first = false;
     vars = (0., 0., 0., 0.);
+    timestamp = Unix.time ();
   }
 
 let list_of_tickers (portfolio : t) : string list =
@@ -95,6 +97,7 @@ let buy_shares portfolio ticker shares cost =
           else portfolio.change +. recent_change);
         first = false;
         vars = portfolio.vars;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio)
@@ -123,6 +126,7 @@ let buy_shares portfolio ticker shares cost =
           else portfolio.change +. recent_change);
         first = false;
         vars = portfolio.vars;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio
@@ -163,6 +167,7 @@ let sell_shares portfolio ticker shares cost =
           else portfolio.change +. recent_change);
         first = false;
         vars = portfolio.vars;
+        timestamp = Unix.time ();
       }
     in
 
@@ -176,6 +181,7 @@ let sell_shares portfolio ticker shares cost =
         change = (if portfolio.first then 0. else portfolio.change);
         first = false;
         vars = portfolio.vars;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio
@@ -199,6 +205,7 @@ let portfolio_swap_first portfolio =
     change = portfolio.change;
     first = Bool.not portfolio.first;
     vars = portfolio.vars;
+    timestamp = Unix.time ();
   }
 
 let refresh_stock portfolio ticker = change_ticker_money portfolio ticker 0.
@@ -216,6 +223,7 @@ let copy portfolio =
     change = portfolio.change;
     first = portfolio.first;
     vars = portfolio.vars;
+    timestamp = Unix.time ();
   }
 
 let refresh portfolio =
@@ -258,13 +266,15 @@ let compare portfolio1 portfolio2 =
   else 0
 
 let change_liquidity portfolio liquid =
+  let new_portfolio = refresh portfolio in
   {
-    liquidity = portfolio.liquidity +. liquid;
-    stocks = Hashtbl.copy portfolio.stocks;
-    net_worth = portfolio.net_worth;
-    change = portfolio.change;
-    first = portfolio.first;
-    vars = portfolio.vars;
+    liquidity = new_portfolio.liquidity +. liquid;
+    stocks = Hashtbl.copy new_portfolio.stocks;
+    net_worth = new_portfolio.net_worth;
+    change = new_portfolio.change;
+    first = new_portfolio.first;
+    vars = new_portfolio.vars;
+    timestamp = new_portfolio.timestamp;
   }
 
 let vars portfolio = portfolio.vars
@@ -325,7 +335,10 @@ let to_json_string t =
   ^ "]" ^ ", " ^ "\"net_worth: \""
   ^ string_of_float t.net_worth
   ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
-  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ "}"
+  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ ","
+  ^ "\"timestamp: \""
+  ^ string_of_float t.timestamp
+  ^ "}"
 
 (**[stock_of_json j] is the stock representation of json [j]*)
 
@@ -371,4 +384,17 @@ let portfolio_of_json (j : Yojson.Basic.t) =
     change = float_of_string (to_string (member "change" j));
     first = bool_of_string (to_string (member "first" j));
     vars = vars_of_json j;
+    timestamp = float_of_string (to_string (member "timestamp" j));
+  }
+
+let sell_all portfolio =
+  let new_portfolio = refresh portfolio in
+  {
+    liquidity = new_portfolio.liquidity +. new_portfolio.net_worth;
+    stocks = Hashtbl.create 50;
+    net_worth = 0.;
+    change = -1. *. new_portfolio.net_worth;
+    first = false;
+    vars = (1., 1., 1., 1.);
+    timestamp = Unix.time ();
   }

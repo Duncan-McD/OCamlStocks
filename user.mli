@@ -49,3 +49,15 @@ val change_test_portfolios : t -> Portfolio.t list -> t
 val to_json_string : t -> string
 
 val user_of_json : Yojson.Basic.t -> t
+
+val set_last_daily_task_timestamp : t -> float -> t
+(** [set_last_daily_task_timestamp u t] sets the time of the last daily tasks 
+    timestamp of user u to time *)
+
+val last_daily_task_timestamp : t -> float
+(** [last_daily_task_timestamp u] is the last time the user u did daily
+    tasks. This time is the amount of seconds since 00:00:00 GMT, Jan. 1, 1970*)
+
+val time_for_daily_tasks : t -> float -> bool
+(** [time_for_daily_tasks u t] is true if it has been at least a day since the 
+    last time daily tasks were run. Otherwise it is false*)

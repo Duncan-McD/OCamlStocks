@@ -6,6 +6,8 @@ type t = {
   past_portfolios : Portfolio.t list;
   test_portfolios : Portfolio.t list;
   config : Config.t;
+  account_creation_time : float;
+  last_daily_task_timestamp : float;
 }
 
 let create email name password =
@@ -17,6 +19,8 @@ let create email name password =
     past_portfolios = [];
     test_portfolios = [];
     config = Config.default ();
+    account_creation_time = Unix.time ();
+    last_daily_task_timestamp = 86400.;
   }
 
 let email user = user.email
@@ -43,6 +47,10 @@ let past_portfolios user = user.past_portfolios
 
 let test_portfolios user = user.test_portfolios
 
+let last_daily_task_timestamp user = user.last_daily_task_timestamp
+
+let account_creation_time user = user.account_creation_time
+
 let config user = user.config
 
 let change_config user configuration =
@@ -54,6 +62,8 @@ let change_config user configuration =
     past_portfolios = user.past_portfolios;
     test_portfolios = user.test_portfolios;
     config = configuration;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
   }
 
 let update_portfolio user portfolio =
@@ -65,6 +75,8 @@ let update_portfolio user portfolio =
     past_portfolios = user.current_portfolio :: user.past_portfolios;
     test_portfolios = user.test_portfolios;
     config = user.config;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
   }
 
 let change_test_portfolios user portfolios =
@@ -76,6 +88,21 @@ let change_test_portfolios user portfolios =
     past_portfolios = past_portfolios user;
     test_portfolios = portfolios;
     config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
+  }
+
+let set_last_daily_task_timestamp user timestamp =
+  {
+    email = email user;
+    name = name user;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = timestamp;
   }
 
 open Yojson.Basic.Util
@@ -95,6 +122,10 @@ let to_json_string t =
   ^ string_of_porfolio_list t.test_portfolios ""
   ^ "]" ^ ", " ^ "\"config: \""
   ^ Config.to_json_string t.config
+  ^ "," ^ "\"account_creation_time: \""
+  ^ string_of_float t.account_creation_time
+  ^ ", " ^ "\"last_daily_task_timestamp: \""
+  ^ string_of_float t.last_daily_task_timestamp
   ^ "}"
 
 let rec portfolio_list_of_json (j : Yojson.Basic.t list) acc =
@@ -114,4 +145,11 @@ let user_of_json (j : Yojson.Basic.t) =
     test_portfolios =
       portfolio_list_of_json (to_list (member "test_portfolios" j)) [];
     config = Config.config_of_json (member "config" j);
+    account_creation_time =
+      float_of_string (to_string (member "account_creation_time" j));
+    last_daily_task_timestamp =
+      float_of_string (to_string (member "last_daily_task_timestamp" j));
   }
+
+let time_for_daily_tasks user timestamp =
+  timestamp -. last_daily_task_timestamp user >= 86400.
