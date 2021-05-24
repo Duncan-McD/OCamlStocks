@@ -217,6 +217,17 @@ let change_ticker_money (portfolio : t) (ticker : string) (money : float) : t =
   let shares = money /. cost_per_share in
   change_ticker_shares portfolio ticker shares cost_per_share
 
+let change_vars (portfolio : t) (x, y, w1, w2) =
+  {
+    liquidity = portfolio.liquidity;
+    stocks = portfolio.stocks;
+    net_worth = portfolio.net_worth;
+    change = portfolio.change;
+    first = Bool.not portfolio.first;
+    vars = (x, y, w1, w2);
+    timestamp = Unix.time ();
+  }
+
 let portfolio_swap_first portfolio =
   {
     liquidity = portfolio.liquidity;
@@ -274,11 +285,11 @@ let buy_stocks portfolio stocks =
   let initial_liquidity = portfolio.liquidity in
   rec_buy stocks portfolio initial_liquidity
 
-let process portfolio = function (**TODO add vars*)
+let process portfolio (x, y, w1, w2) = function
   | buy, sell ->
       let portfolio = copy portfolio in
       let post_sell_portfolio = sell_stocks portfolio sell in
-      buy_stocks post_sell_portfolio buy
+      change_vars (buy_stocks post_sell_portfolio buy) (x, y, w1, w2)
 
 let compare portfolio1 portfolio2 =
   if portfolio1.net_worth > portfolio2.net_worth then 1

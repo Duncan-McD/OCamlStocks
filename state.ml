@@ -305,7 +305,9 @@ let run_algorithm state =
     Algorithm.get_stocks_consts (fst4 constants) (snd4 constants)
       (thd4 constants) (fth4 constants) scraped_subreddit_list
   in
-  let new_portfolio = Portfolio.process porfolio weighted in
+  let new_portfolio =
+    Portfolio.process porfolio (Config.consts config) weighted
+  in
   state.user <- User.update_portfolio state.user new_portfolio;
   ()
 
