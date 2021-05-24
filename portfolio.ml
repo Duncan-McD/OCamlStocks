@@ -7,7 +7,7 @@ type stock = {
   price_per_share : float;
   initial_value : float;
   value : float;
-  change : float;
+  stock_change : float;
 }
 
 type t = {
@@ -34,7 +34,7 @@ let shares (stock : stock) : float = stock.shares
 
 let ticker (stock : stock) : string = stock.ticker
 
-let stock_gain_loss (stock : stock) : float = stock.change
+let stock_gain_loss (stock : stock) : float = stock.stock_change
 
 let empty_portfolio =
   {
@@ -50,6 +50,26 @@ let empty_portfolio =
 let list_of_tickers (portfolio : t) : string list =
   Hashtbl.fold
     (fun name stock stock_names -> name :: stock_names)
+    portfolio.stocks []
+
+let list_of_shares (portfolio : t) =
+  Hashtbl.fold
+    (fun name stock stocks -> stock.shares :: stocks)
+    portfolio.stocks []
+
+let list_of_ppss (portfolio : t) =
+  Hashtbl.fold
+    (fun name stock stocks -> stock.price_per_share :: stocks)
+    portfolio.stocks []
+
+let list_of_values (portfolio : t) =
+  Hashtbl.fold
+    (fun name stock stocks -> stock.value :: stocks)
+    portfolio.stocks []
+
+let list_of_changes (portfolio : t) =
+  Hashtbl.fold
+    (fun name stock stocks -> stock.stock_change :: stocks)
     portfolio.stocks []
 
 let list_of_stocks (portfolio : t) : stock list =
@@ -82,7 +102,7 @@ let buy_shares portfolio ticker shares cost =
         price_per_share = cost_per_share;
         initial_value = past_stock.initial_value;
         value;
-        change = recent_change;
+        stock_change = recent_change;
       }
     in
     Hashtbl.remove portfolio.stocks ticker;
@@ -112,7 +132,7 @@ let buy_shares portfolio ticker shares cost =
         price_per_share = cost_per_share;
         initial_value;
         value;
-        change = recent_change;
+        stock_change = recent_change;
       }
     in
     Hashtbl.add portfolio.stocks ticker new_stock;
@@ -151,7 +171,7 @@ let sell_shares portfolio ticker shares cost =
         price_per_share = cost_per_share;
         initial_value = past_stock.initial_value;
         value;
-        change = recent_change;
+        stock_change = recent_change;
       }
     in
     Hashtbl.remove portfolio.stocks ticker;
@@ -290,7 +310,7 @@ let string_of_stock stock =
   ^ "," ^ "\"value: \""
   ^ string_of_float stock.value
   ^ "," ^ "\"change: \""
-  ^ string_of_float stock.change
+  ^ string_of_float stock.stock_change
   ^ "}"
 
 (**[string_of_stocklist s] is the string in json format of stocklist [s]*)
@@ -349,7 +369,7 @@ let stock_of_json j =
     price_per_share = float_of_string (to_string (member "price_per_share" j));
     initial_value = float_of_string (to_string (member "initial_value" j));
     value = float_of_string (to_string (member "value" j));
-    change = float_of_string (to_string (member "change" j));
+    stock_change = float_of_string (to_string (member "change" j));
   }
 
 (**[stock_name_of_json j] is the ticker of the stock of json [j] *)

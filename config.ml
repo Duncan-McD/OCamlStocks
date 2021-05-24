@@ -8,7 +8,6 @@ type t = {
   optimizing : bool;
   consts : float * float * float * float;
   num_test : int;
-  liquidity : float;
 }
 
 let default =
@@ -17,7 +16,6 @@ let default =
     optimizing = true;
     consts = (1., 1., 1., 1.);
     num_test = 10000;
-    liquidity = 0.;
   }
 
 let add_subreddit config subreddit =
@@ -26,7 +24,6 @@ let add_subreddit config subreddit =
     optimizing = config.optimizing;
     consts = config.consts;
     num_test = config.num_test;
-    liquidity = config.liquidity;
   }
 
 let set_subreddits config new_subreddits =
@@ -35,7 +32,6 @@ let set_subreddits config new_subreddits =
     optimizing = config.optimizing;
     consts = config.consts;
     num_test = config.num_test;
-    liquidity = config.liquidity;
   }
 
 let set_optimizing config b =
@@ -44,7 +40,6 @@ let set_optimizing config b =
     optimizing = b;
     consts = config.consts;
     num_test = config.num_test;
-    liquidity = config.liquidity;
   }
 
 let set_consts config (a, b, c, d) =
@@ -53,7 +48,6 @@ let set_consts config (a, b, c, d) =
     optimizing = config.optimizing;
     consts = (a, b, c, d);
     num_test = config.num_test;
-    liquidity = config.liquidity;
   }
 
 let set_tests config tests =
@@ -62,16 +56,6 @@ let set_tests config tests =
     optimizing = config.optimizing;
     consts = config.consts;
     num_test = tests;
-    liquidity = config.liquidity;
-  }
-
-let set_liquidity config new_liquidity =
-  {
-    subreddits = config.subreddits;
-    optimizing = config.optimizing;
-    consts = config.consts;
-    num_test = config.num_test;
-    liquidity = new_liquidity;
   }
 
 let subreddit_info config = config.subreddits
@@ -81,8 +65,6 @@ let is_optimizing config = config.optimizing
 let consts config = config.consts
 
 let num_tests config = config.num_test
-
-let liquidity config = config.liquidity
 
 let fst3 (t : int * Scraper.subreddit_ordering * string) =
   match t with a, b, c -> a
@@ -155,8 +137,6 @@ let to_json_string (config : t) =
   ^ string_of_bool config.optimizing
   ^ "," ^ "\"consts: \"" ^ string_of_const config ^ "," ^ "\"num_test: \""
   ^ string_of_int config.num_test
-  ^ "," ^ "\"liquidity: \""
-  ^ string_of_float config.liquidity
   ^ "}"
 
 let ordering_of_json (str : string) : Scraper.subreddit_ordering =
@@ -194,5 +174,4 @@ let config_of_json (j : Yojson.Basic.t) =
     optimizing = bool_of_string (to_string (member "optimizing" j));
     consts = consts_of_json (member "consts" j);
     num_test = int_of_string (to_string (member "num_test" j));
-    liquidity = float_of_string (to_string (member "liquidity" j));
   }

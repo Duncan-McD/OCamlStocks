@@ -33,7 +33,6 @@ let rec main prompt =
           if input <> "" then
             try
               let action = State.action_of_string state input in
-              print_endline "HI";
               State.update state action
             with
             | State.InvalidAction (s, string_state) ->

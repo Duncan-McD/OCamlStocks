@@ -41,6 +41,18 @@ val stock_gain_loss : stock -> float
 val list_of_tickers : t -> string list
 (** [list_of_tickers p] is a list of stock tickers in portfolio [p]*)
 
+val list_of_shares : t -> float list
+(** [list_of_shares p] is a list of stock shares in portfolio [p]*)
+
+val list_of_ppss : t -> float list
+(** [list_of_ppss p] is a list of stock price per shares in portfolio [p]*)
+
+val list_of_values : t -> float list
+(** [list_of_values p] is a list of stock values in portfolio [p]*)
+
+val list_of_changes : t -> float list
+(** [list_of_changes p] is a list of stock changes in portfolio [p]*)
+
 val list_of_stocks : t -> stock list
 (** [list_of_stocks p] is a list of stocks in portfolio [p]*)
 

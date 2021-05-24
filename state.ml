@@ -15,6 +15,7 @@ type action =
   | Configure_OP_Use
   | Configure_OP_Consts
   | Configure_OP_Tests
+  | Configure_Liquidity
   | Graph
   | Graph_Networth
   | Graph_Liquidity
@@ -56,6 +57,7 @@ let get_available_actions = function
         Sell_All;
         Refresh_and_Show;
         Graph;
+        Optimize;
         Account;
         Logout;
         Quit;
@@ -68,6 +70,7 @@ let get_available_actions = function
         Configure_OP_Use;
         Configure_OP_Consts;
         Configure_OP_Tests;
+        Configure_Liquidity;
         Menu;
         Configure;
         Logout;
@@ -120,6 +123,7 @@ let action_of_string_menu state s =
   else if s = "show data" then Refresh_and_Show
   else if s = "graph data" then Graph
   else if s = "account" then Account
+  else if s = "optimize" then Optimize
   else if s = "logout" then Logout
   else if s = "quit" then Quit
   else raise (InvalidAction (s, string_of_action state.state))
@@ -131,6 +135,7 @@ let action_of_string_configure state s =
   else if s = "optimizer use" then Configure_OP_Use
   else if s = "optimizer tests" then Configure_OP_Tests
   else if s = "optimizer constants" then Configure_OP_Consts
+  else if s = "change liquidity" then Configure_Liquidity
   else raise (InvalidAction (s, string_of_action state.state))
 
 let action_of_string_graph state s =
@@ -181,6 +186,7 @@ let menu ?(initial = false) state =
      \"show data\" : show text data about your portfolio\n\
      \"graph data\" : graph data about your portfolio\n\
      \"account\" : view and change account settings\n\
+     \"optimize\" : This Runs the optimizer\n\
      \"menu\" : show this menu\n\
      \"logout\" : logout\n\
      \"quit\" : quit\n";
@@ -202,6 +208,7 @@ let configure state =
      \"optimizer tests\" : lets you configure the amount of tests you want to \
      do one each constant in optimization\n\
      \"optimizer constants\" : lets you configure the optimizer constants.\n\
+     \"change liquidity\" : lets you change your liquidity.\n\
      \"menu\" : return to main menu\n\
      \"logout\" : logout\n\
      \"quit\" : quit\n";
@@ -312,6 +319,137 @@ let run_sell_all state =
   let new_user = User.update_portfolio state.user new_portfolio in
   state.user <- new_user
 
+let run_refresh_and_show state =
+  let portfolio = User.current_portfolio state.user in
+  let new_portfolio = Portfolio.refresh portfolio in
+  let new_user = User.update_portfolio state.user new_portfolio in
+  state.user <- new_user;
+
+  let net_worth =
+    Owl.Dataframe.pack_float_series [| Portfolio.net_worth new_portfolio |]
+  in
+  let liquidity =
+    Owl.Dataframe.pack_float_series [| Portfolio.liquidity new_portfolio |]
+  in
+  let change =
+    Owl.Dataframe.pack_float_series
+      [| Portfolio.portfolio_gain_loss new_portfolio |]
+  in
+
+  let portfolio_frame =
+    Owl.Dataframe.make
+      [| "Net Worth"; "Liquidity"; "Change" |]
+      ~data:[| net_worth; liquidity; change |]
+  in
+  Owl_pretty.pp_dataframe Format.std_formatter portfolio_frame;
+  let tickers =
+    Owl.Dataframe.pack_string_series
+      (Array.of_list (Portfolio.list_of_tickers new_portfolio))
+  in
+  let shares =
+    Owl.Dataframe.pack_float_series
+      (Array.of_list (Portfolio.list_of_shares new_portfolio))
+  in
+  let pps =
+    Owl.Dataframe.pack_float_series
+      (Array.of_list (Portfolio.list_of_ppss new_portfolio))
+  in
+  let values =
+    Owl.Dataframe.pack_float_series
+      (Array.of_list (Portfolio.list_of_values new_portfolio))
+  in
+  let change =
+    Owl.Dataframe.pack_float_series
+      (Array.of_list (Portfolio.list_of_changes new_portfolio))
+  in
+  let stocks_frame =
+    Owl.Dataframe.make
+      [| "Ticker"; "Shares"; "Price Per Share"; "Value"; "Recent Change" |]
+      ~data:[| tickers; shares; pps; values; change |]
+  in
+  Owl_pretty.pp_dataframe Format.std_formatter stocks_frame
+
+let rec configure_liquidity state =
+  let portfolio = User.current_portfolio state.user in
+  let liquidity = Portfolio.liquidity portfolio in
+  print_endline ("Your current liquidity is: " ^ string_of_float liquidity);
+  print_endline
+    "enter add or remove followed by the amount of money you would like to do \
+     that for or Q to exit";
+  let input = read_line () in
+  if input = "q" then ()
+  else if String.length input > 4 && String.sub input 0 3 = "add" then (
+    try
+      let f = float_of_string (String.sub input 4 (String.length input - 4)) in
+      let new_portfolio = Portfolio.change_liquidity portfolio f in
+      let new_user = User.update_portfolio state.user new_portfolio in
+      state.user <- new_user
+    with Failure f ->
+      print_endline "Not a Float - Please Try again";
+      configure_liquidity state)
+  else if String.length input > 7 && String.sub input 0 6 = "remove" then (
+    try
+      let f = float_of_string (String.sub input 7 (String.length input - 7)) in
+      let new_portfolio = Portfolio.change_liquidity portfolio (-1. *. f) in
+      let new_user = User.update_portfolio state.user new_portfolio in
+      state.user <- new_user
+    with Failure f ->
+      print_endline "Not a Float - Please Try again";
+      configure_liquidity state)
+  else (
+    print_endline "Invalid input";
+    configure_liquidity state)
+
+let convert_seconds_days s = s /. (24. *. 60. *. 60.)
+
+let convert_seconds_hours s = s /. (60. *. 60.)
+
+let convert_seconds_minutes s = s /. 60.
+
+let get_friendly_time s =
+  if s > 24. *. 60. *. 60. then
+    let time = string_of_float (convert_seconds_days s) in
+    if time = "1." then time ^ " day" else time ^ " days"
+  else if s > 60. *. 60. then
+    let time = string_of_float (convert_seconds_hours s) ^ " hours" in
+    if time = "1." then time ^ " day" else time ^ " hours"
+  else if s > 60. then
+    let time = string_of_float (convert_seconds_hours s) ^ " minutes" in
+    if time = "1." then time ^ " day" else time ^ " minutes"
+  else
+    let time = string_of_float s in
+    if time = "1." then time ^ " second" else time ^ " seconds"
+
+let run_optimize state =
+  let user = state.user in
+  let constants = Uniformtesting.optimized_constants user in
+  let new_user = Uniformtesting.initialize_testing_portfolios user in
+  let config = User.config state.user in
+  let new_config = Config.set_consts config constants in
+  let newer_user = User.change_config new_user new_config in
+  state.user <- newer_user
+
+let rec optimize state =
+  let time_since = Unix.time () -. User.last_daily_task_timestamp state.user in
+  let time_since = convert_seconds_days time_since in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("\nIt has been "
+    ^ get_friendly_time time_since
+    ^ " since you last optimized...");
+  print_endline
+    "\n\
+     It is reccomended that you wait around a day before optimization cycles \
+     to get the best effects from our algorithm when buying";
+  ANSITerminal.print_string [ ANSITerminal.yellow ]
+    "Are you sure you would like to optimize? It takes a while (Y/N)\n";
+  let result = read_line () in
+  if result = "Y" then run_optimize state
+  else if result = "N" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\n Invalid Input use Y or N...\n";
+    optimize state)
+
 let update state action =
   match action with
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
@@ -325,12 +463,14 @@ let update state action =
   | Account -> account state
   | Run_Algorithm -> run_algorithm state
   | Sell_All -> run_sell_all state
-  | Refresh_and_Show | Configure_SR_Subreddits | Configure_SR_Posts
-  | Configure_SR_Ordering | Configure_OP_Use | Configure_OP_Consts
-  | Configure_OP_Tests | Graph_Networth | Graph_Liquidity
-  | Graph_Networth_Liquidity | Graph_Stock | Account_Change_Username
-  | Account_Change_Email | Account_Change_Password | Account_Notification_On
-  | Account_Notification_Off | Account_Delete ->
+  | Refresh_and_Show -> run_refresh_and_show state
+  | Configure_Liquidity -> configure_liquidity state
+  | Optimize -> optimize state
+  | Configure_SR_Subreddits | Configure_SR_Posts | Configure_SR_Ordering
+  | Configure_OP_Use | Configure_OP_Consts | Configure_OP_Tests | Graph_Networth
+  | Graph_Liquidity | Graph_Networth_Liquidity | Graph_Stock
+  | Account_Change_Username | Account_Change_Email | Account_Change_Password
+  | Account_Notification_On | Account_Notification_Off | Account_Delete ->
       failwith ""
   | _ -> ()
 
