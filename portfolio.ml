@@ -13,6 +13,7 @@ type t = {
   net_worth : float;
   change : float;
   first : bool;
+  timestamp : float;
 }
 
 let current_cost ticker =
@@ -38,6 +39,7 @@ let empty_portfolio =
     net_worth = 0.;
     change = 0.;
     first = false;
+    timestamp = Unix.time ();
   }
 
 let list_of_tickers (portfolio : t) : string list =
@@ -87,6 +89,7 @@ let buy_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio)
@@ -114,6 +117,7 @@ let buy_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio
@@ -153,6 +157,7 @@ let sell_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        timestamp = Unix.time ();
       }
     in
 
@@ -165,6 +170,7 @@ let sell_shares portfolio ticker shares cost =
         net_worth = portfolio.net_worth;
         change = (if portfolio.first then 0. else portfolio.change);
         first = false;
+        timestamp = Unix.time ();
       }
     in
     new_portfolio
@@ -187,6 +193,7 @@ let portfolio_swap_first portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = Bool.not portfolio.first;
+    timestamp = Unix.time ();
   }
 
 let refresh_stock portfolio ticker = change_ticker_money portfolio ticker 0.
@@ -203,6 +210,7 @@ let copy portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = portfolio.first;
+    timestamp = Unix.time ();
   }
 
 let refresh portfolio =
@@ -251,4 +259,16 @@ let change_liquidity portfolio liquid =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = portfolio.first;
+    timestamp = Unix.time ();
+  }
+
+let sell_all portfolio =
+  let new_portfolio = refresh portfolio in
+  {
+    liquidity = new_portfolio.liquidity +. new_portfolio.net_worth;
+    stocks = Hashtbl.create 50;
+    net_worth = 0.;
+    change = -1. *. new_portfolio.net_worth;
+    first = false;
+    timestamp = Unix.time ();
   }
