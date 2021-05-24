@@ -18,7 +18,7 @@ let create email name password =
     current_portfolio = Portfolio.empty_portfolio;
     past_portfolios = [];
     test_portfolios = [];
-    config = Config.default;
+    config = Config.default ();
     account_creation_time = Unix.time ();
     last_daily_task_timestamp = 86400.;
   }
@@ -103,6 +103,52 @@ let set_last_daily_task_timestamp user timestamp =
     config = config user;
     account_creation_time = user.account_creation_time;
     last_daily_task_timestamp = timestamp;
+  }
+
+open Yojson.Basic.Util
+
+let rec string_of_porfolio_list portfolio_list acc =
+  match portfolio_list with
+  | [] -> acc
+  | h :: t -> string_of_porfolio_list t (Portfolio.to_json_string h ^ "," ^ acc)
+
+let to_json_string t =
+  "{" ^ "\"email: \"" ^ t.email ^ ", " ^ "\"name: \"" ^ t.name ^ ", "
+  ^ "\"password: \"" ^ t.password ^ "," ^ "\"current_portfolio: \""
+  ^ Portfolio.to_json_string t.current_portfolio
+  ^ "," ^ "\"past_portfolios: \"" ^ "["
+  ^ string_of_porfolio_list t.past_portfolios ""
+  ^ "]" ^ ", " ^ "," ^ "\"test_portfolios: \"" ^ "["
+  ^ string_of_porfolio_list t.test_portfolios ""
+  ^ "]" ^ ", " ^ "\"config: \""
+  ^ Config.to_json_string t.config
+  ^ "," ^ "\"account_creation_time: \""
+  ^ string_of_float t.account_creation_time
+  ^ ", " ^ "\"last_daily_task_timestamp: \""
+  ^ string_of_float t.last_daily_task_timestamp
+  ^ "}"
+
+let rec portfolio_list_of_json (j : Yojson.Basic.t list) acc =
+  match j with
+  | [] -> acc
+  | h :: t -> portfolio_list_of_json t (Portfolio.portfolio_of_json h :: acc)
+
+let user_of_json (j : Yojson.Basic.t) =
+  {
+    email = to_string (member "email" j);
+    name = to_string (member "name" j);
+    password = to_string (member "password" j);
+    current_portfolio =
+      Portfolio.portfolio_of_json (member "current_portfolio" j);
+    past_portfolios =
+      portfolio_list_of_json (to_list (member "past_portfolios" j)) [];
+    test_portfolios =
+      portfolio_list_of_json (to_list (member "test_portfolios" j)) [];
+    config = Config.config_of_json (member "config" j);
+    account_creation_time =
+      float_of_string (to_string (member "account_creation_time" j));
+    last_daily_task_timestamp =
+      float_of_string (to_string (member "last_daily_task_timestamp" j));
   }
 
 let time_for_daily_tasks user timestamp =

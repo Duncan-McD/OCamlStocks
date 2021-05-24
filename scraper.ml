@@ -99,8 +99,8 @@ let get_json (subreddit : string) : Yojson.Basic.t =
 (** [scrape_json_name json] is the name of the json representation of a
     subreddit [json] *)
 let scrape_json_name (json : Yojson.Basic.t) : string =
-  json |> member "data" |> member "children" |> U.to_list
-  |> List.hd |> member "data"
+  json |> member "data" |> member "children" |> U.to_list |> List.hd
+  |> member "data"
   |> member "subreddit_name_prefixed"
   |> U.to_string
 

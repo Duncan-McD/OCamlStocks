@@ -61,10 +61,20 @@ val copy : t -> t
 (** [copy p] is a copy of portfolio p with different references for the values 
     (this is needed because the stocks field of a portfolio is mutable)*)
 
-val compare : t -> t -> float
-(** [compare p1 p2] will return a positive float if p1 has a larger net worth than p2, 
-    a negative float if p1 has a smaller net worth than p2, 
+val compare : t -> t -> int
+(** [compare p1 p2] will return 1 if p1 has a larger net worth than p2, 
+    a -1 if p1 has a smaller net worth than p2, 
     and 0 if they have the same net worth*)
 
+val vars : t -> float * float * float * float
+(**[vars p] is the tuple of constants used by algorithm to generate this portfolio*)
+
+val portfolio_of_json : Yojson.Basic.t -> t
+
+(**[portfolio_of_json j] is the portfolio representation of json [j]*)
+
+val to_json_string : t -> string
+
+(**[to_json_string t] is the string in json format of portfolio [t]*)
 val sell_all : t -> t
 (** [sell_all p] sells all the stocks in portfolio p*)
