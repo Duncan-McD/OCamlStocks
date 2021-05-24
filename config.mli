@@ -23,3 +23,7 @@ val number_of_tests : t -> int
 val subreddit_list : t -> string list
 
 val posts_per_scrape : t -> int
+
+val to_json_string : t -> string
+
+val config_of_json : Yojson.Basic.t -> t

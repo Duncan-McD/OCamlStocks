@@ -323,7 +323,7 @@ let to_json_string t =
 
 open Yojson.Basic
 
-let build_stock j =
+let stock_of_json j =
   {
     ticker = to_string (member "ticker" j);
     shares = float_of_string (to_string (member "shares" j));
@@ -333,14 +333,14 @@ let build_stock j =
     change = float_of_string (to_string (member "change" j));
   }
 
-let build_stock_name j = to_string (member "ticker" j)
+let stock_name_of_json j = to_string (member "ticker" j)
 
 let rec stocks_of_json_stocklist (j : Yojson.Basic.t) list_of_stocks htbl =
   match list_of_stocks with
   | [] -> htbl
   | h :: t ->
       stocks_of_json_stocklist j t
-        (Hashtbl.add htbl (build_stock_name h) (build_stock h);
+        (Hashtbl.add htbl (stock_name_of_json h) (stock_of_json h);
          htbl)
 
 let stocks_of_json (j : Yojson.Basic.t) =

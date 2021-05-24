@@ -1,66 +1,49 @@
-open Yojson
+open Yojson.Basic.Util
+
 let j = Yojson.Basic.from_file "data.json"
-(*take in an object*)
 
-let save_user (user:string) = 
-  
+let file = "data.json"
 
-let save_testing_portfolio  =
-  (* Write message to file *)
-  let oc = open_out file in
-  (* create or truncate file, return channel *)
-  Printf.printf oc "%s\n" str;
-  (* write something *)
-  close_out oc;
+let save_to_file = failwith "unimplimented"
 
-  (* flush and close the channel *)
+let save_testing_portfolio (portfolio : Portfolio.t) : unit =
+  failwith "unimplimented"
 
-  (* Read file and display the first line *)
-  let read_message_of_file = open_in file in
-  try
-    let line = input_line read_message_of_file in
-    (* read line, discard \n *)
-    print_endline line;
-    (* write the result to stdout *)
-    flush stdout;
-    (* write on the underlying device now *)
-    close_in read_message_of_file
-    (* close the input channel *)
-  with e ->
-    (* some unexpected exception occurs *)
-    close_in_noerr read_message_of_file;
-    (* emergency closing *)
-    raise e
+let load_user_json_list = to_list (member "user" (Yojson.Basic.from_file file))
 
-(* exit with error: files are closed but
-   channels are not flushed *)
+let rec update_user_json_list (user : User.t)
+    (user_json_list : Yojson.Basic.t list) (acc : Yojson.Basic.t list) =
+  match user_json_list with
+  | [] -> Yojson.Basic.from_string (User.to_json_string user) :: acc
+  | (h : Yojson.Basic.t) :: (t : Yojson.Basic.t list) ->
+      if to_string (member "name" h) = User.name user then
+        (Yojson.Basic.from_string (User.to_json_string user) :: acc) @ t
+      else update_user_json_list user t (h :: acc)
 
-(* normal exit: all channels are flushed and closed *)
-let save_to_file = 
+let save_user (user : User.t) =
+  let user_json_list = update_user_json_list user load_user_json_list [] in
+  let json_of_json_list = `List user_json_list in
+  Yojson.Basic.to_file file json_of_json_list
 
-  let file = "portfolio_history.txt"
+let rec check_email_password user_json_list email password =
+  match user_json_list with
+  | [] -> false
+  | h :: t ->
+      if
+        to_string (member "email" h) = email
+        && to_string (member "password" h) = password
+      then true
+      else check_email_password t email password
 
-  (*let save_current_portfolio portfolio =
-    let str = ocomma_of_portfolio portfolio in
-    let oc = open_out file in
-    Printf.fprintf oc "%s\n" str;
-    close_out oc
+let is_valid_email_password (email : string) (password : string) =
+  check_email_password load_user_json_list
 
-  (* Read file and display the first line *)
-  let load_last_portfolio =
-    let read_message_of_file = open_in file in
-    try
-      let line = input_line read_message_of_file in
-      (* read line, discard \n *)
-      print_endline line;
-      (* write the result to stdout *)
-      flush stdout;
-      (* write on the underlying device now *)
-      close_in read_message_of_file
-      (* close the input channel *)
-    with e ->
-      (* some unexpected exception occurs *)
-      close_in_noerr read_message_of_file;
-      (* emergency closing *)
-      raise e
-*)
+let rec get_user_from_user_json_list user_json_list email =
+  match user_json_list with
+  | [] -> failwith "Email not found"
+  | h :: t ->
+      if to_string (member "email" h) = email then h
+      else get_user_from_user_json_list t email
+
+let load_user email =
+  User.user_of_json (get_user_from_user_json_list load_user_json_list email)
