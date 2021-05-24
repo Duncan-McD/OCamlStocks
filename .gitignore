@@ -29,3 +29,5 @@ env
 *.jpeg
 *.jpg
 *.pdf
+!algorithm.png
+!history_score.png
