@@ -12,13 +12,11 @@ type action =
   | Configure_SR_Subreddits
   | Configure_SR_Posts
   | Configure_SR_Ordering
-  | Configure_OP_Use
   | Configure_OP_Consts
   | Configure_OP_Tests
   | Configure_Liquidity
   | Graph
   | Graph_Networth
-  | Graph_Liquidity
   | Graph_Networth_Liquidity
   | Graph_Stock
   | Account
@@ -67,7 +65,6 @@ let get_available_actions = function
         Configure_SR_Subreddits;
         Configure_SR_Posts;
         Configure_SR_Ordering;
-        Configure_OP_Use;
         Configure_OP_Consts;
         Configure_OP_Tests;
         Configure_Liquidity;
@@ -79,7 +76,6 @@ let get_available_actions = function
   | Graph ->
       [
         Graph_Networth;
-        Graph_Liquidity;
         Graph_Networth_Liquidity;
         Graph_Stock;
         Graph;
@@ -130,7 +126,6 @@ let action_of_string_configure state s =
   if s = "runner subreddits" then Configure_SR_Subreddits
   else if s = "runner posts" then Configure_SR_Posts
   else if s = "runner ordering" then Configure_SR_Ordering
-  else if s = "optimizer use" then Configure_OP_Use
   else if s = "optimizer tests" then Configure_OP_Tests
   else if s = "optimizer constants" then Configure_OP_Consts
   else if s = "change liquidity" then Configure_Liquidity
@@ -200,8 +195,6 @@ let configure state =
      certain subreddit\n\
      \"runner ordering\" : lets you configure the subreddit scaping order of a \
      certain subreddit  \n\
-     \"optimizer use\" : lets you configure whether or not the optimizer is \
-     enabled\n\
      \"optimizer tests\" : lets you configure the amount of tests you want to \
      do one each constant in optimization\n\
      \"optimizer constants\" : lets you configure the optimizer constants.\n\
@@ -504,6 +497,29 @@ let rec change_password state =
       "\n Invalid Input use Y or N...\n";
     change_username state)
 
+let rec do_delete state =
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    "\n WARNING!!! This will delete your account \n";
+  ANSITerminal.print_string [ ANSITerminal.red ]
+    "Are you sure you would like to DELETE your account? (Y/N)\n";
+  print_string "> ";
+  let result = read_line () in
+  if result = "Y" then (
+    Saveload.delete_user state.user;
+    raise (LogoutAction "delete"))
+  else if result = "N" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.yellow ]
+      "\n Invalid Input use Y or N...\n";
+    do_delete state)
+
+let do_graph_networth state = Grapher.graph_net_worth state.user
+
+let do_graph_networth_liquidity state =
+  Grapher.graph_net_worth_and_liquidity state.user
+
+let do_graph_stock state = failwith "impossible"
+
 let update state action =
   match action with
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
@@ -523,12 +539,12 @@ let update state action =
   | Account_Change_Username -> change_username state
   | Account_Change_Email -> change_email state
   | Account_Change_Password -> change_password state
-  | Account_Delete ->
-      Saveload.delete_user state.user;
-      raise (LogoutAction "delete")
+  | Account_Delete -> do_delete state
+  | Graph_Networth_Liquidity -> do_graph_networth_liquidity state
+  | Graph_Networth -> do_graph_networth state
+  | Graph_Stock -> do_graph_stock state
   | Configure_SR_Subreddits | Configure_SR_Posts | Configure_SR_Ordering
-  | Configure_OP_Use | Configure_OP_Consts | Configure_OP_Tests | Graph_Networth
-  | Graph_Liquidity | Graph_Networth_Liquidity | Graph_Stock | _ ->
+  | Configure_OP_Consts | Configure_OP_Tests | _ ->
       failwith ""
 
 let user state = state.user
