@@ -42,11 +42,12 @@ let initialize_testing_portfolios (user : User.t) =
   User.change_test_portfolios user !testing_portfolio_list
 
 let optimized_constants (user : User.t) : float * float * float * float =
-  (*THIS IS A BAD SOLUTION!! TODO: set up hashtable to store stock data from yahoo finance to save time
-    TODO: figure out where to send constants
-      SetOptimizer constants *)
-  (*TODO: return NONE if test_portfolios is an empty list*)
-  Portfolio.vars
-    (List.hd
-       (List.sort Portfolio.compare
-          (List.map Portfolio.refresh (User.test_portfolios user))))
+  let users_portfolios = User.test_portfolios user in
+  match users_portfolios with
+  | [] -> user |> User.config |> Config.consts
+  | _ -> 
+    let tbl = Hashtbl.create 128 in
+    Portfolio.vars
+      (List.hd
+        (List.sort Portfolio.compare
+            (List.map (Portfolio.refresh_some tbl) (users_portfolios))))
