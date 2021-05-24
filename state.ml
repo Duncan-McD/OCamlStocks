@@ -306,10 +306,15 @@ let run_algorithm state =
   state.user <- User.update_portfolio state.user new_portfolio;
   ()
 
+let run_sell_all state =
+  let portfolio = User.current_portfolio state.user in
+  let new_portfolio = Portfolio.sell_all portfolio in
+  let new_user = User.update_portfolio state.user new_portfolio in
+  state.user <- new_user
+
 let update state action =
   match action with
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
-  | Sell_All -> () (* call set portfolio to result of portfolio.sell_all *)
   | Help -> help ()
   | Menu_Initial -> menu state ~initial:true
   | Menu -> menu state
@@ -319,6 +324,7 @@ let update state action =
   | Graph -> graph state
   | Account -> account state
   | Run_Algorithm -> run_algorithm state
+  | Sell_All -> run_sell_all state
   | Refresh_and_Show | Configure_SR_Subreddits | Configure_SR_Posts
   | Configure_SR_Ordering | Configure_OP_Use | Configure_OP_Consts
   | Configure_OP_Tests | Graph_Networth | Graph_Liquidity
