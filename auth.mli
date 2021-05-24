@@ -3,7 +3,7 @@
 (** {2 Types}*)
 
 type t
-(** The abstract data type for auth *)
+(** The abstract type of auth  *)
 
 type prompt =
   | Initial_Prompt
@@ -13,7 +13,7 @@ type prompt =
   | Already_Taken
   | Changed  (** The type of prompts *)
 
-type auth = Login | Signup  (** The type of the authentication used *)
+type auth = Login | Signup  (** The type of auth used to get the user *)
 
 (** {2 Excepions} *)
 
@@ -22,12 +22,13 @@ exception QuitException
 (** {2 Auth Functions} *)
 
 val prompt_user : prompt -> t
-(** [prompt_user prompt] is an auth type retreived by prompting the user
+(** [prompt_user prompt] is the user retreived by prompting the user
     to login / signup and then asking for their credentials *)
 
-(** {2 Getter Functions}*)
-
-val email : t -> string
-(** [list_of_stocks p] is the user's configuration settings *)
-
 val auth_type : t -> auth
+(** [auth_type auth] is the [auth] the user used *)
+
+val user : t -> User.t
+(** [user auth] is the [user] *)
+
+(** {2 Getters Functions} *)

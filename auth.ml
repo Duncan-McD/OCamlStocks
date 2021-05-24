@@ -6,18 +6,18 @@ type prompt =
   | Already_Taken
   | Changed
 
+exception QuitException
+
 type auth = Login | Signup
 
-type t = string * auth
+type t = auth * User.t
 
-exception QuitException
+let auth_type a = fst a
+
+let user a = snd a
 
 let auth_temp (email, password) =
   if email = "invalid@invalid.com" then false else true
-
-let email user = fst user
-
-let auth_type user = snd user
 
 let rec prompt_user prompt =
   if prompt = Initial_Prompt || prompt = Empty_Input then
@@ -67,18 +67,24 @@ and (* [login ()] is the user email once they have logged in *)
 
     correct_input Login )
   else (
-    print_string "\nEmail: ";
+    print_string "\nName: ";
 
     match read_line () with
     | exception End_of_file -> failwith "Error reading input."
-    | email -> (
-        print_string "Password: ";
+    | name -> (
+        print_string "Email: ";
 
         match read_line () with
         | exception End_of_file -> failwith "Error reading input."
-        | password ->
-            if auth_temp (email, password) then (email, Login)
-            else login Invalid_Input ) )
+        | email -> (
+            print_string "Password: ";
+
+            match read_line () with
+            | exception End_of_file -> failwith "Error reading input."
+            | password ->
+                if auth_temp (email, password) then
+                  (Login, User.create email name password)
+                else login Invalid_Input ) ) )
 
 and (* [signup ()] is the user email once they have signed up *)
     signup prompt =
@@ -95,28 +101,12 @@ and (* [signup ()] is the user email once they have signed up *)
 
   if prompt = Already_Taken || prompt = Invalid_Input then correct_input Signup
   else (
-    print_string "\nEmail: ";
+    print_string "\nName: ";
 
     match read_line () with
     | exception End_of_file -> failwith "Error reading input."
-    | email -> (
-        print_string "Password: ";
-
-        match read_line () with
-        | exception End_of_file -> failwith "Error reading input."
-        | password ->
-            if auth_temp (email, password) then (email, Signup)
-            else signup Invalid_Input ) )
-
-and correct_input login_or_signup =
-  print_string "> ";
-
-  match read_line () with
-  | exception End_of_file -> failwith "Error reading input."
-  | input ->
-      if input <> "" then prompt_user Changed
-      else (
-        print_string "\nEmail: ";
+    | name -> (
+        print_string "Email: ";
 
         match read_line () with
         | exception End_of_file -> failwith "Error reading input."
@@ -126,6 +116,16 @@ and correct_input login_or_signup =
             match read_line () with
             | exception End_of_file -> failwith "Error reading input."
             | password ->
-                if auth_temp (email, password) then (email, login_or_signup)
-                else if login_or_signup = Login then login Invalid_Input
-                else signup Invalid_Input ) )
+                if auth_temp (email, password) then
+                  (Signup, User.create email name password)
+                else signup Invalid_Input ) ) )
+
+and correct_input login_or_signup =
+  print_string "> ";
+
+  match read_line () with
+  | exception End_of_file -> failwith "Error reading input."
+  | input ->
+      if input <> "" then prompt_user Changed
+      else if login_or_signup = Login then login Changed
+      else signup Changed

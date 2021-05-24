@@ -18,11 +18,6 @@ exception QuitAction
 exception LogoutAction
 (** Raised when a user wants to logout of their account *)
 
-exception MenuAction
-(** Raised when an user wants to see the menu 
--- WILL BE DELETED ONCE STATE CAN ACCESS USER DATA 
--- STATE WILL THEN PRINT OUT MENU ITSELF *)
-
 (** {2 Action Functions} *)
 
 val action_of_string : string -> action
@@ -33,16 +28,19 @@ val action_of_string : string -> action
 
 (** {2 State Functions} *)
 
-val init : t
-(** [init] is the initial state *)
+val init : Auth.auth -> User.t -> t
+(** [init auth user] is the program state *)
 
 val update : t -> action -> unit
 (** [update state action] updates [state] based on [action] *)
 
 (** {2 Getter Functions}*)
 
+val user : t -> User.t
+(** [user state] is the current user data *)
+
 val config : t -> Config.t
 (** [list_of_stocks p] is the user's configuration settings *)
 
 val portfolio : t -> Portfolio.t
-(** [portfolio] is the user's portfolio *)
+(** [portfolio state] is the user's portfolio *)
