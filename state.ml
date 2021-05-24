@@ -1,18 +1,41 @@
 type action =
   | Help
+  | Menu_Initial
   | Menu
-  | Configure
   | Run_Algorithm
   | Sell_All
   | Refresh_and_Show
-  | Graph
-  | Account
   | Logout
   | Quit
+  | Optimize (* print time since last optimize, are you sure u'd like to optimize?*)
+  | Configure
+  | Configure_SR_Subreddits
+  | Configure_SR_Posts
+  | Configure_SR_Ordering
+  | Configure_OP_Use
+  | Configure_OP_Consts
+  | Configure_OP_Tests
+  | Graph
+  | Graph_Networth
+  | Graph_Liquidity
+  | Graph_Networth_Liquidity
+  | Graph_Stock
+  | Account
+  | Account_Change_Username
+  | Account_Change_Email
+  | Account_Change_Password
+  | Account_Notification_On
+  | Account_Notification_Off
+  | Account_Delete
 
-type t = { auth : Auth.auth; mutable user : User.t }
+(* when performing any actions on user portfolio that return a new portfolio,
+    save old portfolio to past_portfolios and set returned portfolio as current *)
+    (* when going into configure specific settings | print current settings  *)
+type t = { auth : Auth.auth; mutable user : User.t; state : action }
 
 exception InvalidAction of string
+
+exception InapplicableAction of (string * string)
 
 exception QuitAction
 
@@ -20,12 +43,50 @@ exception LogoutAction
 
 exception HelpAction
 
-let init auth user = { auth; user }
+let init auth user = { auth; user; state = Menu }
+
+let get_available_actions = function
+  | Menu_Initial | Menu ->
+      [
+        Help;
+        Menu;
+        Configure;
+        Run_Algorithm;
+        Sell_All;
+        Refresh_and_Show;
+        Graph;
+        Account;
+        Logout;
+        Quit;
+      ]
+  | Configure ->
+      [
+        Configure_SR_Subreddits;
+        Configure_SR_Posts;
+        Configure_SR_Ordering;
+        Configure_OP_Use;
+        Configure_OP_Consts;
+        Configure_OP_Tests;
+      ]
+  | Graph ->
+      [ Graph_Networth; Graph_Liquidity; Graph_Networth_Liquidity; Graph_Stock ]
+  | Account ->
+      [
+        Account_Change_Username;
+        Account_Change_Email;
+        Account_Change_Password;
+        Account_Notification_On;
+        Account_Notification_Off;
+        Account_Delete;
+      ]
+  | _ -> []
 
 let action_of_string s =
   let s' = String.lowercase_ascii s in
   if s' = "menu" then Menu
+  else if s' = "menu inital" then Menu_Initial
   else if s' = "help" then Help
+  else if s' = "optimize" then Optimize
   else if s' = "quit" then Quit
   else if s' = "logout" then Logout
   else if s' = "configure" then Configure
@@ -34,6 +95,21 @@ let action_of_string s =
   else if s' = "show data" then Refresh_and_Show
   else if s' = "graph data" then Graph
   else raise (InvalidAction s)
+
+  let string_of_action a =
+    let a' = String.lowercase_ascii s in
+    if a' = "menu" then Menu
+    else if a' = "menu inital" then Menu_Initial
+    else if a' = "help" then Help
+    else if a' = "optimize" then Optimize
+    else if a' = "quit" then Quit
+    else if a' = "logout" then Logout
+    else if a' = "configure" then Configure
+    else if a' = "run" then Run_Algorithm
+    else if a' = "sell all" then Sell_All
+    else if a' = "show data" then Refresh_and_Show
+    else if a' = "graph data" then Graph
+    else raise (InvalidAction s)
 
 let menu ?(initial = false) state =
   if initial = false then
@@ -45,8 +121,8 @@ let menu ?(initial = false) state =
       ^ "! In case you forgot, here are your options:\n\n" )
   else
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ( "\nWelcome to " ^ User.name state.user
-      ^ "Below you can see all of the options available to you.\n\n" );
+      ( "\nWelcome, " ^ User.name state.user
+      ^ "! Below you can see all of the options available to you.\n\n" );
 
   print_endline
     "\"help\" : walk you through how I works and how to use me\n\
@@ -101,14 +177,36 @@ let help () =
   | _ -> ()
 
 let update state = function
-  | Menu -> menu state
-  | Help -> help ()
-  | Quit -> raise QuitAction
-  | Logout -> raise LogoutAction
-  | Run_Algorithm -> ()
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
   | Sell_All -> () (* call set portfolio to result of portfolio.sell_all *)
   | _ -> ()
+  | Help -> help ()
+  | Menu_Initial -> menu state ~initial:true
+  | Menu -> menu state
+  | Run_Algorithm 
+  | Sell_All
+  | Refresh_and_Show
+  | Logout -> raise LogoutAction
+  | Quit -> raise QuitAction
+  | Configure
+  | Configure_SR_Subreddits
+  | Configure_SR_Posts
+  | Configure_SR_Ordering
+  | Configure_OP_Use
+  | Configure_OP_Consts
+  | Configure_OP_Tests
+  | Graph -> "open menu"
+  | Graph_Networth -> 
+  | Graph_Liquidity -> 
+  | Graph_Networth_Liquidity ->
+  | Graph_Stock
+  | Account
+  | Account_Change_Username
+  | Account_Change_Email
+  | Account_Change_Password
+  | Account_Notification_On
+  | Account_Notification_Off
+  | Account_Delete
 
 let user state = state.user
 

@@ -1,4 +1,4 @@
-(* [load user] is the [State.t] loaded with [user] *)
+(* [load auth user] is the [State.t] loaded with [user] and [auth] *)
 let load auth_type user = State.init auth_type user
 
 (** [save] saves [state] with given [user] *)
@@ -21,7 +21,7 @@ let rec main prompt =
     let state = load auth_type user in
 
     (* display menu *)
-    let () = State.update state (State.action_of_string "menu") in
+    let () = State.update state (State.action_of_string "menu inital") in
 
     (* while user does not type "quit" or "q" keep runing *)
     let quit_loop = ref false in
@@ -30,7 +30,7 @@ let rec main prompt =
       match read_line () with
       | exception End_of_file -> ()
       | input -> (
-          if input != "" then
+          if input <> "" then
             try
               let action = State.action_of_string input in
               State.update state action
@@ -39,6 +39,11 @@ let rec main prompt =
                 ANSITerminal.print_string [ ANSITerminal.red ]
                   ( "\nInvalid action: \"" ^ s
                   ^ "\". You can type \"menu\" to see your options.\n" )
+            | State.InapplicableAction s, string_state ->
+                ANSITerminal.print_string [ ANSITerminal.red ]
+                  ( "\n\"" ^ s
+                  ^ "\" cannot be used here. You can type \"" ^ string_state ^ "\" to see your \
+                     options.\n" )
             | State.LogoutAction ->
                 save user state;
                 main Auth.Logged_Out
