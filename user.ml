@@ -20,7 +20,7 @@ let create email name password =
     test_portfolios = [];
     config = Config.default;
     account_creation_time = Unix.time ();
-    last_daily_task_timestamp = 0.0;
+    last_daily_task_timestamp = 86400.;
   }
 
 let email user = user.email

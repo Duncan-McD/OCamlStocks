@@ -261,3 +261,14 @@ let change_liquidity portfolio liquid =
     first = portfolio.first;
     timestamp = Unix.time ();
   }
+
+let sell_all portfolio =
+  let new_portfolio = refresh portfolio in
+  {
+    liquidity = new_portfolio.liquidity +. new_portfolio.net_worth;
+    stocks = Hashtbl.create 50;
+    net_worth = 0.;
+    change = -1. *. new_portfolio.net_worth;
+    first = false;
+    timestamp = Unix.time ();
+  }
