@@ -18,7 +18,7 @@ exception QuitAction
 
 exception LogoutAction
 
-exception MenuAction
+exception HelpAction
 
 let init auth user = { auth; user }
 
@@ -60,10 +60,50 @@ let menu ?(initial = false) state =
      \"quit\" : quit\n";
   ()
 
+let help () =
+  let border = "=====================" in
+  print_endline border;
+  print_string
+    "Welcome to the Help Page! Here is a little tutorial of how to use this \
+     program. (press ENTER to continue or type anything and ENTER to quit)";
+  let help_instructions =
+    [
+      {|"configure" allows you to customize your settings like the subreddits you would like to reference and the use of optional optimization features; you can also add money to be used by the program here|};
+      {|"optimize" prompts the program to save relevant data needed to optimize its algorithm and also alerts you of the time elapsed since last optimizing (should be run before "run")|};
+      {|"run" is the main function which runs algorithm (according to your configurations) and buys or sells stocks according to the data found at run time|};
+      {|"sell all" allows you to sell all of your currently owned stocks|};
+      {|"show data" shows updated data about the stocks you currently own|};
+      {|"graph data" generates a graph about the stocks you currently own|};
+      {|"menu" shows a simple menu with all the possible commands|};
+      {|"logout" logs you out of your session in the program|};
+      {|"quit" simply terminates the program and exits|};
+      {|Now that you know all of my actions, let's run through an example workflow a user might go through! (press ENTER to continue or type anything and ENTER to quit)|};
+      {|First, you want to check that your configurations are what you would like them to be, although the provided defaults are more than sufficient to start (no money needs to be added just yet)|};
+      {|Next, run "optimize" to start the optimization process. It is recommended that you wait around a day before beginning to run the program in order to buy or sell any stocks using "run".|};
+      {|Keep in mind that there is no need to keep the program running while waiting; feel free to start the program up again once some time has passed.|};
+      {|Then, run "optimize" once more before running "run" so that the algorithm will be ran using the optimization.|};
+      {|Finally, repeat waiting then running "optimize" and "run" for as long as desired and "sell all" when done; making sure to check your stocks along the way.|};
+    ]
+  in
+  let pause_escape str =
+    match read_line () with
+    | exception End_of_file -> ()
+    | "" -> print_string str
+    | _ ->
+        print_endline @@ border ^ "\n";
+        raise (Failure "quit help")
+  in
+  try
+    List.iter pause_escape help_instructions;
+    print_endline @@ "\n" ^ border ^ "\n"
+  with
+  | Failure _ -> ()
+  | _ -> ()
+
 let update state = function
   | Menu -> menu state
+  | Help -> help ()
   | Quit -> raise QuitAction
-  | Help -> failwith ""
   | Logout -> raise LogoutAction
   | Run_Algorithm -> ()
   (* time_for_daily_tasks will return true if call optizimer function or not in alg *)

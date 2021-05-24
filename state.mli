@@ -18,6 +18,9 @@ exception QuitAction
 exception LogoutAction
 (** Raised when a user wants to logout of their account *)
 
+exception HelpAction
+(** Raised when a user wants to see program help information *)
+
 (** {2 Action Functions} *)
 
 val action_of_string : string -> action
