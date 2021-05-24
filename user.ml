@@ -16,7 +16,7 @@ let create email name password =
     current_portfolio = Portfolio.empty_portfolio;
     past_portfolios = [];
     test_portfolios = [];
-    config = Config.default;
+    config = Config.default ();
   }
 
 let email user = user.email

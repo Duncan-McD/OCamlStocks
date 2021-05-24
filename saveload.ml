@@ -2,9 +2,6 @@ open Yojson.Basic.Util
 
 let file = "data.json"
 
-let save_testing_portfolio (portfolio : Portfolio.t) : unit =
-  failwith "unimplimented"
-
 let load_user_json_list = to_list (member "user" (Yojson.Basic.from_file file))
 
 let rec update_user_json_list (user : User.t)
@@ -32,7 +29,7 @@ let rec check_email_password user_json_list email password =
       else check_email_password t email password
 
 let is_valid_email_password (email : string) (password : string) =
-  check_email_password load_user_json_list
+  check_email_password load_user_json_list email password
 
 let rec get_user_from_user_json_list user_json_list email =
   match user_json_list with

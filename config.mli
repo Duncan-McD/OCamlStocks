@@ -56,3 +56,7 @@ val num_tests : t -> int
 
 val liquidity : t -> float
 (** [liquidity config] is the liquidity in the user's portfolio  *)
+
+val to_json_string : t -> string
+
+val config_of_json : Yojson.Basic.t -> t
