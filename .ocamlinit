@@ -6,7 +6,6 @@
 #require "graphics";;
 #require "ocamlimages.graphics";;
 #require "camlimages.png";;
-#require "Mutex"
 #require "ANSITerminal";;
 #directory "_build";;
 #load "scraper.cmo";;

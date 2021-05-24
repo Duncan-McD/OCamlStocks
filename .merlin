@@ -10,4 +10,3 @@ PKG graphics
 PKG camlimages.graphics
 PKG camlimages.png
 PKG ANSITerminal
-

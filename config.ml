@@ -11,7 +11,7 @@ type t = {
   liquidity : float;
 }
 
-let default () =
+let default =
   {
     subreddits = [ (50, Hot, "r/stocks"); (50, Hot, "r/investing") ];
     optimizing = true;
