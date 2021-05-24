@@ -1,34 +1,58 @@
 (** Representation of a bot's configuration *)
 
-(** {1 Type}*)
+(** {2 Types}*)
 
 type t
 (** The abstract data type for a program configuration *)
 
-val default : t
-(**[default] is the default configuration of config, with [number_of_tests] being 1000,
-    [subreddit_list] consisting of "r/stocks" and "r/investing", and
-    [posts_per_scrape] being 100*)
+type subreddit = int * Scraper.subreddit_ordering * string
+(** The abstract data type for an unscraped subreddit 
+    (num_posts * ordering * url) *)
 
-(** {1 Config Function}*)
+(** {2 Exceptions} *)
 
-val to_json_string : t -> string
-(** [to_json_string t] is the representation of [t] as a string in the json formatt*)
+(** {2 Config Functions}*)
+
+val default : unit -> t
+(** [default] is the bot's default program configuration *)
+
+val add_subreddit : t -> subreddit -> t
+(** [add_subreddit config subreddit] is [config] with the [subreddit] added 
+    to the current list of subreddit configs *)
+
+val set_subreddits : t -> subreddit list -> t
+(** [set_subreddits config subreddits] is [config] with the [subreddit] list set
+    to [subreddits] *)
+
+val set_optimizing : t -> bool -> t
+(** [optimizing config b] is a [config] where optimizing is set to [b] *)
+
+val set_consts : t -> float * float * float * float -> t
+(** [set_consts config consts] is [config] with consts sets to [consts] *)
+
+val set_tests : t -> int -> t
+(** [set_tests config num_tests] is [config] with the number of tests used for 
+    uniform testing set to [num_tests] *)
+
+val set_liquidity : t -> float -> t
+(** [set_liquidity config liquiditiy] is [config] with liquidity set to 
+    [liquidity] *)
 
 (* Add update config function *)
 
-(** {3 Getter Functions}*)
+(** {2 Getter Functions}*)
 
-val number_of_tests : t -> int
-(** [number_of_tests t] is the number of portfolios that will be created when [initialize_testing_portfolios] is run*)
+val subreddit_info : t -> subreddit list
+(** [subreddits_info config] is the user's [subreddit] list *)
 
-val subreddit_list : t -> string list
-(** [subreddit_list t] is the list of subreddits that will be scraped *)
+val is_optimizing : t -> bool
+(** [optimizing config] is whether or not the user wants to be optimizing *)
 
-val posts_per_scrape : t -> int
-(** [posts_per_scrape t] is the number of posts that will be scraped in each subreddit *)
+val consts : t -> float * float * float * float
+(** [consts config] is the user's current optimization consts *)
 
-(** {1 Setter Function}*)
+val num_tests : t -> int
+(** [num_tests config] is the amount of tests used for uniform testing *)
 
-val config_of_json : Yojson.Basic.t -> t
-(** [config_of_json j] is the config representation of json [j]*)
+val liquidity : t -> float
+(** [liquidity config] is the liquidity in the user's portfolio  *)

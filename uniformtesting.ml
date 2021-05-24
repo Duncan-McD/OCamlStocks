@@ -4,7 +4,7 @@ let p n x max =
   | 1 -> float_of_int x
   | i -> float_of_int x *. (max /. float_of_int (n - 1))
 
-let rec get_scraped_list (config : Config.t) (subreddit_list : string list)
+let rec get_scraped_list (config : Config.t) 
     (acc : Scraper.subreddit list) =
   match subreddit_list with
   | [] -> acc
@@ -12,14 +12,14 @@ let rec get_scraped_list (config : Config.t) (subreddit_list : string list)
       get_scraped_list config t
         (Scraper.scrape ~amount:(Config.posts_per_scrape config) h :: acc)
 
-let initialize_testing_portfolios =
-  let config = State.config State.init in
+let initialize_testing_portfolios (user : User.t)=
+  let config = User.config user in
   let n =
     int_of_float
       (Float.sqrt (Float.sqrt (float_of_int (Config.number_of_tests config))))
   in
   let scraped_list =
-    get_scraped_list config (Config.subreddit_list config) []
+    get_scraped_list (Config.subreddit_info config) []
   in
   for score_con = 1 to n do
     for con_const = 1 to n do
@@ -41,5 +41,5 @@ let initialize_testing_portfolios =
   done
 
 let optimized_constants (user : User.t) =
-  Portfolio.vars
+  SetOptimizer constants Portfolio.vars
     (List.hd (List.sort Portfolio.compare (User.test_portfolios user)))
