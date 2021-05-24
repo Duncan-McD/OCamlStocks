@@ -48,6 +48,6 @@ val consts : t -> float * float * float * float
 val num_tests : t -> int
 (** [num_tests config] is the amount of tests used for uniform testing *)
 
-val to_json_string : t -> string
+val to_json : t -> Yojson.Basic.t
 
 val config_of_json : Yojson.Basic.t -> t

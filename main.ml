@@ -2,7 +2,7 @@
 let load auth_type user = State.init auth_type user
 
 (** [save] saves [state] with given [user] *)
-let save user state = ()
+let save (user : User.t) (state : State.t) = Saveload.save_user user
 
 (** [main ()] is the program that allows the user to interact with the bot. *)
 let rec main prompt =

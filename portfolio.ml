@@ -300,24 +300,18 @@ let change_liquidity portfolio liquid =
 let vars portfolio = portfolio.vars
 
 (**[string_of_stock s] is the string in json format of stock [s]*)
-let string_of_stock stock =
-  "{" ^ "\"ticker: \"" ^ stock.ticker ^ ", " ^ "\"shares: \""
-  ^ string_of_float stock.shares
-  ^ "," ^ "\"price_per_share: \""
-  ^ string_of_float stock.price_per_share
-  ^ "," ^ "\"initial_value: \""
-  ^ string_of_float stock.initial_value
-  ^ "," ^ "\"value: \""
-  ^ string_of_float stock.value
-  ^ "," ^ "\"change: \""
-  ^ string_of_float stock.stock_change
-  ^ "}"
+let stock_to_json (stock : stock) =
+  `Assoc
+    [
+      ("ticker", `String stock.ticker);
+      ("shares", `Float stock.shares);
+      ("price_per_share", `Float stock.price_per_share);
+      ("initial_value", `Float stock.initial_value);
+      ("value", `Float stock.value);
+      ("change", `Float stock.stock_change);
+    ]
 
 (**[string_of_stocklist s] is the string in json format of stocklist [s]*)
-let rec string_of_stocklist stocklist acc =
-  match stocklist with
-  | [] -> acc
-  | h :: t -> string_of_stocklist t (acc ^ string_of_stock h)
 
 (**[fst4 t] is the first element in 4-tuple [t]*)
 let fst4 (quad : float * float * float * float) =
@@ -336,40 +330,42 @@ let fth4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> d
 
 (**[string_of_vars t] is the string in json format of vars [t]*)
-let string_of_vars t =
-  "[" ^ "\"x: \""
-  ^ string_of_float (fst4 t.vars)
-  ^ "," ^ "\"y: \""
-  ^ string_of_float (snd4 t.vars)
-  ^ "," ^ "\"w1: \""
-  ^ string_of_float (trd4 t.vars)
-  ^ "," ^ "\"w2: \""
-  ^ string_of_float (trd4 t.vars)
-  ^ "]"
+let vars_to_json (portfolio : t) =
+  `Assoc
+    [
+      ("x", `Float (fst4 portfolio.vars));
+      ("y", `Float (snd4 portfolio.vars));
+      ("w1", `Float (trd4 portfolio.vars));
+      ("w2", `Float (fth4 portfolio.vars));
+    ]
 
-let to_json_string t =
-  "{" ^ "\"liquidity: \""
-  ^ string_of_float t.liquidity
-  ^ ", " ^ "{" ^ "\"stocks: \"" ^ "["
-  ^ string_of_stocklist (list_of_stocks t) ""
-  ^ "]" ^ ", " ^ "\"net_worth: \""
-  ^ string_of_float t.net_worth
-  ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
-  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ ","
-  ^ "\"timestamp: \""
-  ^ string_of_float t.timestamp
-  ^ "}"
+let rec stock_list_to_json (stock_list : stock list) acc =
+  match stock_list with
+  | [] -> `List acc
+  | h :: t -> stock_list_to_json t (stock_to_json h :: acc)
+
+let to_json t =
+  `Assoc
+    [
+      ("liquidity", `Float t.liquidity);
+      ("stocks", stock_list_to_json (list_of_stocks t) []);
+      ("net_worth", `Float t.net_worth);
+      ("change", `Float t.change);
+      ("first", `Bool t.first);
+      ("vars", vars_to_json t);
+      ("timestamp", `Float t.timestamp);
+    ]
 
 (**[stock_of_json j] is the stock representation of json [j]*)
 
 let stock_of_json j =
   {
     ticker = to_string (member "ticker" j);
-    shares = float_of_string (to_string (member "shares" j));
-    price_per_share = float_of_string (to_string (member "price_per_share" j));
-    initial_value = float_of_string (to_string (member "initial_value" j));
-    value = float_of_string (to_string (member "value" j));
-    stock_change = float_of_string (to_string (member "change" j));
+    shares = to_float (member "shares" j);
+    price_per_share = to_float (member "price_per_share" j);
+    initial_value = to_float (member "initial_value" j);
+    value = to_float (member "value" j);
+    stock_change = to_float (member "change" j);
   }
 
 (**[stock_name_of_json j] is the ticker of the stock of json [j] *)
@@ -391,20 +387,20 @@ let stocks_of_json (j : Yojson.Basic.t) =
 
 (**[stocks_of_json j] is the vars representation of json [j]*)
 let vars_of_json (j : Yojson.Basic.t) =
-  ( float_of_string (to_string (member "x" j)),
-    float_of_string (to_string (member "y" j)),
-    float_of_string (to_string (member "w1" j)),
-    float_of_string (to_string (member "w2" j)) )
+  ( to_float (member "x" j),
+    to_float (member "y" j),
+    to_float (member "w1" j),
+    to_float (member "w2" j) )
 
 let portfolio_of_json (j : Yojson.Basic.t) =
   {
-    liquidity = float_of_string (to_string (member "liquidity" j));
+    liquidity = to_float (member "liquidity" j);
     stocks = stocks_of_json j;
-    net_worth = float_of_string (to_string (member "net_worth" j));
-    change = float_of_string (to_string (member "change" j));
-    first = bool_of_string (to_string (member "first" j));
-    vars = vars_of_json j;
-    timestamp = float_of_string (to_string (member "timestamp" j));
+    net_worth = to_float (member "net_worth" j);
+    change = to_float (member "change" j);
+    first = to_bool (member "first" j);
+    vars = vars_of_json (member "vars" j);
+    timestamp = to_float (member "timestamp" j);
   }
 
 let sell_all portfolio =

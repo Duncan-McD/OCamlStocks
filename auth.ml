@@ -12,12 +12,12 @@ type auth = Login | Signup
 
 type t = auth * User.t
 
-let auth_type a = fst a
+let auth_type (a : t) = fst a
 
-let user a = snd a
+let user (a : t) = snd a
 
 let auth_temp (email, password) =
-  if email = "invalid@invalid.com" then false else true
+  Saveload.is_valid_email_password email password
 
 let rec prompt_user prompt =
   if prompt = Initial_Prompt || prompt = Empty_Input then
@@ -65,7 +65,7 @@ and (* [login ()] is the user email once they have logged in *)
        Invalid login credentials. Type anything (e.g. \"back\") to go back, or \
        press enter to try again.\n";
 
-    correct_input Login )
+    correct_input Login)
   else (
     print_string "\nName: ";
 
@@ -83,8 +83,8 @@ and (* [login ()] is the user email once they have logged in *)
             | exception End_of_file -> failwith "Error reading input."
             | password ->
                 if auth_temp (email, password) then
-                  (Login, User.create email name password)
-                else login Invalid_Input ) ) )
+                  (Login, Saveload.load_user email)
+                else login Invalid_Input)))
 
 and (* [signup ()] is the user email once they have signed up *)
     signup prompt =
@@ -116,9 +116,9 @@ and (* [signup ()] is the user email once they have signed up *)
             match read_line () with
             | exception End_of_file -> failwith "Error reading input."
             | password ->
-                if auth_temp (email, password) then
+                if Bool.not (auth_temp (email, password)) then
                   (Signup, User.create email name password)
-                else signup Invalid_Input ) ) )
+                else login Already_Taken)))
 
 and correct_input login_or_signup =
   print_string "> ";

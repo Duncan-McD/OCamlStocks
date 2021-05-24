@@ -12,6 +12,10 @@ depends: [
   "lwt_ssl"
   "csv"
   "pyml"
+  "owl"
+  "owl-plplot"
+  "graphics"
+  "camlimages"
 ]
 
 synopsis: "Ocaml Stock Bot"

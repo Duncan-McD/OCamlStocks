@@ -85,7 +85,7 @@ val portfolio_of_json : Yojson.Basic.t -> t
 
 (**[portfolio_of_json j] is the portfolio representation of json [j]*)
 
-val to_json_string : t -> string
+val to_json : t -> Yojson.Basic.t
 
 (**[to_json_string t] is the string in json format of portfolio [t]*)
 val sell_all : t -> t
