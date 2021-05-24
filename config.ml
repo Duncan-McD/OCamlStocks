@@ -135,7 +135,6 @@ let to_json (config : t) =
       ("optimizing", `Bool config.optimizing);
       ("consts", consts_to_json config);
       ("num_test", `Int config.num_test);
-      ("liquidity", `Float config.liquidity);
     ]
 
 let ordering_of_json (str : string) : Scraper.subreddit_ordering =
