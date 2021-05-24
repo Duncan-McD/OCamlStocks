@@ -398,3 +398,5 @@ let sell_all portfolio =
     vars = (1., 1., 1., 1.);
     timestamp = Unix.time ();
   }
+
+let value stock = stock.value

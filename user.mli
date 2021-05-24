@@ -46,6 +46,8 @@ val change_test_portfolios : t -> Portfolio.t list -> t
 (** [change_test_portfolios u t] changes the user u's test portfolios to the 
     portfolio list t*)
 
+val account_creation_time : t -> float
+(** [account_creation_time u] is the time user u created their account. *)
 val to_json_string : t -> string
 
 val user_of_json : Yojson.Basic.t -> t

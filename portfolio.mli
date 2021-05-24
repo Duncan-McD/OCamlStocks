@@ -78,3 +78,6 @@ val to_json_string : t -> string
 (**[to_json_string t] is the string in json format of portfolio [t]*)
 val sell_all : t -> t
 (** [sell_all p] sells all the stocks in portfolio p*)
+
+val value : stock -> float
+(** [value s] is the current evaluation of your holding in stock s*)

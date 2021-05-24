@@ -25,3 +25,9 @@ get-pip.py
 !testing_files/*.json
 venv
 env
+*.png
+*.jpeg
+*.jpg
+*.pdf
+!algorithm.png
+!history_score.png
