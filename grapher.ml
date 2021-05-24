@@ -8,12 +8,12 @@ let rec get_list_of_net_worths portfolios net_worths =
 let rec get_list_of_timestamps portfolios timestamps =
   match portfolios with
   | [] -> List.rev timestamps
-  | h :: t -> get_list_of_net_worths t (Portfolio.net_worth h :: timestamps)
+  | h :: t -> get_list_of_timestamps t (Portfolio.net_worth h :: timestamps)
 
 let rec get_list_of_liquidities portfolios liquidities =
   match portfolios with
   | [] -> List.rev liquidities
-  | h :: t -> get_list_of_net_worths t (Portfolio.liquidity h :: liquidities)
+  | h :: t -> get_list_of_liquidities t (Portfolio.liquidity h :: liquidities)
 
 let rec get_list_of_values ticker portfolios values =
   match portfolios with
@@ -21,7 +21,8 @@ let rec get_list_of_values ticker portfolios values =
   | h :: t -> (
       let s = Portfolio.stock_from_ticker h ticker in
       match s with
-      | Some stock -> get_list_of_net_worths t (Portfolio.value stock :: values)
+      | Some stock ->
+          get_list_of_values ticker t (Portfolio.value stock :: values)
       | None -> failwith "impossible")
 
 let make_net_worth_and_liquidity_matrices user =
