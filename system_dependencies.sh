@@ -17,3 +17,6 @@ $install_prefix pv
 $install_prefix openssl
 $install_prefix libssl-dev
 $install_prefix w3m
+
+# libplplot-dev libshp-dev for owl-plplot
+# liblapacke-dev libopenblas-dev for owl

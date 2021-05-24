@@ -196,7 +196,7 @@ let parser_tests =
       (Parser.stock_names stocks_1)
       [ "NP"; "TIL" ];
     check_post_props "1st Post of stock \"NP\""
-      (List.hd (snd(Parser.data stocks_1 "NP")))
+      (List.hd (snd (Parser.data stocks_1 "NP")))
       1. 3;
     check_stock_names "Stock Names for 10 posts"
       (Parser.stock_names stocks_10)
@@ -217,7 +217,7 @@ let parser_tests =
         "DD";
       ];
     check_post_props "Third Post of stock \"GME\""
-      (List.hd (snd(Parser.data stocks_10 "GME")))
+      (List.hd (snd (Parser.data stocks_10 "GME")))
       1. 1;
   ]
 

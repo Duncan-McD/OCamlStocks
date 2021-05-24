@@ -41,7 +41,11 @@ let rec get_scrape_time subreddit amount =
     Scraper.scrape subreddit ~amount ~ordering:(Scraper.Top Scraper.AllTime)
   else (
     print_endline "Invalid input";
+<<<<<<< HEAD
+    get_scrape_time subreddit amount)
+=======
     get_scrape_time subreddit amount )
+>>>>>>> bot_runner
 
 let rec get_scrape subreddit amount =
   print_endline
