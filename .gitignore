@@ -19,8 +19,8 @@ _build
 *~
 \#*\#
 .DS_Store
-
-*.txt
+get-pip.py
+*.txt 
 *.json
 !testing_files/*.json
 venv
