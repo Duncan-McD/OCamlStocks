@@ -2,7 +2,16 @@ open Yojson.Basic.Util
 
 let file = "data.json"
 
-let load_user_json_list = to_list (member "user" (Yojson.Basic.from_file file))
+let write_empty_file =
+  let oc = open_out file in
+  Printf.fprintf oc "%s\n" "";
+  close_out oc
+
+let load_user_json_list =
+  try to_list (member "user" (Yojson.Basic.from_file file))
+  with Sys_error s ->
+    write_empty_file;
+    []
 
 let rec update_user_json_list (user : User.t)
     (user_json_list : Yojson.Basic.t list) (acc : Yojson.Basic.t list) =

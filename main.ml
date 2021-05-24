@@ -1,10 +1,13 @@
-let get_user = "user1"
+let get_user_email = "user1"
 
 (** [load] is a [State.t] with saved data or [State.init] if none exists *)
-let load () = Saveload.load_user_state get_user
+
+let current_user = Saveload.load_user get_user_email
+
+let load () = State.load_state_from_user current_user
 
 (** [save] saves [state] *)
-let save sate = Saveload.save_user_state get_user
+let save () = Saveload.save_user current_user
 
 (** [main ()] is the program that allows the user to interact with the bot. *)
 let main () =

@@ -24,3 +24,10 @@ let update state action = state.test <- "updated"
 let config state = state.config
 
 let portfolio state = state.portfolio
+
+let load_state_from_user (user : User.t) =
+  {
+    test = "";
+    config = User.config user;
+    portfolio = User.current_portfolio user;
+  }

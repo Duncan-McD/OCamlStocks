@@ -16,7 +16,7 @@ grapher:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files grapher.byte && ./grapher.byte -runner sequential
 
 bot: 
-	$(OCAMLBUILD) -tag 'debug' $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
+	$(OCAMLBUILD) -tag 'debug' -tag thread $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
 algorithmdemo:
 	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential

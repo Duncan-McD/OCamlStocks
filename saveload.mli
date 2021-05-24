@@ -9,4 +9,4 @@ val is_valid_email_password : string -> string -> bool
   email [e] and password [p], and is false otherwise*)
 
 val load_user : string -> User.t
-(**[ u] saves the data of user [u] to [file]*)
+(**[load_user e] is user with email [e]. Precondition: [e] must be an email of a user*)

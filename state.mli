@@ -40,3 +40,5 @@ val config : t -> Config.t
 
 val portfolio : t -> Portfolio.t
 (** [portfolio] is the user's portfolio *)
+
+val load_state_from_user : User.t -> t
