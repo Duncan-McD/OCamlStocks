@@ -6,6 +6,7 @@ type t = {
   past_portfolios : Portfolio.t list;
   test_portfolios : Portfolio.t list;
   config : Config.t;
+  last_daily_task_timestamp : float;
 }
 
 let create email name password =
@@ -17,6 +18,7 @@ let create email name password =
     past_portfolios = [];
     test_portfolios = [];
     config = Config.default;
+    last_daily_task_timestamp = 0.0;
   }
 
 let email user = user.email
@@ -43,6 +45,8 @@ let past_portfolios user = user.past_portfolios
 
 let test_portfolios user = user.test_portfolios
 
+let last_daily_task_timestamp user = user.last_daily_task_timestamp
+
 let config user = user.config
 
 let change_config user configuration =
@@ -54,6 +58,7 @@ let change_config user configuration =
     past_portfolios = user.past_portfolios;
     test_portfolios = user.test_portfolios;
     config = configuration;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
   }
 
 let update_portfolio user portfolio =
@@ -65,6 +70,7 @@ let update_portfolio user portfolio =
     past_portfolios = user.current_portfolio :: user.past_portfolios;
     test_portfolios = user.test_portfolios;
     config = user.config;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
   }
 
 let change_test_portfolios user portfolios =
@@ -76,4 +82,20 @@ let change_test_portfolios user portfolios =
     past_portfolios = past_portfolios user;
     test_portfolios = portfolios;
     config = config user;
+    last_daily_task_timestamp = last_daily_task_timestamp user;
   }
+
+let set_last_daily_task_timestamp user timestamp =
+  {
+    email = email user;
+    name = name user;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    last_daily_task_timestamp = timestamp;
+  }
+
+let time_for_daily_tasks user timestamp =
+  timestamp -. last_daily_task_timestamp user >= 86400.
