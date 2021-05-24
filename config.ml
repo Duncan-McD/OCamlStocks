@@ -1,14 +1,9 @@
-type t = unit
+type subreddit = int * Scraper.subreddit_ordering * string
 
-(* 
-  Subreddit info: 
-    subreddits: (int, Scraper.ordering, string) list – List.map
-  Optimizing info: 
-    optimizing : bool
-    consts: (float, float, float, float)
-    num_tests: int
-  Portolio info:
-    liquidity:
-*)
-
-let default = ()
+(* type t = {
+  subreddits : subreddit list;
+  optimizing : bool;
+  consts : float * float * float * float;
+  num_test : int;
+  liquidity : float;
+} *)

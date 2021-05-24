@@ -10,11 +10,7 @@ type action =
   | Logout
   | Quit
 
-type t = {
-  mutable config : Config.t;
-  mutable portfolio : Portfolio.t;
-  mutable test : string;
-}
+type t = { mutable config : Config.t; mutable portfolio : Portfolio.t }
 
 exception InvalidAction of string
 
