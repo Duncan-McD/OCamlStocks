@@ -341,11 +341,11 @@ let to_json t =
 let stock_of_json j =
   {
     ticker = to_string (member "ticker" j);
-    shares = float_of_string (to_string (member "shares" j));
-    price_per_share = float_of_string (to_string (member "price_per_share" j));
-    initial_value = float_of_string (to_string (member "initial_value" j));
-    value = float_of_string (to_string (member "value" j));
-    change = float_of_string (to_string (member "change" j));
+    shares = to_float (member "shares" j);
+    price_per_share = to_float (member "price_per_share" j);
+    initial_value = to_float (member "initial_value" j);
+    value = to_float (member "value" j);
+    change = to_float (member "change" j);
   }
 
 (**[stock_name_of_json j] is the ticker of the stock of json [j] *)
@@ -367,20 +367,20 @@ let stocks_of_json (j : Yojson.Basic.t) =
 
 (**[stocks_of_json j] is the vars representation of json [j]*)
 let vars_of_json (j : Yojson.Basic.t) =
-  ( float_of_string (to_string (member "x" j)),
-    float_of_string (to_string (member "y" j)),
-    float_of_string (to_string (member "w1" j)),
-    float_of_string (to_string (member "w2" j)) )
+  ( to_float (member "x" j),
+    to_float (member "y" j),
+    to_float (member "w1" j),
+    to_float (member "w2" j) )
 
 let portfolio_of_json (j : Yojson.Basic.t) =
   {
-    liquidity = float_of_string (to_string (member "liquidity" j));
+    liquidity = to_float (member "liquidity" j);
     stocks = stocks_of_json j;
-    net_worth = float_of_string (to_string (member "net_worth" j));
-    change = float_of_string (to_string (member "change" j));
-    first = bool_of_string (to_string (member "first" j));
-    vars = vars_of_json j;
-    timestamp = float_of_string (to_string (member "timestamp" j));
+    net_worth = to_float (member "net_worth" j);
+    change = to_float (member "change" j);
+    first = to_bool (member "first" j);
+    vars = vars_of_json (member "vars" j);
+    timestamp = to_float (member "timestamp" j);
   }
 
 let sell_all portfolio =

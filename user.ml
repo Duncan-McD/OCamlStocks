@@ -128,7 +128,7 @@ let to_json t =
 
 let rec portfolio_list_of_json (j : Yojson.Basic.t list) acc =
   match j with
-  | [] -> acc
+  | [] -> List.rev acc
   | h :: t -> portfolio_list_of_json t (Portfolio.portfolio_of_json h :: acc)
 
 let user_of_json (j : Yojson.Basic.t) =
@@ -143,10 +143,8 @@ let user_of_json (j : Yojson.Basic.t) =
     test_portfolios =
       portfolio_list_of_json (to_list (member "test_portfolios" j)) [];
     config = Config.config_of_json (member "config" j);
-    account_creation_time =
-      float_of_string (to_string (member "account_creation_time" j));
-    last_daily_task_timestamp =
-      float_of_string (to_string (member "last_daily_task_timestamp" j));
+    account_creation_time = to_float (member "account_creation_time" j);
+    last_daily_task_timestamp = to_float (member "last_daily_task_timestamp" j);
   }
 
 let time_for_daily_tasks user timestamp =

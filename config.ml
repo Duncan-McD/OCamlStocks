@@ -170,26 +170,26 @@ let ordering_of_json (str : string) : Scraper.subreddit_ordering =
   | _ -> failwith "impossible"
 
 let subreddit_of_json (j : Yojson.Basic.t) : subreddit =
-  ( int_of_string (to_string (member "num_posts" j)),
+  ( to_int (member "num_posts" j),
     ordering_of_json (to_string (member "ordering" j)),
     to_string (member "url" j) )
 
 let rec subreddits_of_json (j : Yojson.Basic.t list) acc =
   match j with
-  | [] -> acc
+  | [] -> List.rev acc
   | h :: t -> subreddits_of_json t (subreddit_of_json h :: acc)
 
 let consts_of_json (j : Yojson.Basic.t) =
-  ( float_of_string (to_string (member "x" j)),
-    float_of_string (to_string (member "y" j)),
-    float_of_string (to_string (member "w1" j)),
-    float_of_string (to_string (member "w2" j)) )
+  ( to_float (member "x" j),
+    to_float (member "y" j),
+    to_float (member "w1" j),
+    to_float (member "w2" j) )
 
 let config_of_json (j : Yojson.Basic.t) =
   {
     subreddits = subreddits_of_json (to_list (member "subreddits" j)) [];
-    optimizing = bool_of_string (to_string (member "optimizing" j));
+    optimizing = to_bool (member "optimizing" j);
     consts = consts_of_json (member "consts" j);
-    num_test = int_of_string (to_string (member "num_test" j));
-    liquidity = float_of_string (to_string (member "liquidity" j));
+    num_test = to_int (member "num_test" j);
+    liquidity = to_float (member "liquidity" j);
   }
