@@ -13,7 +13,7 @@ type subreddit = int * Scraper.subreddit_ordering * string
 
 (** {2 Config Functions}*)
 
-val default : t
+val default : unit -> t
 (** [default] is the bot's default program configuration *)
 
 val add_subreddit : t -> subreddit -> t
