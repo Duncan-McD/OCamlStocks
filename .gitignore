@@ -20,5 +20,8 @@ _build
 \#*\#
 .DS_Store
 
+*.txt
+*.json
+!testing_files/*.json
 venv
 env
