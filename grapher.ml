@@ -34,7 +34,7 @@ let y = Owl.Mat.of_array (Array.of_list [ 3.; 4.; 5. ]) 1 3
 
 let () =
   Plot.set_foreground_color h 0 0 0;
-  Plot.set_background_color h 255 255 219;
+  Plot.set_background_color h 30 255 219;
   Plot.set_title h "Function: f(x) = sine x / x";
   Plot.set_xlabel h "time";
   Plot.set_ylabel h "y-axis";
@@ -75,13 +75,31 @@ let () =
   Graphics.set_window_title "Plot One";
   print_endline "Enter Y to end";
   if read_line () = "Y" then Graphics.clear_graph () else ()
-(*
-open Images
 
-let img = Images.load "plot_003.png" []
+let rec find_maximum floats max =
+  match floats with
+  | [] -> max
+  | h :: t -> find_maximum t (if h > max then h else max)
 
-let g = Graphic_image.of_image img
-
-let () =
-  Graphics.draw_image g 0 0;
-  Unix.sleep 10*)
+let graph_net_worth user =
+  let name = User.name user in
+  let matrices = make_net_worth_matrices user in
+  let times = fst matrices in
+  let times_list = Array.to_list (Owl.Mat.to_array times) in
+  let net_worths = snd matrices in
+  let net_worths_list = Array.to_list (Owl.Mat.to_array net_worths) in
+  let max_net_worth = find_maximum net_worths_list in
+  let max_times = find_maximum times_list in
+  Plot.set_foreground_color h 0 0 0;
+  Plot.set_background_color h 30 255 219;
+  Plot.set_title h ("Net Worth of " ^ name);
+  Plot.set_xlabel h "time";
+  Plot.set_ylabel h "net_worth";
+  Plot.set_font_size h 4.;
+  Plot.set_pen_size h 3.;
+  Plot.subplot h 0 0;
+  Plot.plot_fun ~h f 1. 15.;
+  Plot.subplot h 0 1;
+  Plot.set_xrange h 0. 8.;
+  Plot.set_yrange h 0. 8.;
+  Plot.scatter ~h x y
