@@ -272,3 +272,5 @@ let sell_all portfolio =
     first = false;
     timestamp = Unix.time ();
   }
+
+let value stock = stock.value

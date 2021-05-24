@@ -15,7 +15,16 @@ let rec get_list_of_liquidities portfolios liquidities =
   | [] -> List.rev liquidities
   | h :: t -> get_list_of_net_worths t (Portfolio.liquidity h :: liquidities)
 
-let make_net_worth_matrices user =
+let rec get_list_of_values ticker portfolios values =
+  match portfolios with
+  | [] -> List.rev values
+  | h :: t -> (
+      let s = Portfolio.stock_from_ticker h ticker in
+      match s with
+      | Some stock -> get_list_of_net_worths t (Portfolio.value stock :: values)
+      | None -> failwith "impossible")
+
+let make_net_worth_and_liquidity_matrices user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
   let timestamps = get_list_of_timestamps portfolios [] in
   let net_worths = get_list_of_net_worths portfolios [] in
@@ -36,7 +45,7 @@ let make_net_worth_matrices user =
   in
   (timestamp_matrix, liquidity_net_worth_matrix)
 
-let make_net_worth_and_liquidity_matrices user =
+let make_net_worth_matrices user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
   let timestamps = get_list_of_timestamps portfolios [] in
   let net_worths = get_list_of_net_worths portfolios [] in
@@ -49,6 +58,33 @@ let make_net_worth_and_liquidity_matrices user =
     Owl.Mat.of_array (net_worths |> Array.of_list) 1 nets
   in
   (timestamp_matrix, net_worth_matrix)
+
+let rec get_list_of_portfolios_containing_a_stock ticker portfolios
+    portfolios_with_stock =
+  match portfolios with
+  | [] -> List.rev portfolios_with_stock
+  | h :: t -> (
+      let s = Portfolio.stock_from_ticker h ticker in
+      match s with
+      | None -> List.rev portfolios
+      | Some s ->
+          get_list_of_portfolios_containing_a_stock ticker t
+            (h :: portfolios_with_stock))
+
+let make_stock_value_matrices ticker user =
+  let portfolios = User.current_portfolio user :: User.past_portfolios user in
+  let portfolios =
+    get_list_of_portfolios_containing_a_stock ticker portfolios []
+  in
+  let timestamps = get_list_of_timestamps portfolios [] in
+  let values = get_list_of_values ticker portfolios [] in
+  let times = List.length timestamps in
+  let vals = List.length values in
+  let timestamp_matrix =
+    Owl.Mat.of_array (timestamps |> Array.of_list) 1 times
+  in
+  let value_matrix = Owl.Mat.of_array (values |> Array.of_list) 1 vals in
+  (timestamp_matrix, value_matrix)
 
 let rgba_to_rgb =
   Py.initialize ();
@@ -179,29 +215,27 @@ let graph_net_worth user =
 let graph_net_worth_and_liquidity user =
   let name = User.name user in
   let matrices = make_net_worth_and_liquidity_matrices user in
-  let times =
-    fst matrices inlet xs_list = Array.to_list (Owl.Mat.to_array xs)
+  let times = fst matrices in
+  let net_worths_plus_liquidities = snd matrices in
+  let xs_list = Array.to_list (Owl.Mat.to_array times) in
+  let ys_list = Array.to_list (Owl.Mat.to_array net_worths_plus_liquidities) in
+  let maxs_and_mins =
+    get_max_min user times net_worths_plus_liquidities xs_list ys_list
   in
-  let ys_list = Array.to_list (Owl.Mat.to_array ys) in
-  let net_worths = snd matrices in
-  let maxs_and_mins = get_max_min user times net_worths in
-  let xs_list = Array.to_list (Owl.Mat.to_array xs) in
-  let ys_list = Array.to_list (Owl.Mat.to_array ys) in
-  create_and_open_side_by_side name maxs_and_mins times net_worths xs_list
-    ys_list
+  create_and_open_side_by_side name maxs_and_mins times
+    net_worths_plus_liquidities xs_list ys_list
 
 let graph_stock_value user ticker =
   let name = User.name user in
-  let matrices = make_net_worth_matrices user in
+  let matrices = make_stock_value_matrices ticker user in
   let times = fst matrices in
-  let net_worths = snd matrices in
-  let maxs_and_mins = get_max_min user times net_worths in
-  let xs_list = Array.to_list (Owl.Mat.to_array xs) in
-  let ys_list = Array.to_list (Owl.Mat.to_array ys) in
-  create_and_open_side_by_side name maxs_and_mins times net_worths xs_list
-    ys_list
+  let values = snd matrices in
+  let xs_list = Array.to_list (Owl.Mat.to_array times) in
+  let ys_list = Array.to_list (Owl.Mat.to_array values) in
+  let maxs_and_mins = get_max_min user times values xs_list ys_list in
+  create_and_open_side_by_side name maxs_and_mins times values xs_list ys_list
 
-let graph_change user =
+(*let graph_change user time=
   let name = User.name user in
   let matrices = make_net_worth_matrices user in
   let times = fst matrices in
@@ -222,3 +256,4 @@ let graph_stock_change user ticker =
   let ys_list = Array.to_list (Owl.Mat.to_array ys) in
   create_and_open_side_by_side name maxs_and_mins times net_worths xs_list
     ys_list
+*)

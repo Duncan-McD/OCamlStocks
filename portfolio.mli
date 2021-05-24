@@ -68,3 +68,6 @@ val compare : t -> t -> float
 
 val sell_all : t -> t
 (** [sell_all p] sells all the stocks in portfolio p*)
+
+val value : stock -> float
+(** [value s] is the current evaluation of your holding in stock s*)
