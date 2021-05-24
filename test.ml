@@ -250,7 +250,7 @@ let parser_conn_test name str expec_conn =
     assert_bool "Connotation does not match expected range" conn_range
 
 let parser_tests = [
-  parser_stocks_test "1 post in r/stocks hot" ~amount:1 "stocks-hot.json" [];
+  (* parser_stocks_test "1 post in r/stocks hot" ~amount:1 "stocks-hot.json" [];
   parser_stocks_test "2 posts in r/stocks hot" ~amount:2 "stocks-hot.json" ["PEG"];
   parser_stocks_test "7 posts in r/stocks hot" ~amount:7 "stocks-hot.json" ["PEG"];
   parser_stocks_test "24 posts in r/stocks hot" ~amount:24 "stocks-hot.json" ["ABBV"; "ALTO"; "ATI"; "CTXR"; "CVX"; "GO"; "NIO"; "PEG"; "REGN"; "RH"; "SPG"; "T"; "TOO"];
@@ -277,8 +277,8 @@ let parser_tests = [
   parser_stocks_test "1 post in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" [];
   parser_stocks_test "2 posts in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" [];
   parser_stocks_test "14 posts in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "OC"; "ONE"; "PE"; "PLTR"; "SE"; "UWMC"];
-  parser_stocks_test "24 posts in r/wallstreetbets hot" ~amount:24 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "HD"; "OC"; "ONE"; "PE"; "PLTR"; "RIOT"; "SE"; "UWMC"];
-  (* parser_conn_test "postive" "VADER is smart, handsome, and funny." POS;
+  parser_stocks_test "24 posts in r/wallstreetbets hot" ~amount:24 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "HD"; "OC"; "ONE"; "PE"; "PLTR"; "RIOT"; "SE"; "UWMC"]; *)
+  parser_conn_test "postive" "VADER is smart, handsome, and funny." POS;
   parser_conn_test "postive punctuation" "VADER is smart, handsome, and funny!" POS;
   parser_conn_test "postive enhancer" "VADER is very smart, handsome, and funny." POS;
   parser_conn_test "postive captials" "VADER is VERY SMART, handsome, and FUNNY." POS;
@@ -292,7 +292,7 @@ let parser_tests = [
   parser_conn_test "negative mispelling" "Today SUX!" NEG;
   parser_conn_test "social media slang" "Today only kinda sux! But I'll get by, lol" POS;
   parser_conn_test "emoticons" "Make sure you :) or :D today!" POS;
-  parser_conn_test "negative negation" "Not bad at all" POS; *)
+  parser_conn_test "negative negation" "Not bad at all" POS;
   (* TODO: add connotation tests *)
 ]
 
@@ -358,6 +358,6 @@ let parser_tests =
 
 let suite =
   "CamelStonks Test Suite"
-  >::: List.flatten [ (*scraper_tests; cashset_tests;*) parser_tests; ]
+  >::: List.flatten [ scraper_tests; cashset_tests; parser_tests; ]
 
 let _ = run_test_tt_main suite
