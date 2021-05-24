@@ -11,7 +11,11 @@ exception InvalidAction of string
 exception QuitAction
 
 let init =
-  { test = ""; config = Config.default; portfolio = Portfolio.empty_portfolio }
+  {
+    test = "";
+    config = Config.default ();
+    portfolio = Portfolio.empty_portfolio;
+  }
 
 let action_of_string s = raise (InvalidAction "s")
 

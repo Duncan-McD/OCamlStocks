@@ -1,8 +1,12 @@
 (** [cashtable] is the hashtable that stores the hashed names of stocks as keys with value 0 *)
-let cashtable = Hashtbl.create 10624
+let cashtable_size = 10624
+
+let cashtable = Hashtbl.create cashtable_size
 
 (** [word_hashtable] is the hashtable that stores the hashed names of common words that may be the same as a stock ticker 0 *)
-let word_hashtbl = Hashtbl.create 50
+let word_hashtbl_size = 53
+
+let word_hashtbl = Hashtbl.create word_hashtbl_size
 
 let stock_file = "stocks.csv"
 
@@ -26,7 +30,7 @@ let add_to_stock_hashtbl (csv_line : string) =
 (** constructs [word_hashtbl] from commonwords.csv; constructs [cashtable]*)
 let () =
   let ic = open_in words_file in
-  for i = 1 to 49 do
+  for i = 1 to word_hashtbl_size do
     try
       let line = input_line ic in
       line |> parse_line |> build_word_hashtable
@@ -36,7 +40,7 @@ let () =
   done;
   close_in ic;
   let ic = open_in stock_file in
-  for i = 1 to 10624 do
+  for i = 1 to cashtable_size do
     try
       let line = input_line ic in
       line |> parse_line |> add_to_stock_hashtbl

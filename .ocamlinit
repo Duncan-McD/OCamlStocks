@@ -2,10 +2,13 @@
 #require "yojson";;
 #require "csv";;
 #require "pyml";;
+<<<<<<< HEAD
 #require "owl";;
 #require "graphics";;
 #require "ocamlimages.graphics";;
 #require "camlimages.png";;
+=======
+>>>>>>> main
 #require "ANSITerminal";;
 #directory "_build";;
 #load "scraper.cmo";;
@@ -14,4 +17,7 @@
 #load "parser.cmo";;
 #load "optimizer.cmo";;
 #load "algorithm.cmo";;
+#load "uniformtesting.cmo";;
+#load "testreadwrite.cmo";;
 #load "portfolio.cmo";;
+#load "user.cmo";;
