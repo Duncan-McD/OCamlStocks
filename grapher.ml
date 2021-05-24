@@ -234,26 +234,3 @@ let graph_stock_value user ticker =
   let ys_list = Array.to_list (Owl.Mat.to_array values) in
   let maxs_and_mins = get_max_min user times values xs_list ys_list in
   create_and_open_side_by_side name maxs_and_mins times values xs_list ys_list
-
-(*let graph_change user time=
-  let name = User.name user in
-  let matrices = make_net_worth_matrices user in
-  let times = fst matrices in
-  let net_worths = snd matrices in
-  let maxs_and_mins = get_max_min user times net_worths in
-  let xs_list = Array.to_list (Owl.Mat.to_array xs) in
-  let ys_list = Array.to_list (Owl.Mat.to_array ys) in
-  create_and_open_side_by_side name maxs_and_mins times net_worths xs_list
-    ys_list
-
-let graph_stock_change user ticker =
-  let name = User.name user in
-  let matrices = make_net_worth_matrices user in
-  let times = fst matrices in
-  let net_worths = snd matrices in
-  let maxs_and_mins = get_max_min user times net_worths in
-  let xs_list = Array.to_list (Owl.Mat.to_array xs) in
-  let ys_list = Array.to_list (Owl.Mat.to_array ys) in
-  create_and_open_side_by_side name maxs_and_mins times net_worths xs_list
-    ys_list
-*)
