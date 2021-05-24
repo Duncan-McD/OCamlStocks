@@ -8,18 +8,21 @@ let write_empty_file =
   close_out oc
 
 let load_user_json_list =
-  try to_list (member "user" (Yojson.Basic.from_file file))
-  with Sys_error s ->
-    write_empty_file;
-    []
+  try to_list (member "user" (Yojson.Basic.from_file file)) with
+  | Sys_error s ->
+      write_empty_file;
+      []
+  | Yojson.Json_error e ->
+      write_empty_file;
+      []
 
 let rec update_user_json_list (user : User.t)
     (user_json_list : Yojson.Basic.t list) (acc : Yojson.Basic.t list) =
   match user_json_list with
-  | [] -> Yojson.Basic.from_string (User.to_json_string user) :: acc
+  | [] -> User.to_json user :: acc
   | (h : Yojson.Basic.t) :: (t : Yojson.Basic.t list) ->
       if to_string (member "name" h) = User.name user then
-        (Yojson.Basic.from_string (User.to_json_string user) :: acc) @ t
+        (User.to_json user :: acc) @ t
       else update_user_json_list user t (h :: acc)
 
 let save_user (user : User.t) =

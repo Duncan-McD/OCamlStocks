@@ -107,26 +107,24 @@ let set_last_daily_task_timestamp user timestamp =
 
 open Yojson.Basic.Util
 
-let rec string_of_porfolio_list portfolio_list acc =
+let rec portfolio_list_to_json (portfolio_list : Portfolio.t list) acc =
   match portfolio_list with
-  | [] -> acc
-  | h :: t -> string_of_porfolio_list t (Portfolio.to_json_string h ^ "," ^ acc)
+  | [] -> `List acc
+  | h :: t -> portfolio_list_to_json t (Portfolio.to_json h :: acc)
 
-let to_json_string t =
-  "{" ^ "\"email: \"" ^ t.email ^ ", " ^ "\"name: \"" ^ t.name ^ ", "
-  ^ "\"password: \"" ^ t.password ^ "," ^ "\"current_portfolio: \""
-  ^ Portfolio.to_json_string t.current_portfolio
-  ^ "," ^ "\"past_portfolios: \"" ^ "["
-  ^ string_of_porfolio_list t.past_portfolios ""
-  ^ "]" ^ ", " ^ "," ^ "\"test_portfolios: \"" ^ "["
-  ^ string_of_porfolio_list t.test_portfolios ""
-  ^ "]" ^ ", " ^ "\"config: \""
-  ^ Config.to_json_string t.config
-  ^ "," ^ "\"account_creation_time: \""
-  ^ string_of_float t.account_creation_time
-  ^ ", " ^ "\"last_daily_task_timestamp: \""
-  ^ string_of_float t.last_daily_task_timestamp
-  ^ "}"
+let to_json t =
+  `Assoc
+    [
+      ("email", `String t.email);
+      ("name", `String t.name);
+      ("password", `String t.password);
+      ("current_portfolio", Portfolio.to_json t.current_portfolio);
+      ("past_portfolios", portfolio_list_to_json t.past_portfolios []);
+      ("test_portfolios", portfolio_list_to_json t.test_portfolios []);
+      ("config", Config.to_json t.config);
+      ("account_creation_time", `Float t.account_creation_time);
+      ("last_daily_task_timestamp", `Float t.last_daily_task_timestamp);
+    ]
 
 let rec portfolio_list_of_json (j : Yojson.Basic.t list) acc =
   match j with

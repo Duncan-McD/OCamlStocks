@@ -280,24 +280,18 @@ let change_liquidity portfolio liquid =
 let vars portfolio = portfolio.vars
 
 (**[string_of_stock s] is the string in json format of stock [s]*)
-let string_of_stock stock =
-  "{" ^ "\"ticker: \"" ^ stock.ticker ^ ", " ^ "\"shares: \""
-  ^ string_of_float stock.shares
-  ^ "," ^ "\"price_per_share: \""
-  ^ string_of_float stock.price_per_share
-  ^ "," ^ "\"initial_value: \""
-  ^ string_of_float stock.initial_value
-  ^ "," ^ "\"value: \""
-  ^ string_of_float stock.value
-  ^ "," ^ "\"change: \""
-  ^ string_of_float stock.change
-  ^ "}"
+let stock_to_json (stock : stock) =
+  `Assoc
+    [
+      ("ticker", `String stock.ticker);
+      ("shares", `Float stock.shares);
+      ("price_per_share", `Float stock.price_per_share);
+      ("initial_value", `Float stock.initial_value);
+      ("value", `Float stock.value);
+      ("change", `Float stock.change);
+    ]
 
 (**[string_of_stocklist s] is the string in json format of stocklist [s]*)
-let rec string_of_stocklist stocklist acc =
-  match stocklist with
-  | [] -> acc
-  | h :: t -> string_of_stocklist t (acc ^ string_of_stock h)
 
 (**[fst4 t] is the first element in 4-tuple [t]*)
 let fst4 (quad : float * float * float * float) =
@@ -316,29 +310,31 @@ let fth4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> d
 
 (**[string_of_vars t] is the string in json format of vars [t]*)
-let string_of_vars t =
-  "[" ^ "\"x: \""
-  ^ string_of_float (fst4 t.vars)
-  ^ "," ^ "\"y: \""
-  ^ string_of_float (snd4 t.vars)
-  ^ "," ^ "\"w1: \""
-  ^ string_of_float (trd4 t.vars)
-  ^ "," ^ "\"w2: \""
-  ^ string_of_float (trd4 t.vars)
-  ^ "]"
+let vars_to_json (portfolio : t) =
+  `Assoc
+    [
+      ("x", `Float (fst4 portfolio.vars));
+      ("y", `Float (snd4 portfolio.vars));
+      ("w1", `Float (trd4 portfolio.vars));
+      ("w2", `Float (fth4 portfolio.vars));
+    ]
 
-let to_json_string t =
-  "{" ^ "\"liquidity: \""
-  ^ string_of_float t.liquidity
-  ^ ", " ^ "{" ^ "\"stocks: \"" ^ "["
-  ^ string_of_stocklist (list_of_stocks t) ""
-  ^ "]" ^ ", " ^ "\"net_worth: \""
-  ^ string_of_float t.net_worth
-  ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
-  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ ","
-  ^ "\"timestamp: \""
-  ^ string_of_float t.timestamp
-  ^ "}"
+let rec stock_list_to_json (stock_list : stock list) acc =
+  match stock_list with
+  | [] -> `List acc
+  | h :: t -> stock_list_to_json t (stock_to_json h :: acc)
+
+let to_json t =
+  `Assoc
+    [
+      ("liquidity", `Float t.liquidity);
+      ("stocks", stock_list_to_json (list_of_stocks t) []);
+      ("net_worth", `Float t.net_worth);
+      ("change", `Float t.change);
+      ("first", `Bool t.first);
+      ("vars", vars_to_json t);
+      ("timestamp", `Float t.timestamp);
+    ]
 
 (**[stock_of_json j] is the stock representation of json [j]*)
 
