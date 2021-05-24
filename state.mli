@@ -15,6 +15,14 @@ exception InvalidAction of string
 exception QuitAction
 (** Raised when a user wants to quit the program *)
 
+exception LogoutAction
+(** Raised when a user wants to logout of their account *)
+
+exception MenuAction
+(** Raised when an user wants to see the menu 
+-- WILL BE DELETED ONCE STATE CAN ACCESS USER DATA 
+-- STATE WILL THEN PRINT OUT MENU ITSELF *)
+
 (** {2 Action Functions} *)
 
 val action_of_string : string -> action

@@ -29,4 +29,4 @@ val prompt_user : prompt -> t
 val email : t -> string
 (** [list_of_stocks p] is the user's configuration settings *)
 
-val auth : t -> auth
+val auth_type : t -> auth

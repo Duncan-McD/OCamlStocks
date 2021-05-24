@@ -16,7 +16,7 @@ let auth_temp (email, password) =
 
 let email user = fst user
 
-let auth user = snd user
+let auth_type user = snd user
 
 let rec prompt_user prompt =
   if prompt = Initial_Prompt then
@@ -25,6 +25,11 @@ let rec prompt_user prompt =
        Type \"login\" or \"signup\", to get started. If you would like to \
        quit, type \"quit\"."
   else if prompt = Logged_Out then
+    let () =
+      ANSITerminal.print_string [ ANSITerminal.green ]
+        "\nYou have been sucessfully logged out.\n"
+    in
+
     print_endline
       "\n\
        Type \"login\" or \"signup\", to go back. If you would like to quit, \
