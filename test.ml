@@ -11,10 +11,21 @@
       Stockdata (manual)
         - Manually tested retrieval of stock data since stockdata is all present
         based values that change constantly
-      Parser (OUnit)
-      Optimizer (OUnit + manually)
-      Algorithm (OUnit + manually)
-      Portfolio ()
+      Parser (OUnit + manual)
+        - General parsing tests developed using black box testing
+        - Connotation tests developed with glass box and randomized testing
+        - History score tested manually (similar to Stockdata)
+        - DISCLAIMER: tests commented out by default due to the large amount of
+        time required to complete tests; recommended that you run a maximum of
+        half of the tests so there are no issues with timing out
+      Optimizer (manual)
+        - Manually tested the daily optimization using portfolios
+      Algorithm (manual)
+        - Manually tested due to changing history score over time
+        - Checked calculations done with various different constants
+      Portfolio (OUnit + manual)
+        - OUnit testing ran on simple portfolios
+        - Manual testing used on time sensitive functions
 
     This testing approach aimed to rigorously test all aspects of the system
     that were possible to test. The tests used maneuvered around the system's
@@ -24,20 +35,14 @@
     modules as certain aspects relied upon the validity of earlier modules. The
     various use of different test case development systems (i.e. glass box or
     black box) were used whenever possible to gain maximum testing exposure and
-    bisect coverage.
-
-    Rubric: (TODO: remove rubric when completed test plan)
-    -4: The test plan is missing.
-    -1: The test plan does not explain which parts of the system were automatically tested by OUnit vs. manually tested.
-    -1: The test plan does not explain what modules were tested by OUnit and how test cases were developed (black box, glass box, randomized, etc.).
-    -1: The test plan does not provide an argument for why the testing approach demonstrates the correctness of the system.
- *)
+    bisect coverage. *)
 
 open OUnit2
 open Printf
 open Scraper
 open Cashset
 open Parser
+open Portfolio
 
 let pp_string s = "\"" ^ s ^ "\""
 
@@ -193,7 +198,7 @@ let scraper_tests = [
 ]
 
 let cashset_test ticker expec =
-  "cashset test: " ^ ticker >:: fun _ -> 
+  "cashset: " ^ ticker >:: fun _ -> 
     assert_equal expec (Cashset.is_stock_name ticker) ~printer:string_of_bool
 
 let cashset_tests = [
@@ -234,7 +239,7 @@ let parser_stocks_test name ?(amount = 24) json_file expec_stocks =
   let subreddit = scrape_json ~amount ("testing_files/" ^ json_file) in
   let stocks = List.sort String.compare (stock_names @@ parse subreddit) in
   let sort_expec = List.sort String.compare expec_stocks in
-  "parser stocks test: " ^ name >:: fun _ -> 
+  "parser stocks: " ^ name >:: fun _ -> 
     assert_equal sort_expec stocks ~printer:(pp_list pp_string)
 
 type conn = POS | NEG | NEU
@@ -246,7 +251,7 @@ let parser_conn_test name str expec_conn =
   | NEG -> conn <= -0.05
   | NEU -> conn > -0.05 && conn < 0.05
   in
-  "parser connotation test: " ^ name >:: fun _ -> 
+  "parser connotation: " ^ name >:: fun _ -> 
     assert_bool "Connotation does not match expected range" conn_range
 
 let parser_tests = [
@@ -296,68 +301,8 @@ let parser_tests = [
   (* TODO: add connotation tests *)
 ]
 
-
-(* let function_test_string name str1 str2 =
-  name >:: fun _ -> assert_equal ~printer:pp_string str1 str2
-
-let function_test_bool name val1 val2 =
-  name >:: fun _ -> assert_equal val1 val2 ~printer:string_of_bool
-
-let get_stocks json n = scrape_json json ~amount:n
-
-let check_stock_names name exp_stock_names stock_names =
-  name >:: fun _ ->
-  assert_equal
-    (List.sort_uniq compare exp_stock_names)
-    (List.sort_uniq compare stock_names)
-    ~printer:(pp_list pp_string)
-
-let check_post_props name post exp_upvote_ratio exp_upvote_score =
-  let correct_uvr = Parser.upvote_ratio post = exp_upvote_ratio in
-  let correct_uvs = Parser.upvote_score post = exp_upvote_score in
-  name >:: fun _ -> assert_equal (correct_uvr && correct_uvs) true
-
-let parser_tests =
-  let subreddit_1 =
-    Scraper.scrape_json "testing_files/stocksnew.json" ~amount:1
-  in
-  let stocks_1 = Parser.parse subreddit_1 in
-  let subreddit_10 =
-    Scraper.scrape_json "testing_files/stocksnew.json" ~amount:10
-  in
-  let stocks_10 = Parser.parse subreddit_10 in
-  [
-    check_stock_names "Stock Names for 1 post"
-      (Parser.stock_names stocks_1)
-      [ "NP"; "TIL" ];
-    check_post_props "1st Post of stock \"NP\""
-      (List.hd (snd(Parser.data stocks_1 "NP")))
-      1. 3;
-    check_stock_names "Stock Names for 10 posts"
-      (Parser.stock_names stocks_10)
-      [
-        "UWMC";
-        "NP";
-        "TIL";
-        "VIAC";
-        "SI";
-        "AM";
-        "PE";
-        "SEE";
-        "ANY";
-        "GME";
-        "SO";
-        "AMC";
-        "CBS";
-        "DD";
-      ];
-    check_post_props "Third Post of stock \"GME\""
-      (List.hd (snd(Parser.data stocks_10 "GME")))
-      1. 1;
-  ] *)
-
 let suite =
   "CamelStonks Test Suite"
-  >::: List.flatten [ scraper_tests; cashset_tests; parser_tests; ]
+  >::: List.flatten [ scraper_tests; cashset_tests; parser_tests; portfolio_tests; ]
 
 let _ = run_test_tt_main suite
