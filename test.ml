@@ -232,7 +232,6 @@ let cashset_tests = [
   cashset_test "IF" false;
   cashset_test "WHAT" false;
   cashset_test "TIL" false;
-  (* TODO: add cashset tests *)
 ]
 
 let parser_stocks_test name ?(amount = 24) json_file expec_stocks = 
@@ -299,6 +298,40 @@ let parser_tests = [
   parser_conn_test "emoticons" "Make sure you :) or :D today!" POS;
   parser_conn_test "negative negation" "Not bad at all" POS;
   (* TODO: add connotation tests *)
+]
+
+let portfolio_ticker_test name portfolio expec_tickers = 
+  "portfolio tickers: " ^ name >:: fun _ -> 
+    assert_equal expec_tickers (list_of_tickers portfolio)
+    ~printer:(pp_list pp_string)
+
+let portfolio_stocks_test name portfolio expec_tickers = 
+  "portfolio tickers: " ^ name >:: fun _ -> 
+    assert_equal expec_tickers (list_of_stocks portfolio)
+
+let portfolio_worth_test name portfolio expec_worth = 
+  "portfolio worth: " ^ name >:: fun _ -> 
+    assert_equal expec_worth (net_worth portfolio)
+    ~printer:string_of_float
+
+let portfolio_liquidity_test name portfolio expec_liq = 
+  "portfolio worth: " ^ name >:: fun _ -> 
+    assert_equal expec_liq (liquidity portfolio)
+    ~printer:string_of_float
+
+let portfolio_equal_test name portfolio expec_portfolio = 
+  "portfolio equal: " ^ name >:: fun _ -> 
+    assert_equal 0 (compare expec_portfolio portfolio)
+    ~printer:string_of_int
+
+let portfolio_tests = [
+  portfolio_ticker_test "empty portfolio has no tickers" empty_portfolio [];
+  portfolio_stocks_test "empty portfolio has no stocks" empty_portfolio [];
+  portfolio_worth_test "empty portfolio has no worth" empty_portfolio 0.;
+  portfolio_liquidity_test "empty portfolio has no liquidity" empty_portfolio 0.;
+  portfolio_equal_test "empty portfolio is still empty when sold" empty_portfolio (refresh empty_portfolio);
+  portfolio_equal_test "empty portfolio is still empty when copied" empty_portfolio (copy empty_portfolio);
+  portfolio_equal_test "empty portfolio is still empty when sold" empty_portfolio (sell_all empty_portfolio);
 ]
 
 let suite =
