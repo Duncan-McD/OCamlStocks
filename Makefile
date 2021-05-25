@@ -1,15 +1,15 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio user grapher optimizer config state uniformtesting saveload auth
+MODULES= scraper authors parser cashset stockdata algorithm portfolio user grapher config state uniformtesting saveload auth
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
 TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
+DEPS= yojson,mechaml,csv,mechaml,pyml,owl,owl-plplot,graphics,camlimages.graphics,camlimages.png,ANSITerminal
 
 default: bot
 
 utop: build
-	OCAMLRUNPARAM=b utop
 
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
@@ -27,12 +27,12 @@ docs: docs-public docs-private
 	
 docs-public: build
 	mkdir -p _doc.public
-	ocamlfind ocamldoc -I _build -package yojson,mechaml,csv \
+	ocamlfind ocamldoc -I _build -package $(DEPS) \
 		-html -stars -d _doc.public $(MLIS)
 
 docs-private: build
 	mkdir -p _doc.private
-	ocamlfind ocamldoc -I _build -package yojson,mechaml,csv \
+	ocamlfind ocamldoc -I _build -package $(DEPS) \
 		-html -stars -d _doc.private \
 		-inv-merge-ml-mli -m A $(MLIS) $(MLS)
 

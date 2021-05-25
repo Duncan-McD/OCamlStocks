@@ -14,7 +14,9 @@
 #load "parser.cmo";;
 #load "optimizer.cmo";;
 #load "algorithm.cmo";;
-#load "uniformtesting.cmo";;
 #load "testreadwrite.cmo";;
 #load "portfolio.cmo";;
+#load "config.cmo";;
 #load "user.cmo";;
+#load "uniformtesting.cmo";;
+

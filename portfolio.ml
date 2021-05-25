@@ -276,6 +276,30 @@ let refresh portfolio =
   portfolio |> copy |> portfolio_swap_first
   |> rec_refresh_portfolio (list_of_tickers portfolio)
 
+(**[refresh_stock_some p t m tbl] is the portfolio with stock of ticker [t] updated*)
+let refresh_stock_some (portfolio : t) (ticker : string) (money : float)
+    (tbl : (string, float) Hashtbl.t) : t =
+  let cost_per_share =
+    if Hashtbl.mem tbl ticker then Hashtbl.find tbl ticker
+    else
+      let cost = current_cost ticker in
+      Hashtbl.add tbl ticker cost;
+      cost
+  in
+  let shares = money /. cost_per_share in
+  change_ticker_shares portfolio ticker shares cost_per_share
+
+(**[rec_refresh_portfolio_some tbl t p] is the portfolio with each stock in [t] updated*)
+let rec rec_refresh_portfolio_some tbl ticker_names portfolio =
+  match ticker_names with
+  | [] -> portfolio
+  | h :: t -> rec_refresh_portfolio t (refresh_stock_some portfolio h 0. tbl)
+
+(**[refresh_some tbl p] is the portfolio with each stock updated*)
+let refresh_some tbl portfolio =
+  portfolio |> copy |> portfolio_swap_first
+  |> rec_refresh_portfolio_some tbl (list_of_tickers portfolio)
+
 (**[rec_sell t p] is the portfolio with each stock sold*)
 let rec rec_sell ticker_names portfolio =
   match ticker_names with
