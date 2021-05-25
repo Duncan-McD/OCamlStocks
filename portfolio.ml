@@ -1,3 +1,6 @@
+open Yojson.Basic
+open Yojson.Basic.Util
+
 type stock = {
   ticker : string;
   shares : float;
@@ -13,6 +16,7 @@ type t = {
   net_worth : float;
   change : float;
   first : bool;
+  vars : float * float * float * float;
   timestamp : float;
 }
 
@@ -39,6 +43,7 @@ let empty_portfolio =
     net_worth = 0.;
     change = 0.;
     first = false;
+    vars = (0., 0., 0., 0.);
     timestamp = Unix.time ();
   }
 
@@ -61,6 +66,8 @@ let buy_shares portfolio ticker shares cost =
   let new_liquidity = if diff > 0. then 0. else -1. *. diff in
   let new_shares = if diff > 0. then liquidity /. cost_per_share else shares in
 
+  (*let change_stock_shares (portfolio : t) (stock : stock) (shares : int)
+    (liquidity : float) : t = failwith "unimplemented"*)
   let stock_exists = Hashtbl.mem portfolio.stocks ticker in
   if stock_exists then (
     let past_stock = Hashtbl.find portfolio.stocks ticker in
@@ -89,6 +96,7 @@ let buy_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
         timestamp = Unix.time ();
       }
     in
@@ -117,6 +125,7 @@ let buy_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
         timestamp = Unix.time ();
       }
     in
@@ -157,6 +166,7 @@ let sell_shares portfolio ticker shares cost =
           (if portfolio.first then 0. +. recent_change
           else portfolio.change +. recent_change);
         first = false;
+        vars = portfolio.vars;
         timestamp = Unix.time ();
       }
     in
@@ -170,6 +180,7 @@ let sell_shares portfolio ticker shares cost =
         net_worth = portfolio.net_worth;
         change = (if portfolio.first then 0. else portfolio.change);
         first = false;
+        vars = portfolio.vars;
         timestamp = Unix.time ();
       }
     in
@@ -193,6 +204,7 @@ let portfolio_swap_first portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = Bool.not portfolio.first;
+    vars = portfolio.vars;
     timestamp = Unix.time ();
   }
 
@@ -210,6 +222,7 @@ let copy portfolio =
     net_worth = portfolio.net_worth;
     change = portfolio.change;
     first = portfolio.first;
+    vars = portfolio.vars;
     timestamp = Unix.time ();
   }
 
@@ -248,16 +261,142 @@ let process portfolio = function
       buy_stocks post_sell_portfolio buy
 
 let compare portfolio1 portfolio2 =
-  if portfolio1.net_worth > portfolio2.net_worth then 1.
-  else if portfolio1.net_worth < portfolio2.net_worth then -1.
-  else 0.
+  if portfolio1.net_worth > portfolio2.net_worth then 1
+  else if portfolio1.net_worth < portfolio2.net_worth then -1
+  else 0
 
 let change_liquidity portfolio liquid =
+  let new_portfolio = refresh portfolio in
   {
-    liquidity = portfolio.liquidity +. liquid;
-    stocks = Hashtbl.copy portfolio.stocks;
-    net_worth = portfolio.net_worth;
-    change = portfolio.change;
-    first = portfolio.first;
+    liquidity = new_portfolio.liquidity +. liquid;
+    stocks = Hashtbl.copy new_portfolio.stocks;
+    net_worth = new_portfolio.net_worth;
+    change = new_portfolio.change;
+    first = new_portfolio.first;
+    vars = new_portfolio.vars;
+    timestamp = new_portfolio.timestamp;
+  }
+
+let vars portfolio = portfolio.vars
+
+(**[string_of_stock s] is the string in json format of stock [s]*)
+let string_of_stock stock =
+  "{" ^ "\"ticker: \"" ^ stock.ticker ^ ", " ^ "\"shares: \""
+  ^ string_of_float stock.shares
+  ^ "," ^ "\"price_per_share: \""
+  ^ string_of_float stock.price_per_share
+  ^ "," ^ "\"initial_value: \""
+  ^ string_of_float stock.initial_value
+  ^ "," ^ "\"value: \""
+  ^ string_of_float stock.value
+  ^ "," ^ "\"change: \""
+  ^ string_of_float stock.change
+  ^ "}"
+
+(**[string_of_stocklist s] is the string in json format of stocklist [s]*)
+let rec string_of_stocklist stocklist acc =
+  match stocklist with
+  | [] -> acc
+  | h :: t -> string_of_stocklist t (acc ^ string_of_stock h)
+
+(**[fst4 t] is the first element in 4-tuple [t]*)
+let fst4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> a
+
+(**[snd4 t] is the second element in 4-tuple [t]*)
+let snd4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> b
+
+(**[trd4 t] is the third element in 4-tuple [t]*)
+let trd4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> c
+
+(**[fth4 t] is the fourth element in 4-tuple [t]*)
+let fth4 (quad : float * float * float * float) =
+  match quad with a, b, c, d -> d
+
+(**[string_of_vars t] is the string in json format of vars [t]*)
+let string_of_vars t =
+  "[" ^ "\"x: \""
+  ^ string_of_float (fst4 t.vars)
+  ^ "," ^ "\"y: \""
+  ^ string_of_float (snd4 t.vars)
+  ^ "," ^ "\"w1: \""
+  ^ string_of_float (trd4 t.vars)
+  ^ "," ^ "\"w2: \""
+  ^ string_of_float (trd4 t.vars)
+  ^ "]"
+
+let to_json_string t =
+  "{" ^ "\"liquidity: \""
+  ^ string_of_float t.liquidity
+  ^ ", " ^ "{" ^ "\"stocks: \"" ^ "["
+  ^ string_of_stocklist (list_of_stocks t) ""
+  ^ "]" ^ ", " ^ "\"net_worth: \""
+  ^ string_of_float t.net_worth
+  ^ "," ^ "\"change: \"" ^ string_of_float t.change ^ "," ^ "\"first: \""
+  ^ string_of_bool t.first ^ "," ^ "\"vars: \"" ^ string_of_vars t ^ ","
+  ^ "\"timestamp: \""
+  ^ string_of_float t.timestamp
+  ^ "}"
+
+(**[stock_of_json j] is the stock representation of json [j]*)
+
+let stock_of_json j =
+  {
+    ticker = to_string (member "ticker" j);
+    shares = float_of_string (to_string (member "shares" j));
+    price_per_share = float_of_string (to_string (member "price_per_share" j));
+    initial_value = float_of_string (to_string (member "initial_value" j));
+    value = float_of_string (to_string (member "value" j));
+    change = float_of_string (to_string (member "change" j));
+  }
+
+(**[stock_name_of_json j] is the ticker of the stock of json [j] *)
+let stock_name_of_json j = to_string (member "ticker" j)
+
+(**[stocks_of_json_stocklist j l htbl] is  representation of json [j] *)
+let rec stocks_of_json_stocklist (j : Yojson.Basic.t) list_of_stocks htbl =
+  match list_of_stocks with
+  | [] -> htbl
+  | h :: t ->
+      stocks_of_json_stocklist j t
+        (Hashtbl.add htbl (stock_name_of_json h) (stock_of_json h);
+         htbl)
+
+(**[stocks_of_json j] is the stocks representation of json [j]*)
+let stocks_of_json (j : Yojson.Basic.t) =
+  let list_of_stocks = to_list (member "stocks" j) in
+  stocks_of_json_stocklist j list_of_stocks (Hashtbl.create 50)
+
+(**[stocks_of_json j] is the vars representation of json [j]*)
+let vars_of_json (j : Yojson.Basic.t) =
+  ( float_of_string (to_string (member "x" j)),
+    float_of_string (to_string (member "y" j)),
+    float_of_string (to_string (member "w1" j)),
+    float_of_string (to_string (member "w2" j)) )
+
+let portfolio_of_json (j : Yojson.Basic.t) =
+  {
+    liquidity = float_of_string (to_string (member "liquidity" j));
+    stocks = stocks_of_json j;
+    net_worth = float_of_string (to_string (member "net_worth" j));
+    change = float_of_string (to_string (member "change" j));
+    first = bool_of_string (to_string (member "first" j));
+    vars = vars_of_json j;
+    timestamp = float_of_string (to_string (member "timestamp" j));
+  }
+
+let sell_all portfolio =
+  let new_portfolio = refresh portfolio in
+  {
+    liquidity = new_portfolio.liquidity +. new_portfolio.net_worth;
+    stocks = Hashtbl.create 50;
+    net_worth = 0.;
+    change = -1. *. new_portfolio.net_worth;
+    first = false;
+    vars = (1., 1., 1., 1.);
     timestamp = Unix.time ();
   }
+
+let value stock = stock.value

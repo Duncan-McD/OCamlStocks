@@ -46,11 +46,17 @@ val change_test_portfolios : t -> Portfolio.t list -> t
 (** [change_test_portfolios u t] changes the user u's test portfolios to the 
     portfolio list t*)
 
+val account_creation_time : t -> float
+(** [account_creation_time u] is the time user u created their account. *)
+val to_json_string : t -> string
+
+val user_of_json : Yojson.Basic.t -> t
+
 val set_last_daily_task_timestamp : t -> float -> t
 (** [set_last_daily_task_timestamp u t] sets the time of the last daily tasks 
     timestamp of user u to time *)
 
-val set_last_daily_task_timestamp : t -> float
+val last_daily_task_timestamp : t -> float
 (** [last_daily_task_timestamp u] is the last time the user u did daily
     tasks. This time is the amount of seconds since 00:00:00 GMT, Jan. 1, 1970*)
 
