@@ -18,8 +18,8 @@
         - DISCLAIMER: tests commented out by default due to the large amount of
         time required to complete tests; recommended that you run a maximum of
         half of the tests so there are no issues with timing out
-      Optimizer (manual)
-        - Manually tested the daily optimization using portfolios
+      Grapher (manual)
+        - Manually tested the grapher functinoality marginally
       Algorithm (manual)
         - Manually tested due to changing history score over time
         - Checked calculations done with various different constants

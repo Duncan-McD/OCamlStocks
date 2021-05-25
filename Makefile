@@ -21,7 +21,7 @@ test:
 	$(OCAMLBUILD) -tag thread -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
-	zip src.zip  README.md INSTALL.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat *.png .ocamlinit ocamlstocks.opam testing_files testing_files/stocksnew.json .gitignore demo_files demo_files/*.ml* demo_files/demo.sh demo_files/demo2.sh LICENSE Makefile	
+	zip src.zip  README.md INSTALL.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat *.png .ocamlinit ocamlstocks.opam testing_files testing_files/*.json .gitignore LICENSE Makefile	
 
 docs: docs-public docs-private
 	
