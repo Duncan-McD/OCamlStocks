@@ -32,8 +32,6 @@ val set_tests : t -> int -> t
 (** [set_tests config num_tests] is [config] with the number of tests used for 
     uniform testing set to [num_tests] *)
 
-(* Add update config function *)
-
 (** {2 Getter Functions}*)
 
 val subreddit_info : t -> subreddit list
@@ -49,5 +47,7 @@ val num_tests : t -> int
 (** [num_tests config] is the amount of tests used for uniform testing *)
 
 val to_json : t -> Yojson.Basic.t
+(** [to_json config] is a [Yojson.Basic.t] of [config] *)
 
 val config_of_json : Yojson.Basic.t -> t
+(** [config_of_json config_json] is [config] from [config_json] *)

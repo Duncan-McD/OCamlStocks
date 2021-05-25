@@ -39,6 +39,12 @@ pv
 openssl
 libssl-dev
 w3m
+libplplot-dev
+libshp-dev
+liblapacke-dev
+libopenblas-dev
+openblas
+plplot
 ```
 
 2. Run this command (assuming you have `opam` installed already if not install opam using your package installer):

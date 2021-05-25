@@ -64,7 +64,3 @@ let get_stocks_consts x y q w subreddit_list =
   in
   List.fold_left decision_func ([], [])
     (List.combine stocks_list (fst processed))
-
-let get_stocks subreddit_list =
-  let x, y, q, w = Optimizer.constants () in
-  get_stocks_consts x y q w subreddit_list

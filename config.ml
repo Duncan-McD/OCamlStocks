@@ -66,15 +66,19 @@ let consts config = config.consts
 
 let num_tests config = config.num_test
 
+(** [fst3 (a, b, c)] is a *)
 let fst3 (t : int * Scraper.subreddit_ordering * string) =
   match t with a, b, c -> a
 
+(** [snd3 (a, b, c)] is b *)
 let snd3 (t : int * Scraper.subreddit_ordering * string) =
   match t with a, b, c -> b
 
+(** [trd3 (a, b, c)] is c *)
 let trd3 (t : int * Scraper.subreddit_ordering * string) =
   match t with a, b, c -> c
 
+(** [string_of_subreddit_ordering ordering] is a string version of [ordering] *)
 let string_of_subreddit_ordering (ordering : Scraper.subreddit_ordering) =
   match ordering with
   | Hot -> "Hot"
@@ -87,7 +91,7 @@ let string_of_subreddit_ordering (ordering : Scraper.subreddit_ordering) =
       | ThisWeek -> "ThisWeek"
       | ThisMonth -> "ThisMonth"
       | ThisYear -> "ThisYear"
-      | AllTime -> "AllTime")
+      | AllTime -> "AllTime" )
 
 (**[fst4 t] is the first element in 4-tuple [t]*)
 let fst4 (quad : float * float * float * float) =
@@ -123,6 +127,8 @@ let subreddit_to_json (subreddit : subreddit) =
       ("url", `String (trd3 subreddit));
     ]
 
+(** [subreddits_to_json subreddits] is a list with each subreddit in 
+    [subreddits] converted to json *)
 let rec subreddits_to_json (subreddit_list : subreddit list) acc =
   match subreddit_list with
   | [] -> `List acc
@@ -137,6 +143,8 @@ let to_json (config : t) =
       ("num_test", `Int config.num_test);
     ]
 
+(** [ordering_of_json json_str] is a [Scraper.subreddit_ordering] 
+    from [json_str] *)
 let ordering_of_json (str : string) : Scraper.subreddit_ordering =
   match str with
   | s when s = "Hot" -> Hot
@@ -150,16 +158,19 @@ let ordering_of_json (str : string) : Scraper.subreddit_ordering =
   | s when s = "AllTime" -> Top AllTime
   | _ -> failwith "impossible"
 
+(** [subreddit_of_json json] is a subreddit from the [json] *)
 let subreddit_of_json (j : Yojson.Basic.t) : subreddit =
   ( to_int (member "num_posts" j),
     ordering_of_json (to_string (member "ordering" j)),
     to_string (member "url" j) )
 
+(** [subreddits_of_json json] is a subreddit list from [json] *)
 let rec subreddits_of_json (j : Yojson.Basic.t list) acc =
   match j with
   | [] -> List.rev acc
   | h :: t -> subreddits_of_json t (subreddit_of_json h :: acc)
 
+(** [consts_of_json json] is the consts quad from [json] *)
 let consts_of_json (j : Yojson.Basic.t) =
   ( to_float (member "x" j),
     to_float (member "y" j),
