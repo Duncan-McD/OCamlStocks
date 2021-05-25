@@ -10,8 +10,6 @@ type action =
   | Optimize (* print time since last optimize, are you sure u'd like to optimize?*)
   | Configure
   | Configure_SR_Subreddits
-  | Configure_SR_Posts
-  | Configure_SR_Ordering
   | Configure_OP_Consts
   | Configure_OP_Tests
   | Configure_Liquidity
@@ -63,8 +61,6 @@ let get_available_actions = function
   | Configure ->
       [
         Configure_SR_Subreddits;
-        Configure_SR_Posts;
-        Configure_SR_Ordering;
         Configure_OP_Consts;
         Configure_OP_Tests;
         Configure_Liquidity;
@@ -124,8 +120,6 @@ let action_of_string_menu state s =
 
 let action_of_string_configure state s =
   if s = "runner subreddits" then Configure_SR_Subreddits
-  else if s = "runner posts" then Configure_SR_Posts
-  else if s = "runner ordering" then Configure_SR_Ordering
   else if s = "optimizer tests" then Configure_OP_Tests
   else if s = "optimizer constants" then Configure_OP_Consts
   else if s = "change liquidity" then Configure_Liquidity
@@ -191,10 +185,6 @@ let configure state =
   print_endline
     "\"runner subreddits\" : lets you configure what subreddits you want the \
      runner to scrape\n\
-     \"runner posts\" : lets you configure how many posts are scraped by a \
-     certain subreddit\n\
-     \"runner ordering\" : lets you configure the subreddit scaping order of a \
-     certain subreddit  \n\
      \"optimizer tests\" : lets you configure the amount of tests you want to \
      do one each constant in optimization\n\
      \"optimizer constants\" : lets you configure the optimizer constants.\n\
@@ -520,7 +510,215 @@ let do_graph_networth state = Grapher.graph_net_worth state.user
 let do_graph_networth_liquidity state =
   Grapher.graph_net_worth_and_liquidity state.user
 
-let do_graph_stock state = failwith "impossible"
+let rec print_ticker_list = function
+  | [] -> ()
+  | h :: t -> ANSITerminal.print_string [ ANSITerminal.yellow ] (" " ^ h)
+
+let rec do_graph_stock state =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "\n\
+    \ What stock do you want to scrape? Below are your options (enter Q to \
+     exit): \n";
+  let current_portfolio = User.current_portfolio state.user in
+  let list_of_tickers = Portfolio.list_of_tickers current_portfolio in
+  print_ticker_list list_of_tickers;
+  print_string "> ";
+  let result = read_line () in
+  if List.mem result list_of_tickers then
+    Grapher.graph_stock_value state.user result
+  else if result = "Q" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.yellow ]
+      "\n Invalid Input use Y or N...\n";
+    do_graph_stock state)
+
+let rec do_configure_tests state =
+  let config = User.config state.user in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "\n How many tests do you want to run per each optimization constant? \n";
+  print_string "> ";
+  let result = read_line () in
+  try
+    let num_tests = int_of_string result in
+    let new_config = Config.set_tests config num_tests in
+    let new_user = User.change_config state.user new_config in
+    state.user <- new_user
+  with Failure f ->
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "\n Invalid Input: Please enter an Integer...\n";
+    do_configure_tests state
+
+let string_of_consts user =
+  let config = User.config user in
+  let constants = Config.consts config in
+  "("
+  ^ string_of_float (fst4 constants)
+  ^ ","
+  ^ string_of_float (snd4 constants)
+  ^ ","
+  ^ string_of_float (thd4 constants)
+  ^ ","
+  ^ string_of_float (fth4 constants)
+  ^ ")"
+
+let rec ask_for_const message =
+  ANSITerminal.print_string [ ANSITerminal.blue ] message;
+  print_endline
+    "You must enter a float (with decimal) between 0.0 and 1.0 (Not including \
+     0.0 but including 1.0)";
+  print_string "> ";
+  let result = read_line () in
+  try
+    let var = float_of_string result in
+    if var <= 0.0 || var > 1.0 then (
+      ANSITerminal.print_string [ ANSITerminal.red ]
+        "Invalid Input: Out of Bounds. Try again...";
+      ask_for_const message)
+    else var
+  with Failure f ->
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Invalid Input: Not a float. Try again...";
+    ask_for_const message
+
+let do_configure_constants state =
+  let config = User.config state.user in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    ("\n Your Current constants are: " ^ string_of_consts state.user ^ "\n");
+  let x =
+    ask_for_const
+      "\n\
+       What would you like constant one to be? This constant weights the score \
+       of a reddit post higher\n"
+  in
+  let y =
+    ask_for_const
+      "\n\
+       What would you like constant two to be? This constant weights the \
+       connotation of a reddit post higher\n"
+  in
+  let w1 =
+    ask_for_const
+      "\n\
+       What would you like constant three to be? This constant weights the \
+       number of posts mentioning a stock higher\n"
+  in
+  let w2 =
+    ask_for_const
+      "\n\
+       What would you like constant four to be? This constant weights the \
+       history score of a stock higher\n"
+  in
+  let new_config = Config.set_consts config (x, y, w1, w2) in
+  let new_user = User.change_config state.user new_config in
+  state.user <- new_user
+
+let rec print_subreddits subreddit_string_list =
+  match subreddit_string_list with
+  | [] -> ()
+  | h :: t -> ANSITerminal.print_string [ ANSITerminal.yellow ] " h"
+
+let thd3 (_, _, x) = x
+
+let convert_info_to_string subreddits = List.map (fun x -> thd3 x) subreddits
+
+let rec ask_for_ordering () =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "What ordering do you want? The options are:";
+  print_endline
+    "\"Hot\",\"New\",\"Rising\",\"TopNow\",\"TopToday\",\"TopThisWeek\",\"TopThisMonth\",\"TopThisYear\",\"TopAllTime\"";
+  print_string "> ";
+  let result = read_line () in
+  if result = "Hot" then Scraper.Hot
+  else if result = "New" then Scraper.New
+  else if result = "Rising" then Scraper.Rising
+  else if result = "TopNow" then Scraper.Top Scraper.Now
+  else if result = "TopWeek" then Scraper.Top Scraper.ThisWeek
+  else if result = "TopMonth" then Scraper.Top Scraper.ThisMonth
+  else if result = "TopYear" then Scraper.Top Scraper.ThisYear
+  else if result = "TopAllTime" then Scraper.Top Scraper.AllTime
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Invalid Input: that was not an option. Try again...";
+    ask_for_ordering ())
+
+let rec ask_for_name () =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "What subreddit do you want to scrape?";
+  print_string "> ";
+  read_line ()
+
+let rec ask_for_num_posts () =
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "How many posts do you want to scrape on this subreddit?";
+  print_string "> ";
+  let result = read_line () in
+  try int_of_string result
+  with Failure f ->
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Invalid Input: Enter an integer only. Try again...";
+    ask_for_num_posts ()
+
+let rec remove_sub subreddits sub acc =
+  match subreddits with
+  | [] -> List.rev acc
+  | (x, y, z) :: t ->
+      if z <> sub then remove_sub t sub ((x, y, z) :: acc)
+      else List.rev (acc @ t)
+
+let rec remove_subreddit state =
+  let config = User.config state.user in
+  let subreddits = Config.subreddit_info config in
+  let subreddit_strings = convert_info_to_string subreddits in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "Which of the following stocks would you like to remove?";
+  print_subreddits subreddit_strings;
+  print_string "\n> ";
+  let result = read_line () in
+  if List.length subreddit_strings = 0 then (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "There is no subreddits add one first before removing";
+    ())
+  else if List.mem result subreddit_strings then
+    let new_subreddits = remove_sub subreddits result [] in
+    let new_config = Config.set_subreddits config new_subreddits in
+    let new_user = User.change_config state.user new_config in
+    state.user <- new_user
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Invalid Input: that stock was not an option. Try again...";
+    remove_subreddit state)
+
+let add_subreddit state =
+  let sub_name = ask_for_name () in
+  let amount = ask_for_num_posts () in
+  let ordering = ask_for_ordering () in
+  let config = User.config state.user in
+  let subreddits = Config.subreddit_info config in
+  let new_subreddits = (amount, ordering, sub_name) :: subreddits in
+  let new_config = Config.set_subreddits config new_subreddits in
+  let new_user = User.change_config state.user new_config in
+  state.user <- new_user
+
+let rec ask_for_change state =
+  let config = User.config state.user in
+  let subreddits = Config.subreddit_info config in
+  let subreddit_strings = convert_info_to_string subreddits in
+  ANSITerminal.print_string [ ANSITerminal.blue ]
+    "Would you like to add or remove a subreddit from the following list? \
+     (add/remove/no)";
+  print_subreddits subreddit_strings;
+  print_string "\n> ";
+  let result = read_line () in
+  if result = "add" then add_subreddit state
+  else if result = "remove" then remove_subreddit state
+  else if result = "no" then ()
+  else (
+    ANSITerminal.print_string [ ANSITerminal.red ]
+      "Invalid Input: must be \"add\",\"remove\",or \"no\". Try again...";
+    ask_for_change state);
+  ask_for_change state
+
+let do_configure_subreddits state = ask_for_change state
 
 let update state action =
   match action with
@@ -545,9 +743,10 @@ let update state action =
   | Graph_Networth_Liquidity -> do_graph_networth_liquidity state
   | Graph_Networth -> do_graph_networth state
   | Graph_Stock -> do_graph_stock state
-  | Configure_SR_Subreddits | Configure_SR_Posts | Configure_SR_Ordering
-  | Configure_OP_Consts | Configure_OP_Tests | _ ->
-      failwith ""
+  | Configure_OP_Tests -> do_configure_tests state
+  | Configure_OP_Consts -> do_configure_constants state
+  | Configure_SR_Subreddits -> do_configure_subreddits state
+  | _ -> failwith ""
 
 let user state = state.user
 

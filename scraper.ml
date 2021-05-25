@@ -160,7 +160,6 @@ let subreddit_doesnt_exist (subreddit : string) : bool =
   |> get_json |> member "data" |> member "dist" |> to_int = 0
 
 let scrape ?(amount = 100) ?(ordering = New) (subreddit : string) : subreddit =
-  print_string "\nScraping Subreddit ";
   if subreddit_doesnt_exist subreddit then raise (SubredditNotFound subreddit);
   let new_subreddit_link =
     "https://www.reddit.com/" ^ subreddit ^ get_ordering_url_parameter ordering
