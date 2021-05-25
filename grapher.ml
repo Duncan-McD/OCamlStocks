@@ -87,7 +87,7 @@ let make_stock_value_matrices ticker user =
   let value_matrix = Owl.Mat.of_array (values |> Array.of_list) 1 vals in
   (timestamp_matrix, value_matrix)
 
-let rgba_to_rgb =
+let rgba_to_rgb () =
   Py.initialize ();
   ignore
     (Py.Run.eval ~start:Py.File
@@ -102,7 +102,7 @@ rgb_image.save('plot.png')|});
   Py.finalize ();
   ()
 
-let open_plot =
+let open_plot () =
   Graphics.open_graph "";
   let img = Images.load "plot.png" [] in
   let x = fst (Images.size img) in
@@ -199,8 +199,8 @@ let create_and_open_side_by_side name maxs_and_mins x_matrix y_matrix x_list
   Plot.set_yrange h miny maxy;
   Plot.scatter ~h x_matrix y_matrix;
   Plot.output h;
-  rgba_to_rgb;
-  open_plot
+  rgba_to_rgb ();
+  open_plot ()
 
 let graph_net_worth user =
   let name = User.name user in

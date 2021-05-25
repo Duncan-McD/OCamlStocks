@@ -18,7 +18,7 @@ let create email name password =
     current_portfolio = Portfolio.empty_portfolio;
     past_portfolios = [];
     test_portfolios = [];
-    config = Config.default ();
+    config = Config.default;
     account_creation_time = Unix.time ();
     last_daily_task_timestamp = 86400.;
   }
@@ -107,30 +107,28 @@ let set_last_daily_task_timestamp user timestamp =
 
 open Yojson.Basic.Util
 
-let rec string_of_porfolio_list portfolio_list acc =
+let rec portfolio_list_to_json (portfolio_list : Portfolio.t list) acc =
   match portfolio_list with
-  | [] -> acc
-  | h :: t -> string_of_porfolio_list t (Portfolio.to_json_string h ^ "," ^ acc)
+  | [] -> `List acc
+  | h :: t -> portfolio_list_to_json t (Portfolio.to_json h :: acc)
 
-let to_json_string t =
-  "{" ^ "\"email: \"" ^ t.email ^ ", " ^ "\"name: \"" ^ t.name ^ ", "
-  ^ "\"password: \"" ^ t.password ^ "," ^ "\"current_portfolio: \""
-  ^ Portfolio.to_json_string t.current_portfolio
-  ^ "," ^ "\"past_portfolios: \"" ^ "["
-  ^ string_of_porfolio_list t.past_portfolios ""
-  ^ "]" ^ ", " ^ "," ^ "\"test_portfolios: \"" ^ "["
-  ^ string_of_porfolio_list t.test_portfolios ""
-  ^ "]" ^ ", " ^ "\"config: \""
-  ^ Config.to_json_string t.config
-  ^ "," ^ "\"account_creation_time: \""
-  ^ string_of_float t.account_creation_time
-  ^ ", " ^ "\"last_daily_task_timestamp: \""
-  ^ string_of_float t.last_daily_task_timestamp
-  ^ "}"
+let to_json t =
+  `Assoc
+    [
+      ("email", `String t.email);
+      ("name", `String t.name);
+      ("password", `String t.password);
+      ("current_portfolio", Portfolio.to_json t.current_portfolio);
+      ("past_portfolios", portfolio_list_to_json t.past_portfolios []);
+      ("test_portfolios", portfolio_list_to_json t.test_portfolios []);
+      ("config", Config.to_json t.config);
+      ("account_creation_time", `Float t.account_creation_time);
+      ("last_daily_task_timestamp", `Float t.last_daily_task_timestamp);
+    ]
 
 let rec portfolio_list_of_json (j : Yojson.Basic.t list) acc =
   match j with
-  | [] -> acc
+  | [] -> List.rev acc
   | h :: t -> portfolio_list_of_json t (Portfolio.portfolio_of_json h :: acc)
 
 let user_of_json (j : Yojson.Basic.t) =
@@ -145,11 +143,48 @@ let user_of_json (j : Yojson.Basic.t) =
     test_portfolios =
       portfolio_list_of_json (to_list (member "test_portfolios" j)) [];
     config = Config.config_of_json (member "config" j);
-    account_creation_time =
-      float_of_string (to_string (member "account_creation_time" j));
-    last_daily_task_timestamp =
-      float_of_string (to_string (member "last_daily_task_timestamp" j));
+    account_creation_time = to_float (member "account_creation_time" j);
+    last_daily_task_timestamp = to_float (member "last_daily_task_timestamp" j);
   }
 
 let time_for_daily_tasks user timestamp =
   timestamp -. last_daily_task_timestamp user >= 86400.
+
+let set_email user email_input =
+  {
+    email = email_input;
+    name = name user;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }
+
+let set_username user username_input =
+  {
+    email = email user;
+    name = username_input;
+    password = password user;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }
+
+let set_password user password_input =
+  {
+    email = email user;
+    name = name user;
+    password = password_input;
+    current_portfolio = current_portfolio user;
+    past_portfolios = past_portfolios user;
+    test_portfolios = test_portfolios user;
+    config = config user;
+    account_creation_time = user.account_creation_time;
+    last_daily_task_timestamp = user.last_daily_task_timestamp;
+  }

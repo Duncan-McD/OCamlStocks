@@ -48,7 +48,7 @@ val change_test_portfolios : t -> Portfolio.t list -> t
 
 val account_creation_time : t -> float
 (** [account_creation_time u] is the time user u created their account. *)
-val to_json_string : t -> string
+val to_json : t -> Yojson.Basic.t
 
 val user_of_json : Yojson.Basic.t -> t
 
@@ -63,3 +63,12 @@ val last_daily_task_timestamp : t -> float
 val time_for_daily_tasks : t -> float -> bool
 (** [time_for_daily_tasks u t] is true if it has been at least a day since the 
     last time daily tasks were run. Otherwise it is false*)
+
+val set_username : t -> string -> t
+(** [set_username u s] is user u but with the username changed to s*)
+
+val set_password : t -> string -> t
+(** [set_password u s] is user u but with the password changed to s*)
+
+val set_email : t -> string -> t
+(** [set_email u s] is user u but with the email changed to s*)
