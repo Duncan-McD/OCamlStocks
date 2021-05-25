@@ -24,10 +24,11 @@ let connotation_post post =
   connotation_str postText
 
 let history_score stock_data =
-  let rating =
-    match stock_data with Some sd -> Stockdata.rating sd | None -> 3.
-  in
-  -1. *. tan (Float.pi /. 4. *. (rating -. 3.))
+  match stock_data with 
+  | Some sd -> let rating = Stockdata.rating sd in
+    Some (-1. *. tan (Float.pi /. 4. *. (rating -. 3.)))
+  | None -> None
+  
 
 (* [convert_to_ticker stock_ticker] is [stock_ticker] if [stock_ticker] 
     begins with "$" else it is $ ^ [stock_ticker] *)
@@ -40,9 +41,12 @@ let update_one_stock stock_name post stocks =
   if Hashtbl.mem stocks stock_name then
     let data = Hashtbl.find stocks stock_name in
     match data with h, p -> Hashtbl.replace stocks stock_name (h, post :: p)
-  else
-    Hashtbl.add stocks stock_name
-      (history_score (stock_name |> Stockdata.stockdata_from_ticker), [ post ]);
+  else begin
+    let hist_score = history_score (stock_name |> Stockdata.stockdata_from_ticker) in
+    match hist_score with
+    | Some score -> Hashtbl.add stocks stock_name (score, [ post ])
+    | None -> ()
+  end;
   stocks
 
 (*  [update_stocks text post stocks_seen stocks] is [stocks] 
