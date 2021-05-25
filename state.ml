@@ -615,7 +615,9 @@ let do_configure_constants state =
 let rec print_subreddits subreddit_string_list =
   match subreddit_string_list with
   | [] -> ()
-  | h :: t -> ANSITerminal.print_string [ ANSITerminal.yellow ] " h"
+  | h :: t ->
+      ANSITerminal.print_string [ ANSITerminal.yellow ] (" " ^ h);
+      print_subreddits t
 
 let thd3 (_, _, x) = x
 
@@ -670,7 +672,7 @@ let rec remove_subreddit state =
   let subreddits = Config.subreddit_info config in
   let subreddit_strings = convert_info_to_string subreddits in
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    "Which of the following stocks would you like to remove?";
+    "Which of the following stocks would you like to remove?\n";
   print_subreddits subreddit_strings;
   print_string "\n> ";
   let result = read_line () in
@@ -705,18 +707,21 @@ let rec ask_for_change state =
   let subreddit_strings = convert_info_to_string subreddits in
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "Would you like to add or remove a subreddit from the following list? \
-     (add/remove/no)";
+     (add/remove/no)\n";
   print_subreddits subreddit_strings;
   print_string "\n> ";
   let result = read_line () in
-  if result = "add" then add_subreddit state
-  else if result = "remove" then remove_subreddit state
+  if result = "add" then (
+    add_subreddit state;
+    ask_for_change state)
+  else if result = "remove" then (
+    remove_subreddit state;
+    ask_for_change state)
   else if result = "no" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: must be \"add\",\"remove\",or \"no\". Try again...";
-    ask_for_change state);
-  ask_for_change state
+    ask_for_change state)
 
 let do_configure_subreddits state = ask_for_change state
 
