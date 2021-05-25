@@ -4,7 +4,7 @@
 
 type action
 
-type t
+type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 (** The abstract data type for a state *)
 
 (** {2 Exceptions} *)
@@ -19,7 +19,7 @@ exception InapplicableAction of (string * string)
 exception QuitAction
 (** Raised when a user wants to quit the program *)
 
-exception LogoutAction
+exception LogoutAction of string
 (** Raised when a user wants to logout of their account *)
 
 exception HelpAction

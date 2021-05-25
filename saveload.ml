@@ -20,11 +20,24 @@ let rec update_user_json_list (user : User.t)
   | [] -> User.to_json user :: acc
   | (h : Yojson.Basic.t) :: (t : Yojson.Basic.t list) ->
       if to_string (member "name" h) = User.name user then
-        (User.to_json user :: acc) @ t
+        User.to_json user :: acc @ t
+      else update_user_json_list user t (h :: acc)
+
+let rec remove_user_json_list (user : User.t)
+    (user_json_list : Yojson.Basic.t list) (acc : Yojson.Basic.t list) =
+  match user_json_list with
+  | [] -> acc
+  | (h : Yojson.Basic.t) :: (t : Yojson.Basic.t list) ->
+      if to_string (member "name" h) = User.name user then acc @ t
       else update_user_json_list user t (h :: acc)
 
 let save_user (user : User.t) =
   let user_json_list = update_user_json_list user (load_user_json_list ()) [] in
+  let json_of_json_list = `List user_json_list in
+  Yojson.Basic.to_file file json_of_json_list
+
+let delete_user (user : User.t) =
+  let user_json_list = remove_user_json_list user (load_user_json_list ()) [] in
   let json_of_json_list = `List user_json_list in
   Yojson.Basic.to_file file json_of_json_list
 

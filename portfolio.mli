@@ -41,6 +41,18 @@ val stock_gain_loss : stock -> float
 val list_of_tickers : t -> string list
 (** [list_of_tickers p] is a list of stock tickers in portfolio [p]*)
 
+val list_of_shares : t -> float list
+(** [list_of_shares p] is a list of stock shares in portfolio [p]*)
+
+val list_of_ppss : t -> float list
+(** [list_of_ppss p] is a list of stock price per shares in portfolio [p]*)
+
+val list_of_values : t -> float list
+(** [list_of_values p] is a list of stock values in portfolio [p]*)
+
+val list_of_changes : t -> float list
+(** [list_of_changes p] is a list of stock changes in portfolio [p]*)
+
 val list_of_stocks : t -> stock list
 (** [list_of_stocks p] is a list of stocks in portfolio [p]*)
 
@@ -58,9 +70,10 @@ val refresh_some : (string, float) Hashtbl.t -> t -> t
 (** [refresh p tbl] is the portfolio p but with refreshed data based on newer
     stock data only if that data is not already found in tbl *)
 
-val process : t -> (string * float) list * string list -> t
-(** [process p l] is the portfolio p but with the stocks in l processed 
-    - l is the output of Algorithm.ml*)
+val process :
+  t -> float * float * float * float -> (string * float) list * string list -> t
+(** [process p l v] is the portfolio [p] but with the stocks in [l] processed 
+    with from vars [v] - [l] is the output of Algorithm.ml*)
 
 val copy : t -> t
 (** [copy p] is a copy of portfolio p with different references for the values 

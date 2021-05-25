@@ -33,7 +33,10 @@ let initialize_testing_portfolios (user : User.t) =
               hist_const' scraped_list
           in
           testing_portfolio_list :=
-            Portfolio.process (User.current_portfolio user) algoed
+            Portfolio.process
+              (User.current_portfolio user)
+              (score_con', con_const', num_posts_const', hist_const')
+              algoed
             :: !testing_portfolio_list
         done
       done

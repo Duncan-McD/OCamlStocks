@@ -32,10 +32,6 @@ val set_tests : t -> int -> t
 (** [set_tests config num_tests] is [config] with the number of tests used for 
     uniform testing set to [num_tests] *)
 
-val set_liquidity : t -> float -> t
-(** [set_liquidity config liquiditiy] is [config] with liquidity set to 
-    [liquidity] *)
-
 (* Add update config function *)
 
 (** {2 Getter Functions}*)
@@ -51,9 +47,6 @@ val consts : t -> float * float * float * float
 
 val num_tests : t -> int
 (** [num_tests config] is the amount of tests used for uniform testing *)
-
-val liquidity : t -> float
-(** [liquidity config] is the liquidity in the user's portfolio  *)
 
 val to_json : t -> Yojson.Basic.t
 
