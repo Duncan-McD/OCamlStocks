@@ -38,63 +38,74 @@ exception QuitAction
 
 exception LogoutAction of string
 
-exception HelpAction
-
 let init auth user = { auth; user; state = Menu }
 
+let menu_actions =
+  [
+    Help;
+    Menu;
+    Menu_Initial;
+    Configure;
+    Run_Algorithm;
+    Sell_All;
+    Refresh_and_Show;
+    Graph;
+    Optimize;
+    Account;
+    Logout;
+    Quit;
+  ]
+
+let configure_actions =
+  [
+    Configure_SR_Subreddits;
+    Configure_OP_Consts;
+    Configure_OP_Tests;
+    Configure_Liquidity;
+    Menu;
+    Configure;
+    Logout;
+    Quit;
+  ]
+
+let graph_actions =
+  [
+    Graph_Networth;
+    Graph_Networth_Liquidity;
+    Graph_Stock;
+    Graph;
+    Menu;
+    Logout;
+    Quit;
+  ]
+
+let account_actions =
+  [
+    Account_Change_Username;
+    Account_Change_Email;
+    Account_Change_Password;
+    Account_Delete;
+    Account;
+    Menu;
+    Logout;
+    Quit;
+  ]
+
+(** [get_available_actions state_action] is a list of actions available to 
+    the user given the program's state *)
 let get_available_actions = function
-  | Menu_Initial | Menu ->
-      [
-        Help;
-        Menu;
-        Menu_Initial;
-        Configure;
-        Run_Algorithm;
-        Sell_All;
-        Refresh_and_Show;
-        Graph;
-        Optimize;
-        Account;
-        Logout;
-        Quit;
-      ]
-  | Configure ->
-      [
-        Configure_SR_Subreddits;
-        Configure_OP_Consts;
-        Configure_OP_Tests;
-        Configure_Liquidity;
-        Menu;
-        Configure;
-        Logout;
-        Quit;
-      ]
-  | Graph ->
-      [
-        Graph_Networth;
-        Graph_Networth_Liquidity;
-        Graph_Stock;
-        Graph;
-        Menu;
-        Logout;
-        Quit;
-      ]
-  | Account ->
-      [
-        Account_Change_Username;
-        Account_Change_Email;
-        Account_Change_Password;
-        Account_Delete;
-        Account;
-        Menu;
-        Logout;
-        Quit;
-      ]
+  | Menu_Initial | Menu -> menu_actions
+  | Configure -> configure_actions
+  | Graph -> graph_actions
+  | Account -> account_actions
   | _ -> []
 
+(** [is_valid_action current_action action] is true if the current_action is in 
+    the list of available actions from [action] *)
 let is_valid_action current_action action =
   List.mem action (get_available_actions current_action)
 
+(** [string_of_action action] is the string representation of [action] *)
 let string_of_action a =
   match a with
   | Menu | Menu_Initial -> "menu"
@@ -103,6 +114,10 @@ let string_of_action a =
   | Account -> "account"
   | _ -> failwith "not a *state* action"
 
+(** [action_of_string_menu state input_string] is the [action] representation of
+    [input_string]
+    [rasies InvalidAction] if the action is not in [menu_actions]
+*)
 let action_of_string_menu state s =
   if s = "help" then Help
   else if s = "menu initial" then Menu_Initial
@@ -118,6 +133,10 @@ let action_of_string_menu state s =
   else if s = "quit" then Quit
   else raise (InvalidAction (s, string_of_action state.state))
 
+(** [action_of_string_menu state input_string] is the [action] representation of
+    [input_string]
+    [rasies InvalidAction] if the action is not in [configure_actions]
+*)
 let action_of_string_configure state s =
   if s = "runner subreddits" then Configure_SR_Subreddits
   else if s = "optimizer tests" then Configure_OP_Tests
@@ -125,12 +144,20 @@ let action_of_string_configure state s =
   else if s = "change liquidity" then Configure_Liquidity
   else raise (InvalidAction (s, string_of_action state.state))
 
+(** [action_of_string_menu state input_string] is the [action] representation of
+    [input_string]
+    [rasies InvalidAction] if the action is not in [graph_actions]
+*)
 let action_of_string_graph state s =
   if s = "graph net worth" then Graph_Networth
   else if s = "graph net worth and liquidity" then Graph_Networth_Liquidity
   else if s = "graph stock" then Graph_Stock
   else raise (InvalidAction (s, string_of_action state.state))
 
+(** [action_of_string_menu state input_string] is the [action] representation of
+    [input_string]
+    [rasies InvalidAction] if the action is not in [account_actions]
+*)
 let action_of_string_account state s =
   if s = "change email" then Account_Change_Email
   else if s = "change password" then Account_Change_Password
@@ -138,6 +165,10 @@ let action_of_string_account state s =
   else if s = "delete" then Account_Delete
   else raise (InvalidAction (s, string_of_action state.state))
 
+(** [action_of_string state input_string] is the [action] representation of
+    [input_string] 
+    [rasies InapplicableAction] if the action is not valid for the given [state]
+*)
 let action_of_string state s =
   let s' = String.lowercase_ascii s in
   let result =
@@ -146,23 +177,26 @@ let action_of_string state s =
       try action_of_string_configure state s'
       with InvalidAction s -> (
         try action_of_string_graph state s'
-        with InvalidAction s -> action_of_string_account state s'))
+        with InvalidAction s -> action_of_string_account state s' ) )
   in
   if is_valid_action state.state result then result
   else raise (InapplicableAction (s, string_of_action state.state))
 
+(** [menu ?initial state] prints the menu options available to the user
+    depending on if it is the first time printing out the menu [?initial] 
+    and updates [state] to be in the menu state *)
 let menu ?(initial = false) state =
   if initial = false then
     ANSITerminal.print_string [ ANSITerminal.magenta ]
       "\nOStocker Actions Menu:\n\n"
   else if state.auth = Login then
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ("\nWelcome back " ^ User.name state.user
-     ^ "! In case you forgot, here are your options:\n\n")
+      ( "\nWelcome back " ^ User.name state.user
+      ^ "! In case you forgot, here are your options:\n\n" )
   else
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ("\nWelcome, " ^ User.name state.user
-     ^ "! Below you can see all of the options available to you.\n\n");
+      ( "\nWelcome, " ^ User.name state.user
+      ^ "! Below you can see all of the options available to you.\n\n" );
   print_endline ("Email: " ^ User.email state.user);
   print_endline
     "\"help\" : walk you through how I works and how to use me\n\
@@ -179,6 +213,7 @@ let menu ?(initial = false) state =
   state.state <- Menu;
   ()
 
+(** [configure state] prints the configure options *)
 let configure state =
   ANSITerminal.print_string [ ANSITerminal.magenta ]
     "\nOStocker Configurations Menu:\n\n";
@@ -195,6 +230,7 @@ let configure state =
   state.state <- Configure;
   ()
 
+(** [graph state] prints the graph options *)
 let graph state =
   ANSITerminal.print_string [ ANSITerminal.magenta ]
     "\nOStocker Grapher and Data Visualization Menu:\n\n";
@@ -210,6 +246,7 @@ let graph state =
   state.state <- Graph;
   ()
 
+(** [account state] prints the account options *)
 let account state =
   ANSITerminal.print_string [ ANSITerminal.magenta ]
     "\nOStocker Account Settings Menu:\n\n";
@@ -224,31 +261,33 @@ let account state =
   state.state <- Account;
   ()
 
+let help_instructions =
+  [
+    {|"configure" allows you to customize your settings like the subreddits you would like to reference and the use of optional optimization features; you can also add money to be used by the program here|};
+    {|"optimize" prompts the program to save relevant data needed to optimize its algorithm and also alerts you of the time elapsed since last optimizing (should be run before "run")|};
+    {|"run" is the main function which runs algorithm (according to your configurations) and buys or sells stocks according to the data found at run time|};
+    {|"sell all" allows you to sell all of your currently owned stocks|};
+    {|"show data" shows updated data about the stocks you currently own|};
+    {|"graph data" generates a graph about the stocks you currently own|};
+    {|"menu" shows a simple menu with all the possible commands|};
+    {|"logout" logs you out of your session in the program|};
+    {|"quit" simply terminates the program and exits|};
+    {|Now that you know all of my actions, let's run through an example workflow a user might go through! (press ENTER to continue or type anything and ENTER to quit)|};
+    {|First, you want to check that your configurations are what you would like them to be, although the provided defaults are more than sufficient to start (no money needs to be added just yet)|};
+    {|Next, run "optimize" to start the optimization process. It is recommended that you wait around a day before beginning to run the program in order to buy or sell any stocks using "run".|};
+    {|Keep in mind that there is no need to keep the program running while waiting; feel free to start the program up again once some time has passed.|};
+    {|Then, run "optimize" once more before running "run" so that the algorithm will be ran using the optimization.|};
+    {|Finally, repeat waiting then running "optimize" and "run" for as long as desired and "sell all" when done; making sure to check your stocks along the way.|};
+  ]
+
+(** [help ()] prints the actions with a more detailed description for the user *)
 let help () =
   let border = "=====================" in
   print_endline border;
   print_string
     "Welcome to the Help Page! Here is a little tutorial of how to use this \
      program. (press ENTER to continue or type anything and ENTER to quit)";
-  let help_instructions =
-    [
-      {|"configure" allows you to customize your settings like the subreddits you would like to reference and the use of optional optimization features; you can also add money to be used by the program here|};
-      {|"optimize" prompts the program to save relevant data needed to optimize its algorithm and also alerts you of the time elapsed since last optimizing (should be run before "run")|};
-      {|"run" is the main function which runs algorithm (according to your configurations) and buys or sells stocks according to the data found at run time|};
-      {|"sell all" allows you to sell all of your currently owned stocks|};
-      {|"show data" shows updated data about the stocks you currently own|};
-      {|"graph data" generates a graph about the stocks you currently own|};
-      {|"menu" shows a simple menu with all the possible commands|};
-      {|"logout" logs you out of your session in the program|};
-      {|"quit" simply terminates the program and exits|};
-      {|Now that you know all of my actions, let's run through an example workflow a user might go through! (press ENTER to continue or type anything and ENTER to quit)|};
-      {|First, you want to check that your configurations are what you would like them to be, although the provided defaults are more than sufficient to start (no money needs to be added just yet)|};
-      {|Next, run "optimize" to start the optimization process. It is recommended that you wait around a day before beginning to run the program in order to buy or sell any stocks using "run".|};
-      {|Keep in mind that there is no need to keep the program running while waiting; feel free to start the program up again once some time has passed.|};
-      {|Then, run "optimize" once more before running "run" so that the algorithm will be ran using the optimization.|};
-      {|Finally, repeat waiting then running "optimize" and "run" for as long as desired and "sell all" when done; making sure to check your stocks along the way.|};
-    ]
-  in
+
   let pause_escape str =
     match read_line () with
     | exception End_of_file -> ()
@@ -264,14 +303,20 @@ let help () =
   | Failure _ -> ()
   | _ -> ()
 
+(** [fst4 (a,b,c,d)] is a *)
 let fst4 (x, _, _, _) = x
 
+(** [snd4 (a,b,c,d)] is b *)
 let snd4 (_, x, _, _) = x
 
+(** [thd4 (a,b,c,d)] is c *)
 let thd4 (_, _, x, _) = x
 
+(** [fth4 (a,b,c,d)] is d *)
 let fth4 (_, _, _, x) = x
 
+(** [run_algorithm state] runs the algorithm to determine stocks to buy and sell
+    and updates the portfolio in [state] *)
 let run_algorithm state =
   let porfolio = User.current_portfolio state.user in
   let config = User.config state.user in
@@ -294,12 +339,14 @@ let run_algorithm state =
   state.user <- User.update_portfolio state.user new_portfolio;
   ()
 
+(** [run_sell_all state] sells all stocks in [state] *)
 let run_sell_all state =
   let portfolio = User.current_portfolio state.user in
   let new_portfolio = Portfolio.sell_all portfolio in
   let new_user = User.update_portfolio state.user new_portfolio in
   state.user <- new_user
 
+(** [run_refresh_and_show state] updates portfolio in [state] and graphs data *)
 let run_refresh_and_show state =
   let portfolio = User.current_portfolio state.user in
   let new_portfolio = Portfolio.refresh portfolio in
@@ -350,6 +397,7 @@ let run_refresh_and_show state =
   in
   Owl_pretty.pp_dataframe Format.std_formatter stocks_frame
 
+(** [configure_liquidity state] configures liquidity in [state] *)
 let rec configure_liquidity state =
   let portfolio = User.current_portfolio state.user in
   let liquidity = Portfolio.liquidity portfolio in
@@ -367,7 +415,7 @@ let rec configure_liquidity state =
       state.user <- new_user
     with Failure f ->
       print_endline "Not a Float - Please Try again";
-      configure_liquidity state)
+      configure_liquidity state )
   else if String.length input > 7 && String.sub input 0 6 = "remove" then (
     try
       let f = float_of_string (String.sub input 7 (String.length input - 7)) in
@@ -376,17 +424,22 @@ let rec configure_liquidity state =
       state.user <- new_user
     with Failure f ->
       print_endline "Not a Float - Please Try again";
-      configure_liquidity state)
+      configure_liquidity state )
   else (
     print_endline "Invalid input";
-    configure_liquidity state)
+    configure_liquidity state )
 
+(** [convert_seconds_days seconds] is seconds to days *)
 let convert_seconds_days s = s /. (24. *. 60. *. 60.)
 
+(** [convert_seconds_days seconds] is seconds to hours *)
 let convert_seconds_hours s = s /. (60. *. 60.)
 
+(** [convert_seconds_days seconds] is seconds to minutes *)
 let convert_seconds_minutes s = s /. 60.
 
+(** [get_friendly_time s] gets the time in the largest applicable units 
+    (e.g. 2 hours instead of 120 minutes | 1 day instead of 86,400 seconds) *)
 let get_friendly_time s =
   if s > 24. *. 60. *. 60. then
     let time = string_of_float (convert_seconds_days s) in
@@ -401,6 +454,7 @@ let get_friendly_time s =
     let time = string_of_float s in
     if time = "1." then time ^ " second" else time ^ " seconds"
 
+(** [run_optimize state] runs uniform testing and updates [state]*)
 let run_optimize state =
   let user = state.user in
   let constants = Uniformtesting.optimized_constants user in
@@ -410,13 +464,14 @@ let run_optimize state =
   let newer_user = User.change_config new_user new_config in
   state.user <- newer_user
 
+(** [optimize state] prompts the user if if they want to optimize *)
 let rec optimize state =
   let time_since = Unix.time () -. User.last_daily_task_timestamp state.user in
   let time_since = convert_seconds_days time_since in
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    ("\nIt has been "
+    ( "\nIt has been "
     ^ get_friendly_time time_since
-    ^ " since you last optimized...");
+    ^ " since you last optimized..." );
   print_endline
     "\n\
      It is reccomended that you wait around a day before optimization cycles \
@@ -430,8 +485,10 @@ let rec optimize state =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    optimize state)
+    optimize state )
 
+(** [change_username state] prompts the user to change their username and 
+    updates [state] accordingly*)
 let rec change_username state =
   ANSITerminal.print_string [ ANSITerminal.blue ] "\n Name Change: \n";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
@@ -444,13 +501,15 @@ let rec change_username state =
     print_string "> ";
     let new_username = read_line () in
     let new_user = User.set_username state.user new_username in
-    state.user <- new_user)
+    state.user <- new_user )
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_username state)
+    change_username state )
 
+(** [change_email state] prompts the user to change their email and updates 
+    [state] accordingly *)
 let rec change_email state =
   ANSITerminal.print_string [ ANSITerminal.blue ] "\n Email Change: \n";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
@@ -463,13 +522,15 @@ let rec change_email state =
     print_string "> ";
     let new_email = read_line () in
     let new_user = User.set_email state.user new_email in
-    state.user <- new_user)
+    state.user <- new_user )
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_email state)
+    change_email state )
 
+(** [change_password state] prompts the user to change their password and 
+    updates [state] accordingly *)
 let rec change_password state =
   ANSITerminal.print_string [ ANSITerminal.blue ] "\n Password Change: \n";
   ANSITerminal.print_string [ ANSITerminal.yellow ]
@@ -482,13 +543,15 @@ let rec change_password state =
     print_string "> ";
     let new_password = read_line () in
     let new_user = User.set_password state.user new_password in
-    state.user <- new_user)
+    state.user <- new_user )
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_username state)
+    change_username state )
 
+(** [do_delete state] prompts the user to delete their account and updates 
+    [state] accordingly *)
 let rec do_delete state =
   ANSITerminal.print_string [ ANSITerminal.red ]
     "\n WARNING!!! This will delete your account \n";
@@ -498,22 +561,27 @@ let rec do_delete state =
   let result = read_line () in
   if result = "Y" then (
     Saveload.delete_user state.user;
-    raise (LogoutAction "delete"))
+    raise (LogoutAction "delete") )
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.yellow ]
       "\n Invalid Input use Y or N...\n";
-    do_delete state)
+    do_delete state )
 
+(** [do_graph_networth state] graphs the user;s networth *)
 let do_graph_networth state = Grapher.graph_net_worth state.user
 
+(** [do_graph_networth_liquidity state] graphs the user's networth and 
+    liquidity *)
 let do_graph_networth_liquidity state =
   Grapher.graph_net_worth_and_liquidity state.user
 
+(** [print_ticker_list ticker_list] prints each ticker in the list *)
 let rec print_ticker_list = function
   | [] -> ()
   | h :: t -> ANSITerminal.print_string [ ANSITerminal.yellow ] (" " ^ h)
 
+(** [do_graph_stock state] prompts the user for a stock and graphs its data *)
 let rec do_graph_stock state =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "\n\
@@ -530,8 +598,10 @@ let rec do_graph_stock state =
   else (
     ANSITerminal.print_string [ ANSITerminal.yellow ]
       "\n Invalid Input use Y or N...\n";
-    do_graph_stock state)
+    do_graph_stock state )
 
+(** [do_configure_tests state] prompts the user to configure the number of 
+    uniform distribution tests *)
 let rec do_configure_tests state =
   let config = User.config state.user in
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -548,6 +618,8 @@ let rec do_configure_tests state =
       "\n Invalid Input: Please enter an Integer...\n";
     do_configure_tests state
 
+(** [string_of_consts user] returns a string representation of the 
+    uniform distribution constants *)
 let string_of_consts user =
   let config = User.config user in
   let constants = Config.consts config in
@@ -561,6 +633,8 @@ let string_of_consts user =
   ^ string_of_float (fth4 constants)
   ^ ")"
 
+(** [ask_for_const msg] prompts the user to enter their own constants to use in 
+    optimization / algorithm *)
 let rec ask_for_const message =
   ANSITerminal.print_string [ ANSITerminal.blue ] message;
   print_endline
@@ -573,13 +647,15 @@ let rec ask_for_const message =
     if var <= 0.0 || var > 1.0 then (
       ANSITerminal.print_string [ ANSITerminal.red ]
         "Invalid Input: Out of Bounds. Try again...";
-      ask_for_const message)
+      ask_for_const message )
     else var
   with Failure f ->
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: Not a float. Try again...";
     ask_for_const message
 
+(** [do_configure_constants state] prints the user's current constants and
+    prompts them whether or not they would like to set their own *)
 let do_configure_constants state =
   let config = User.config state.user in
   ANSITerminal.print_string [ ANSITerminal.blue ]
@@ -612,15 +688,21 @@ let do_configure_constants state =
   let new_user = User.change_config state.user new_config in
   state.user <- new_user
 
+(** [print_subreddits subreddit_string_list] prints the users subreddits *)
 let rec print_subreddits subreddit_string_list =
   match subreddit_string_list with
   | [] -> ()
   | h :: t -> ANSITerminal.print_string [ ANSITerminal.yellow ] " h"
 
+(** [thd3 (a, b, c)] is [c] *)
 let thd3 (_, _, x) = x
 
+(** [convert_info_to_string subreddits] is a list of subreddit names in 
+    [subreddits] *)
 let convert_info_to_string subreddits = List.map (fun x -> thd3 x) subreddits
 
+(** [ask_for_ordering ()] prompts the user to input the [Scraper.ordering] used 
+    to retreive subreddit posts *)
 let rec ask_for_ordering () =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "What ordering do you want? The options are:";
@@ -639,14 +721,17 @@ let rec ask_for_ordering () =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: that was not an option. Try again...";
-    ask_for_ordering ())
+    ask_for_ordering () )
 
+(** [ask_for_name ()] prompts the user to enter a subreddit name *)
 let rec ask_for_name () =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "What subreddit do you want to scrape?";
   print_string "> ";
   read_line ()
 
+(** [ask_for_num_posts ()] prompts the user to enter the number of posts in the 
+    subreddit to scrape *)
 let rec ask_for_num_posts () =
   ANSITerminal.print_string [ ANSITerminal.blue ]
     "How many posts do you want to scrape on this subreddit?";
@@ -658,6 +743,7 @@ let rec ask_for_num_posts () =
       "Invalid Input: Enter an integer only. Try again...";
     ask_for_num_posts ()
 
+(** [remove subreddit ()] removes [sub] from [subreddits] *)
 let rec remove_sub subreddits sub acc =
   match subreddits with
   | [] -> List.rev acc
@@ -665,6 +751,8 @@ let rec remove_sub subreddits sub acc =
       if z <> sub then remove_sub t sub ((x, y, z) :: acc)
       else List.rev (acc @ t)
 
+(** [remove_subreddit state] prompts the user which subreddit they would like to
+    remove and removes it from [state] *)
 let rec remove_subreddit state =
   let config = User.config state.user in
   let subreddits = Config.subreddit_info config in
@@ -677,7 +765,7 @@ let rec remove_subreddit state =
   if List.length subreddit_strings = 0 then (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "There is no subreddits add one first before removing";
-    ())
+    () )
   else if List.mem result subreddit_strings then
     let new_subreddits = remove_sub subreddits result [] in
     let new_config = Config.set_subreddits config new_subreddits in
@@ -686,8 +774,10 @@ let rec remove_subreddit state =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: that stock was not an option. Try again...";
-    remove_subreddit state)
+    remove_subreddit state )
 
+(** [add_subreddit state] prompts the user to input subreddit data and updates 
+    [state] accordingly *)
 let add_subreddit state =
   let sub_name = ask_for_name () in
   let amount = ask_for_num_posts () in
@@ -699,6 +789,8 @@ let add_subreddit state =
   let new_user = User.change_config state.user new_config in
   state.user <- new_user
 
+(** [ask_for_change state] prompts the user if they would like to remove a 
+    subreddit from the list of subreddits *)
 let rec ask_for_change state =
   let config = User.config state.user in
   let subreddits = Config.subreddit_info config in
@@ -715,9 +807,11 @@ let rec ask_for_change state =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: must be \"add\",\"remove\",or \"no\". Try again...";
-    ask_for_change state);
+    ask_for_change state );
   ask_for_change state
 
+(** [do_configure_subreddits state] prompts the user if they want to change 
+    subreddit data and proceeds accordingly *)
 let do_configure_subreddits state = ask_for_change state
 
 let update state action =
