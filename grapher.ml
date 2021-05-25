@@ -23,7 +23,7 @@ let rec get_list_of_values ticker portfolios values =
       match s with
       | Some stock ->
           get_list_of_values ticker t (Portfolio.value stock :: values)
-      | None -> failwith "impossible")
+      | None -> failwith "impossible" )
 
 let make_net_worth_and_liquidity_matrices user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
@@ -70,7 +70,7 @@ let rec get_list_of_portfolios_containing_a_stock ticker portfolios
       | None -> List.rev portfolios
       | Some s ->
           get_list_of_portfolios_containing_a_stock ticker t
-            (h :: portfolios_with_stock))
+            (h :: portfolios_with_stock) )
 
 let make_stock_value_matrices ticker user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in

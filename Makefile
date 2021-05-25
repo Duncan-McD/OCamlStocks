@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio user optimizer grapher optimizer config state uniformtesting saveload auth
+MODULES= scraper authors parser cashset stockdata algorithm portfolio user grapher optimizer config state uniformtesting saveload auth
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)

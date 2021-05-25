@@ -1,1 +1,1 @@
-let hours_worked = 100
+let hours_worked = 420
