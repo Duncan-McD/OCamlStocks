@@ -3,6 +3,7 @@
 (** {2 Types}*)
 
 type action
+(**The abstract data type for an action in State*)
 
 type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 (** The abstract data type for a state *)
@@ -14,16 +15,13 @@ exception InvalidAction of (string * string)
 
 exception InapplicableAction of (string * string)
 (** Raised when a string's coorisponding action cannot be called from the 
-    location you are in*)
+    location you are in *)
 
 exception QuitAction
 (** Raised when a user wants to quit the program *)
 
 exception LogoutAction of string
 (** Raised when a user wants to logout of their account *)
-
-exception HelpAction
-(** Raised when a user wants to see program help information *)
 
 (** {2 Action Functions} *)
 

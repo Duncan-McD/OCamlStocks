@@ -46,6 +46,8 @@ let rec process_scores (list_of_stocks : string list)
       process_scores t parsed_subreddit x y q w (curr_score :: acc)
         (sum +. if curr_score > 0. then curr_score else 0.)
 
+(* [sr_list_to_stocks_lists stocks_list subreddit_list] is [stocks_lists] with 
+    every subrredit in [subreddit_list] parsed and added *)
 let rec sr_list_to_stocks_list stocks_list = function
   | [] -> stocks_list
   | sr :: t -> sr_list_to_stocks_list (Parser.parse sr :: stocks_list) t
@@ -62,7 +64,3 @@ let get_stocks_consts x y q w subreddit_list =
   in
   List.fold_left decision_func ([], [])
     (List.combine stocks_list (fst processed))
-
-let get_stocks subreddit_list =
-  let x, y, q, w = Optimizer.constants () in
-  get_stocks_consts x y q w subreddit_list

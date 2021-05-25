@@ -1,4 +1,4 @@
-MODULES= scraper authors parser cashset stockdata algorithm portfolio user optimizer grapher config state uniformtesting saveload auth
+MODULES= scraper authors parser cashset stockdata algorithm portfolio user grapher config state uniformtesting saveload auth
 OBJECTS=$(MODULES:=.cmo)
 MLS=$(MODULES:=.ml)
 MLIS=$(MODULES:=.mli)
@@ -6,37 +6,16 @@ TEST=test.byte
 MAIN=main.byte
 OCAMLBUILD=ocamlbuild -use-ocamlfind
 DEPS= yojson,mechaml,csv,mechaml,pyml,owl,owl-plplot,graphics,camlimages.graphics,camlimages.png,ANSITerminal
-default: build
-	OCAMLRUNPARAM=b utop
+
+default: bot
+
+utop: build
 
 build:
 	$(OCAMLBUILD) $(OBJECTS) -tag thread
 
 bot: 
 	$(OCAMLBUILD) -tag 'debug' -tag thread $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
-grapher:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files grapher.byte && ./grapher.byte -runner sequential
-
-algorithmdemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files algorithmdemo.byte && ./algorithmdemo.byte -runner sequential
-
-connotationdemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files connotationdemo.byte && ./connotationdemo.byte -runner sequential
-
-historydemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files historydemo.byte && ./historydemo.byte -runner sequential
-
-scraperdemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files scraperdemo.byte && ./scraperdemo.byte -runner sequential
-
-cashsetdemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files cashsetdemo.byte && ./cashsetdemo.byte -runner sequential
-
-stockdatademo: 
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files stockdatademo.byte && ./stockdatademo.byte -runner sequential
-
-parserdemo:
-	ocamlbuild -use-ocamlfind -tag 'debug' -tag thread -I demo_files parserdemo.byte && ./parserdemo.byte -runner sequential
 
 test:
 	$(OCAMLBUILD) -tag thread -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
@@ -65,19 +44,6 @@ install:
 	chmod u+x system_dependencies.sh
 	./system_dependencies.sh
 	opam install . --deps-only
-
-demo1:
-	chmod u+x ./demo_files/demo.sh
-	./demo_files/demo.sh
-
-demo2:
-	chmod u+x ./demo_files/demo2.sh
-	./demo_files/demo2.sh
-
-demo:
-	make demo1
-	sleep 5
-	make demo2
 
 lines:
 	cloc --by-file --exclude-dir=demo_files,_build --include-lang=OCaml .

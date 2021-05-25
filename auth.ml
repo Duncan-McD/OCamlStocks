@@ -16,7 +16,9 @@ let auth_type (a : t) = fst a
 
 let user (a : t) = snd a
 
-let auth_temp (email, password) =
+(** [auth_user (email, password)] is true if there currently exists user with 
+  email [email] and password [passsword], and is false otherwise *)
+let auth_user (email, password) =
   Saveload.is_valid_email_password email password
 
 let rec prompt_user prompt =
@@ -57,7 +59,7 @@ let rec prompt_user prompt =
       else if input = "quit" then raise QuitException
       else prompt_user Invalid_Input
 
-and (* [login ()] is the user email once they have logged in *)
+and (* [login prompt] is the user email once they have logged in *)
     login prompt =
   if prompt = Invalid_Input then (
     ANSITerminal.print_string [ ANSITerminal.red ]
@@ -65,7 +67,7 @@ and (* [login ()] is the user email once they have logged in *)
        Invalid login credentials. Type anything (e.g. \"back\") to go back, or \
        press enter to try again.\n";
 
-    correct_input Login)
+    correct_input Login )
   else (
     print_string "\nName: ";
 
@@ -82,11 +84,11 @@ and (* [login ()] is the user email once they have logged in *)
             match read_line () with
             | exception End_of_file -> failwith "Error reading input."
             | password ->
-                if auth_temp (email, password) then
+                if auth_user (email, password) then
                   (Login, Saveload.load_user email)
-                else login Invalid_Input)))
+                else login Invalid_Input ) ) )
 
-and (* [signup ()] is the user email once they have signed up *)
+and (* [signup prompt] is the user email once they have signed up *)
     signup prompt =
   if prompt = Already_Taken then
     ANSITerminal.print_string [ ANSITerminal.red ]
@@ -116,10 +118,13 @@ and (* [signup ()] is the user email once they have signed up *)
             match read_line () with
             | exception End_of_file -> failwith "Error reading input."
             | password ->
-                if Bool.not (auth_temp (email, password)) then
+                if Bool.not (auth_user (email, password)) then
                   (Signup, User.create email name password)
-                else login Already_Taken)))
+                else login Already_Taken ) ) )
 
+(** [correct_input login_or_signup] brings the user back to the login/signup 
+    menu or re prompts them for their user name and password through the login 
+    or signup function *)
 and correct_input login_or_signup =
   print_string "> ";
 

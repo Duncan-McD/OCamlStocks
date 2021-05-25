@@ -18,6 +18,7 @@ type auth = Login | Signup  (** The type of auth used to get the user *)
 (** {2 Excepions} *)
 
 exception QuitException
+(** Exception raised when the user tries to quit out of login / signup *)
 
 (** {2 Auth Functions} *)
 

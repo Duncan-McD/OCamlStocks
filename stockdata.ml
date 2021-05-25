@@ -20,16 +20,18 @@ let get_one_tag (tag : string) (soup_node : soup node M.m) : string =
 
 exception ExitLoop of int
 
+(**[remove_commas o s] is the string [s] without commas*)
 let rec remove_commas o s =
   if String.length s <> 0 then
-    if String.get s 0 = ',' then
-      remove_commas o (String.sub s 1 (String.length s - 1))
+    if s.[0] = ',' then remove_commas o (String.sub s 1 (String.length s - 1))
     else
       remove_commas
-        (o ^ Char.escaped (String.get s 0))
+        (o ^ Char.escaped s.[0])
         (String.sub s 1 (String.length s - 1))
   else o
 
+(**[index_of_substring s sub] the int corresponding to the index of [s] 
+that is the first instance of [sub]*)
 let index_of_substring (s : string) (sub : string) : int =
   try
     let sub_length = String.length sub in
@@ -39,23 +41,25 @@ let index_of_substring (s : string) (sub : string) : int =
     -1
   with ExitLoop i -> i
 
-(* css selector for stock day change *)
+(** [change_selector] is the css selector for stock day change *)
 let change_selector =
   "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
    div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > \
    span.Trsdu\\(0\\.3s\\).Fw\\(500\\).Pstart\\(10px\\).Fz\\(24px\\)"
 
-(* css selector for stock value *)
+(* [value_selector] is the css selector for stock value *)
 let value_selector =
   "#quote-header-info > div.My\\(6px\\).Pos\\(r\\).smartphone_Mt\\(6px\\) > \
    div.D\\(ib\\).Va\\(m\\).Maw\\(65\\%\\).Ov\\(h\\) > div > \
    span.Trsdu\\(0\\.3s\\).Fw\\(b\\).Fz\\(36px\\).Mb\\(-4px\\).D\\(ib\\)"
 
+(* [rating_selector] is the css selector for rating *)
 let rating_selector = "body > div + div + script"
 
-(* css selector to indicate stock existence *)
+(* [does_not_exist_selector] is the css selector to indicate stock existence *)
 let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
+(* [does_not_exist_selector2] is a secondary css selector to indicate stock existence *)
 let does_not_exist_selector2 =
   "#quote-summary > \
    div.D\\(ib\\).W\\(1\\/2\\).Bxz\\(bb\\).Pend\\(12px\\).Va\\(t\\).ie-7_D\\(i\\).smartphone_D\\(b\\).smartphone_W\\(100\\%\\).smartphone_Pend\\(0px\\).smartphone_BdY.smartphone_Bdc\\(\\$seperatorColor\\) \
@@ -78,6 +82,7 @@ let scrape_change link =
   let value = new_change |> remove_commas "" in
   float_of_string value
 
+(** [scrape_rating l] is the current rating of stock from link [l] *)
 let scrape_rating link =
   try
     let rating_script = get_one_tag rating_selector (get_soup link) in
@@ -128,6 +133,8 @@ let stock_exists ticker =
     && get_one_tag does_not_exist_selector2 (get_soup link) <> "N/A"
   with Failure s -> false
 
+(**[stockdata_from_ticker t] is the stockdata of ticker [t]. Returns None 
+if the stock does not exist*)
 let stockdata_from_ticker (ticker : string) : t option =
   if stock_exists ticker = false then None
   else
