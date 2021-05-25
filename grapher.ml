@@ -1,20 +1,24 @@
 module Plot = Owl_plplot.Plot
 
+(** [get_list_of_net_worths p n] recursively returns a list of net worths*)
 let rec get_list_of_net_worths portfolios net_worths =
   match portfolios with
   | [] -> List.rev net_worths
   | h :: t -> get_list_of_net_worths t (Portfolio.net_worth h :: net_worths)
 
+(** [get_list_of_timestamps p t] recursively returns a list of timestamps*)
 let rec get_list_of_timestamps portfolios timestamps =
   match portfolios with
   | [] -> List.rev timestamps
   | h :: t -> get_list_of_timestamps t (Portfolio.net_worth h :: timestamps)
 
+(** [get_list_of_liquidities p l] recursively returns a list of liquidities*)
 let rec get_list_of_liquidities portfolios liquidities =
   match portfolios with
   | [] -> List.rev liquidities
   | h :: t -> get_list_of_liquidities t (Portfolio.liquidity h :: liquidities)
 
+(** [get_list_of_values p v] recursively returns a list of values*)
 let rec get_list_of_values ticker portfolios values =
   match portfolios with
   | [] -> List.rev values
@@ -23,8 +27,10 @@ let rec get_list_of_values ticker portfolios values =
       match s with
       | Some stock ->
           get_list_of_values ticker t (Portfolio.value stock :: values)
-      | None -> failwith "impossible" )
+      | None -> failwith "impossible")
 
+(** [make_net_worth_and_liquidity_matrices u] is the net worth and liquidity 
+    matrices for user [u]*)
 let make_net_worth_and_liquidity_matrices user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
   let timestamps = get_list_of_timestamps portfolios [] in
@@ -46,6 +52,7 @@ let make_net_worth_and_liquidity_matrices user =
   in
   (timestamp_matrix, liquidity_net_worth_matrix)
 
+(** [make_net_worth_matrices u] is the net worth matrices for user [u]*)
 let make_net_worth_matrices user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
   let timestamps = get_list_of_timestamps portfolios [] in
@@ -60,6 +67,8 @@ let make_net_worth_matrices user =
   in
   (timestamp_matrix, net_worth_matrix)
 
+(** [get_list_of_portfolios_containing_a_stock t p] returns the amount of 
+    portfolios in list p that contain stock with ticker t*)
 let rec get_list_of_portfolios_containing_a_stock ticker portfolios
     portfolios_with_stock =
   match portfolios with
@@ -70,8 +79,10 @@ let rec get_list_of_portfolios_containing_a_stock ticker portfolios
       | None -> List.rev portfolios
       | Some s ->
           get_list_of_portfolios_containing_a_stock ticker t
-            (h :: portfolios_with_stock) )
+            (h :: portfolios_with_stock))
 
+(** [make_net_stock_value_matrices t u] is the stock value matrices for user [u]
+     and ticker [t]*)
 let make_stock_value_matrices ticker user =
   let portfolios = User.current_portfolio user :: User.past_portfolios user in
   let portfolios =
@@ -87,6 +98,7 @@ let make_stock_value_matrices ticker user =
   let value_matrix = Owl.Mat.of_array (values |> Array.of_list) 1 vals in
   (timestamp_matrix, value_matrix)
 
+(**[rgba_to_rgb ()] converts a photo fom rgba to rgb*)
 let rgba_to_rgb () =
   Py.initialize ();
   ignore
@@ -102,6 +114,7 @@ rgb_image.save('plot.png')|});
   Py.finalize ();
   ()
 
+(** [open_plot ()] opens the plot.png file created earlier*)
 let open_plot () =
   Graphics.open_graph "";
   let img = Images.load "plot.png" [] in
@@ -110,10 +123,9 @@ let open_plot () =
   Graphics.resize_window x y;
   let g = Graphic_image.of_image img in
   Graphics.draw_image g 0 0;
-  Graphics.set_window_title "Plot One";
-  print_endline "Enter Y to end";
-  if read_line () = "Y" then Graphics.clear_graph () else ()
+  Graphics.set_window_title "Plot One"
 
+(**[make_function c] returns the line connecting to sets of coordinates c*)
 let make_function coordinates =
   let x1 = coordinates |> fst |> fst in
   let y1 = coordinates |> fst |> snd in
@@ -124,6 +136,8 @@ let make_function coordinates =
   let slope = rise /. run in
   fun x -> (slope *. (x -. x1)) +. y1
 
+(**[make_functions_for_piecewise c f] recursively returns a list of functions 
+    representing a piecewise function for a set of points p*)
 let rec make_functions_for_piecewise coordinates functions =
   match coordinates with
   | [ h ] -> List.rev functions
@@ -132,18 +146,23 @@ let rec make_functions_for_piecewise coordinates functions =
         (make_function (h1, h2) :: functions)
   | _ -> failwith "impossible"
 
+(** [find_location x xs f] is the location of [x] in [xs]*)
 let rec find_location x xs function_number =
   match xs with
   | [] -> function_number
   | h :: t ->
       if x <= h then function_number else find_location x t (function_number + 1)
 
+(**[get_last l] is the last element of a list l*)
 let rec get_last l =
   match l with [ h ] -> h | h :: t -> get_last t | _ -> failwith "impossible"
 
+(**[get_list_index l n] returns the index of n in l*)
 let rec get_list_index l n =
   if n <= 1 then List.hd l else get_list_index (List.tl l) (n - 1)
 
+(** [piece_wise_function xs ys x] represents a piecewise funtoin connecting the 
+    points in xs,ys for any given input x*)
 let piece_wise_function xs ys x =
   let coordinates = List.combine xs ys in
   let functions = make_functions_for_piecewise coordinates [] in
@@ -152,18 +171,23 @@ let piece_wise_function xs ys x =
   else if function_to_evaluate >= List.length functions then get_last ys
   else (get_list_index functions function_to_evaluate) x
 
+(** [find_maximum f m] finds the maxium float in f*)
 let rec find_maximum floats max =
   match floats with
   | [] -> max
   | h :: t -> find_maximum t (if h > max then h else max)
 
+(** [find_minimum f m] finds the minimum float in f*)
 let rec find_minimum floats max =
   match floats with
   | [] -> max
   | h :: t -> find_maximum t (if h < max then h else max)
 
+(** [convert_seconds_days s] is s seconds in days*)
 let convert_seconds_days s = s /. (24. *. 60. *. 60.)
 
+(** [get_max_min u xs ys xsl ysl] is the allowed maxium and minums of a plot
+given all the coordinats xs/xs_list and ys/ys_list for user [u]*)
 let get_max_min user xs ys xs_list ys_list =
   let max_y = find_maximum ys_list (-1. *. Float.max_float) in
   let min_y = find_minimum ys_list Float.max_float in
@@ -178,6 +202,8 @@ let get_max_min user xs ys xs_list ys_list =
   let miny = max_y -. ((max_y -. min_y) *. 0.05) in
   ((minx, maxx), (miny, maxy))
 
+(** [create_and_open_side_by_side n mam xm ym xl yl] creates a side by side plot
+with name [n] with max and mins [mam] [xm]/[xl] and [ym]/[yl] matrices/lists*)
 let create_and_open_side_by_side name maxs_and_mins x_matrix y_matrix x_list
     y_list =
   let h = Plot.create ~m:1 ~n:2 "plot.png" in

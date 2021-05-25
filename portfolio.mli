@@ -8,7 +8,7 @@ type t
 type stock
 (** The abstract data type for a stock in a portfolio*)
 
-(** {2 Portfolio Functions}*)
+(** {5 Portfolio Functions}*)
 
 val empty_portfolio : t
 (** [empty_portfolio] is an initial empty portfolio*)
@@ -63,7 +63,12 @@ val stock_from_ticker : t -> string -> stock option
 (** {2 Actions}*)
 
 val refresh : t -> t
-(** [refresh p] is the portfolio p but with refreshed data based on newer stock data*)
+(** [refresh p] is the portfolio p but with refreshed data based on newer stock
+    data*)
+
+val refresh_some : (string, float) Hashtbl.t -> t -> t
+(** [refresh p tbl] is the portfolio p but with refreshed data based on newer
+    stock data only if that data is not already found in tbl *)
 
 val process :
   t -> float * float * float * float -> (string * float) list * string list -> t

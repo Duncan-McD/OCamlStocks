@@ -1,9 +1,13 @@
+(**[p n x max] is the [x]th float out of [n] parts where the difference 
+between 0. and [max] is split into n parts,*)
 let p n x max =
   match n with
   | 0 -> 0.
   | 1 -> float_of_int x
   | i -> float_of_int x *. (max /. float_of_int (n - 1))
 
+(**[get_scraped_list s acc] is the list of scraped subreddits scraped
+ from subreddit list [s]*)
 let rec get_scraped_list
     (sub_list : (int * Scraper.subreddit_ordering * string) list)
     (acc : Scraper.subreddit list) =
@@ -45,11 +49,12 @@ let initialize_testing_portfolios (user : User.t) =
   User.change_test_portfolios user !testing_portfolio_list
 
 let optimized_constants (user : User.t) : float * float * float * float =
-  (*THIS IS A BAD SOLUTION!! TODO: set up hashtable to store stock data from yahoo finance to save time
-    TODO: figure out where to send constants
-      SetOptimizer constants *)
-  (*TODO: return NONE if test_portfolios is an empty list*)
-  Portfolio.vars
-    (List.hd
-       (List.sort Portfolio.compare
-          (List.map Portfolio.refresh (User.test_portfolios user))))
+  let users_portfolios = User.test_portfolios user in
+  match users_portfolios with
+  | [] -> user |> User.config |> Config.consts
+  | _ -> 
+    let tbl = Hashtbl.create 128 in
+    Portfolio.vars
+      (List.hd
+        (List.sort Portfolio.compare
+            (List.map (Portfolio.refresh_some tbl) (users_portfolios))))

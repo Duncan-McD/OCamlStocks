@@ -1,7 +1,48 @@
+(** Test Plan:
+      Scraper (OUnit + manual)
+        - OUnit testing ran on JSON snapshots of subreddits
+        - General scraping tests developed using glass box testing
+        - Functions on post types developed with black box testing
+        - Manual testing used for live scraping from web and different orderings
+      Cashset (OUnit)
+        - OUnit testing ran on stock tickers
+        - Tested both real and fake ticker names
+        - Tested common words factored out
+      Stockdata (manual)
+        - Manually tested retrieval of stock data since stockdata is all present
+        based values that change constantly
+      Parser (OUnit + manual)
+        - General parsing tests developed using black box testing
+        - Connotation tests developed with glass box and randomized testing
+        - History score tested manually (similar to Stockdata)
+        - DISCLAIMER: tests commented out by default due to the large amount of
+        time required to complete tests; recommended that you run a maximum of
+        half of the tests so there are no issues with timing out
+      Optimizer (manual)
+        - Manually tested the daily optimization using portfolios
+      Algorithm (manual)
+        - Manually tested due to changing history score over time
+        - Checked calculations done with various different constants
+      Portfolio (OUnit + manual)
+        - OUnit testing ran on simple portfolios
+        - Manual testing used on time sensitive functions
+
+    This testing approach aimed to rigorously test all aspects of the system
+    that were possible to test. The tests used maneuvered around the system's
+    reliance on present time values that were constantly changing, like stock
+    values or reddit posts. In order to be assured of each modules' validity we
+    not only tested in isolation but also required testing be done between
+    modules as certain aspects relied upon the validity of earlier modules. The
+    various use of different test case development systems (i.e. glass box or
+    black box) were used whenever possible to gain maximum testing exposure and
+    bisect coverage. *)
+
 open OUnit2
 open Printf
-open Cashset
 open Scraper
+open Cashset
+open Parser
+open Portfolio
 
 let pp_string s = "\"" ^ s ^ "\""
 
@@ -18,260 +59,304 @@ let pp_list pp_elt lst =
   in
   "[" ^ pp_elts lst ^ "]"
 
-let function_test_string name str1 str2 =
-  name >:: fun _ -> assert_equal ~printer:pp_string str1 str2
+let scraper_name_test name json_file expec_name =
+  let subreddit = scrape_json ~amount:1 ("testing_files/" ^ json_file) in
+  let name = subreddit_name subreddit in
+  "subreddit name: " ^ name >:: fun _ -> 
+    assert_equal expec_name name ~printer:pp_string
 
-let function_test_bool name val1 val2 =
-  name >:: fun _ -> assert_equal val1 val2 ~printer:string_of_bool
-
-let scraper_test name ?(amount = 100) json_file attr_func expec_attr =
-  let scraped_body =
-    match posts (scrape_json ~amount json_file) with
+let scraper_posts_test name ?(amount = 24) json_file attr_func expec_attr printer =
+  let scraped_post =
+    match posts (scrape_json ~amount ("testing_files/" ^ json_file)) with
     | last_post :: t -> attr_func last_post
     | [] -> failwith "No posts scraped"
   in
-  name >:: fun _ -> assert_equal expec_attr scraped_body
+  name >:: fun _ -> assert_equal expec_attr scraped_post ~printer:printer
 
-let scraper_tests =
-  [
-    scraper_test "First post body" ~amount:1 "testing_files/stocksnew.json" body
-      "[The panic of 1901](https://en.wikipedia.org/wiki/Panic_of_1901) was \
-       caused by a standoff between J.P. Morgan/James Hill and E. H. Harriman \
-       for control over Northern Pacific Railways. Trying to take control of \
-       the company, both parties combined bought over 94% of the float. At the \
-       same time, other investors were heavily shorting the stock (to sell to \
-       one of the parties), until at one point everyone realized that they \
-       won't be able to cover their short position because Morgan/Hill and \
-       Harriman won't sell their shares. The shorts were squeezed as they \
-       fought for the remaining 6% of the shares and drove NP from $20 to \
-       $240. To pay for the high covering share prices, the shorts liquidated \
-       their other positions, causing mass panic that rippled through the \
-       whole stock market. Overwhelming cries of \"sell! sell! sell!\" were \
-       heard at the NYSE trading floor. Temporary relief were provided when \
-       rumors of Morgan's broker's death were spread, but quickly dissipated \
-       and the panic resumed. The whole ordeal concluded only when the two \
-       parties reached a truce and the shorts were finally able to cover their \
-       positions.";
-    scraper_test "Second post body" ~amount:2 "testing_files/stocksnew.json"
-      body
-      "What's going on gamblers? Well looks like we're back to discussing \
-       value stocks with solid fundamentals that are undervalued and being hit \
-       hard by shorts. Similar to the original GME in it's inception but \
-       obviously different in it's own right.\n\n\
-       Disclosure: This is not meant to be another \"short attack\" stock \
-       conversation, but it turns out it's looking like UWMC is currently \
-       being heavily shorted against, which is just a positive for those of us \
-       who invested in the stock and know it's fair value, market share, and \
-       future growth.\n\n\
-       Before I jump into some information regarding UWMC, the short volumes, \
-       and a few other things. For those who are new to this ticker and want \
-       DD on it, click \
-       [here](https://www.reddit.com/r/wallstreetbets/comments/m5yvwc/uwmc_key_points_to_the_company/) \
-       for my DD, it's pretty short and sweet.\n\n\
-       Now, something that got everyone riled up over the last few days was \
-       the fact that UWMC wasn't added to the Russell 1000 &amp; 3000 as \
-       stated by FTSE Russell Preliminary Inclusions. Turns out for some \
-       reason UWMC wasn't selected, and as the Russell Index were the one's \
-       who mentioned that they were adding UWMC, CEO Matt Ishbia made a \
-       statement to shareholders informing they didn't understand why it \
-       wasn't added and believe that the Russell Index miscalculated the \
-       available shares to the public (%5 minimum) and have sought out to \
-       rectify this with the Russell Index. There's information on WSB  \
-       regarding that so I won't go into details. But in short, there's a \
-       chance still for UWMC to be added to the Russell Index and for it to be \
-       corrected. Regardless if they're not added right away, we can \
-       confidently expect them to at some point be added in the next future \
-       quarters. CEO Matt Ishbia informed they've reached out to Russell Index \
-       to try and have it rectified. Something that's important to understand \
-       here is that UWMC being added to the Russell Index wasn't a major \
-       factor for investors wanting to invest in this company. Being added to \
-       the Russell Index, albeit would have been a great catalyst is not a \
-       reason to be concerned, end of story. If you would like to have a quick \
-       break down on some key points on the company, please click the link \
-       above to my DD, it's pretty short and sweet.\n\n\
-       Now, assuming you read my DD or already understand the value of this \
-       company, the fact that it's severely undervalued, high dividends, %545 \
-       growth year over year, etc etc. Something of notable mention here is \
-       the current short volume percentage.\n\n\
-       Before I jump into the details, there was a good post on here about \
-       Finra and Fintel not reporting all of the short volume information and \
-       not being able to provide the total amount of shares shorted from all \
-       markets etc. This is very accurate as even on there websites, they \
-       indicate that the information are from data pools that they have access \
-       to and don't factor all shares, dark pools, etc. (To better understand; \
-       to get the true volume of shorted stocks or short interest, you would \
-       need to compile all trades from a variety of exchanges, NYSE, NASDAQ, \
-       MM, etc.) Another thing I'd like to point out is that over the last \
-       month or two, the short interest updates which are supposed to be \
-       bi-weekly, has been reporting late. As of right now, we're 03/25/2021 \
-       the available short interest data is currently dated as of 02/26/2021 \
-       and that information was only updated last week from the previous date \
-       of 02/12/2021 ... We're 03/25/2021 and the data is a whole month old \
-       when it's supposed to be updated bi-weekly. I find that very odd, \
-       unless I'm mistaken here, it seems there's a massive delay on updating \
-       the Short Interests information on stocks. (Correct me if I'm wrong).\n\n\
-       With that being said, I want to jump into the current short volume % as \
-       per Fintel and ShortVolumes. This is not considered the true short \
-       volume as it doesn't consider the entire market, but is used to probe \
-       the current situation to get a better understanding as to how much of \
-       the traded volume has been shorted and for the month of March, it's \
-       incredibly high.\n\n\
-       Most notable date is March 3rd, 2021 (Where it began), there was a \
-       trading volume above 90M that day with 28% of the volume shorted. The \
-       average volume traded daily is between 9M - 10M. That alone is massive. \
-       Moving forward from the date of 03/03/2021, the short volume of the \
-       daily trading volume has been averaging out to around 28-31%.\n\n\
-       As of 03/11/2021 to present day; the average shorted volume has been \
-       between 55% - 65%, which is absolutely ridiculous. Don't forget there's \
-       only 90.23M float of shares available to the public. The rest is owned \
-       by UWMC and Institutions and are not available to investors. Please \
-       refer to the charts below.\n\n\
-       &amp;#x200B;\n\n\
-       https://preview.redd.it/du8ri17h84p61.png?width=842&amp;format=png&amp;auto=webp&amp;s=3ae417df7a25e14ca0a4095b98a86f0cc4e90c95\n\n\
-       https://preview.redd.it/i8lyjf3i84p61.png?width=844&amp;format=png&amp;auto=webp&amp;s=a1561154897a405d1d891e4c855626d4af818518\n\n\
-       &amp;#x200B;\n\n\
-       As you can see by the information above, UWMC is in fact being heavily \
-       shorted against. The red bars on the chart is the shorted volume, green \
-       is the long volume.\n\n\
-       On top of that, don't forget the high %4.83 dividend payout dated \
-       03/09/2021 that's going to be paid out to investors in April, which the \
-       shorts must cover as well.\n\n\
-       Another thing to factor in here is as of March the 3rd, 2021 and \
-       onward, the average price of the stock has been between $8 and above. \
-       This means that shorts most likely did not make any profits yet apart \
-       from maybe the few who sold when it was starting to hit $9. (AKA \
-       possibilities for a short squeeze and/or gamma squeeze is looking very \
-       plausible).\n\n\
-       Overall, UWMC is a serious company with 34% market share, the largest \
-       wholesale lender in America, they're extremely undervalued, payout high \
-       dividends, and the icing on the cake; they're extremely shorted for \
-       reasons that make absolutely no sense. This is most definitely the \
-       play, and a great hedge for the current market we're in, personal \
-       opinion.\n\n\
-       Disclaimer: I am invested in UWMC with 211 shares @ $9.09 and will be \
-       buying more. Proof of positions are on my DD which is linked above.\n\n\
-       I'm not a financial advisors, this is not financial advice, etc. etc.\n\n\
-       I can write more about the positive sentiments UWMC has going for it \
-       but it's currently 2:34 AM and I need to go to sleep and get ready for \
-       work.\n\n\
-       I hope this provides useful and to all investors print those tendies \
-       and get that ticket to the moon one way or another! 🚀🌔";
-    scraper_test "Last post body" ~amount:25 "testing_files/stocksnew.json" body
-      "";
-    scraper_test "First post title" ~amount:1 "testing_files/stocksnew.json"
-      title
-      "TIL the first market crash at the NYSE was caused by an epic short \
-       squeeze";
-    scraper_test "Last post score" ~amount:25 "testing_files/stocksnew.json"
-      score 274;
-    scraper_test "Third post upvote ratio" ~amount:3
-      "testing_files/stocksnew.json" upvote_ratio 0.83;
-  ]
+let scraper_title_test name ?(amount = 24) json_file expec_title =
+  scraper_posts_test ("subreddit post title: " ^ name) ~amount json_file 
+    Scraper.title expec_title pp_string
+    
+let scraper_body_test name ?(amount = 24) json_file expec_body =
+  scraper_posts_test ("subreddit post body: " ^ name) ~amount json_file 
+    Scraper.body expec_body pp_string
 
-let get_stocks json n = scrape_json json ~amount:n
+let scraper_score_test name ?(amount = 24) json_file expec_score =
+  scraper_posts_test ("subreddit post score: " ^ name) ~amount json_file 
+    Scraper.score expec_score string_of_int
 
-let check_stock_names name exp_stock_names stock_names =
-  name >:: fun _ ->
-  assert_equal
-    (List.sort_uniq compare exp_stock_names)
-    (List.sort_uniq compare stock_names)
+let scraper_ratio_test name ?(amount = 24) json_file expec_ratio =
+  scraper_posts_test ("subreddit post upvote ratio: " ^ name) ~amount json_file 
+    Scraper.upvote_ratio expec_ratio string_of_float
+
+let scraper_excep_test name ?(amount = 25) json_file =
+  "scraper exception: " ^ name >:: fun _ -> assert_raises 
+    (TooManyPostsRequested (amount - 24))
+    (fun () -> scrape_json ~amount ("testing_files/" ^ json_file))
+
+let scraper_tests = [
+  scraper_name_test "r/stocks hot" "stocks-hot.json" "r/stocks";
+  scraper_name_test "r/stocks new" "stocks-new.json" "r/stocks";
+  scraper_name_test "r/stocks rising" "stocks-rising.json" "r/stocks";
+  scraper_name_test "r/stocks top alltime" "stocks-top-alltime.json" "r/stocks";
+  scraper_name_test "r/stocks top today" "stocks-top-today.json" "r/stocks";
+  scraper_name_test "r/investing hot" "investing-hot.json" "r/investing";
+  scraper_name_test "r/wallstreetbets hot" "wallstreetbets-hot.json" "r/wallstreetbets";
+  scraper_title_test "post 1 in r/stocks hot" ~amount:1 "stocks-hot.json" "Rate My Portfolio - r/Stocks Quarterly Thread March 2021";
+  scraper_title_test "post 2 in r/stocks hot" ~amount:2 "stocks-hot.json" "r/Stocks Daily Discussion &amp; Fundamentals Friday May 14, 2021";
+  scraper_title_test "post 7 in r/stocks hot" ~amount:7 "stocks-hot.json" "If your goal is to live off your stock returns, how much are you looking to invest?";
+  scraper_title_test "post 1 in r/stocks new" ~amount:1 "stocks-new.json" "Does anyone know of publicly traded companies that specialize/ have relations with nanotechnology?";
+  scraper_title_test "post 2 in r/stocks new" ~amount:2 "stocks-new.json" "Should I invest more than half of my money as a first year college student living with their parents?";
+  scraper_title_test "post 11 in r/stocks new" ~amount:11 "stocks-new.json" "Trading simulator?";
+  scraper_title_test "post 1 in r/stocks rising" ~amount:1 "stocks-rising.json" "Dymon Asia Capital purchases $100,000,000 worth of Palantir ($PLTR) shares";
+  scraper_title_test "post 2 in r/stocks rising" ~amount:2 "stocks-rising.json" "Trading simulator?";
+  scraper_title_test "post 15 in r/stocks rising" ~amount:15 "stocks-rising.json" "What is the general sentiment about the stock market?";
+  scraper_title_test "post 1 in r/stocks top alltime" ~amount:1 "stocks-top-alltime.json" "It's fucking awful seeing the \"Silver\" misinformation campaign everywhere I look";
+  scraper_title_test "post 2 in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" "Companies try to prevent people from trading GME and AMC";
+  scraper_title_test "post 18 in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" "Sign The Petition: Retail Investors Demand Market Transparency! Make the Hedge Funds report their Shorts!";
+  scraper_title_test "post 1 in r/stocks top today" ~amount:1 "stocks-top-today.json" "Why would anyone invest in IBM? Losing money since 2013?";
+  scraper_title_test "post 2 in r/stocks top today" ~amount:2 "stocks-top-today.json" "What's causing ICLN to gradually decline since the January? Do you reckon it will recover?";
+  scraper_title_test "post 9 in r/stocks top today" ~amount:9 "stocks-top-today.json" "What are some aggressive/risky ETFs";
+  scraper_title_test "post 1 in r/investing hot" ~amount:1 "investing-hot.json" "Daily General Discussion and spitballin thread - May 16, 2021";
+  scraper_title_test "post 2 in r/investing hot" ~amount:2 "investing-hot.json" "Daily Advice Thread - All basic help or advice questions must be posted here.";
+  scraper_title_test "post 20 in r/investing hot" ~amount:20 "investing-hot.json" "(US) How will a lazy portfolio handle the inflation we are starting to see?";
+  scraper_title_test "post 1 in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" "What Are Your Moves Tomorrow, May 17, 2021";
+  scraper_title_test "post 2 in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" "Government hates this simple tax trick";
+  scraper_title_test "post 14 in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" "This is not economic boom, this is just recovery !!!!";
+  scraper_body_test "post 1 in r/stocks hot" ~amount:1 "stocks-hot.json" "Please use this thread to discuss your portfolio, learn of other stock tickers, and help out users by giving constructive criticism.\n\nWhy quarterly?  Public companies report earnings quarterly; many investors take this as an opportunity to rebalance their portfolios.  We highly recommend you do some reading:  A list of [relevant posts &amp; book recommendations.](https://www.reddit.com/r/stocks/wiki/index#wiki_relevant_posts_.26amp.3B_book_recommendations)\n\nYou can find stocks on your own by using a scanner like your broker's or [Finviz.](https://finviz.com/screener.ashx)  To help further, here's a list of [relevant websites.](https://www.reddit.com/r/stocks/wiki/index#wiki_relevant_websites.2Fapps)\n\nIf you don't have a broker yet, see our [list of brokers](https://www.reddit.com/r/stocks/wiki/index#wiki_brokers_for_investing) or search old posts.  If you haven't started investing or trading yet, then setup your [paper trading.](https://www.reddit.com/r/stocks/wiki/index#wiki_is_there_a_way_to_practice.3F)\n\nBe aware of [Business Cycle Investing](https://eresearch.fidelity.com/eresearch/markets_sectors/sectors/si_business_cycle.jhtml?tab=sibusiness) which Fidelity issues updates to the state of global business cycles every 1 to 3 months (note: Fidelity changes their links often, so search for it since their take on it is enlightening).  [Investopedia's take on the Business Cycle](https://www.investopedia.com/articles/investing/061316/business-cycle-investing-ratios-use-each-cycle.asp) and their [video.](https://www.investopedia.com/video/play/business-cycle/)\n\nIf you need help with a falling stock price, check out Investopedia's [The Art of Selling A Losing Position](https://www.investopedia.com/articles/02/022002.asp) and their [list of biases.](https://www.investopedia.com/articles/stocks/08/capital-losses.asp)\n\nHere's a list of all the [previous portfolio stickies.](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+%22Rate+My+Portfolio%22+-+r%2FStocks+Quarterly+Thread&amp;restrict_sr=on&amp;include_over_18=on&amp;sort=new&amp;t=all)";
+  scraper_body_test "post 2 in r/stocks hot" ~amount:2 "stocks-hot.json" "This is the daily discussion, so anything stocks related is fine, but the theme for today is on fundamentals, but if fundamentals aren't your thing then just ignore the theme and/or [post your arguments against fundamentals here](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+%22r%2Fstocks+semiannual+arguments+against+TA%22&amp;restrict_sr=on&amp;include_over_18=on&amp;sort=new&amp;t=all) and not in the current post.\n\nSome helpful day to day links, including news:\n\n* [Finviz](https://finviz.com/quote.ashx?t=spy) for charts, fundamentals, and aggregated news on individual stocks\n* [Bloomberg market news](https://www.bloomberg.com/markets)\n* StreetInsider news:\n  * [Market Check](https://www.streetinsider.com/Market+Check) - Possibly why the market is doing what it's doing including sudden spikes/dips\n  * [Reuters aggregated](https://www.streetinsider.com/Reuters) - Global news\n\n-----\n\nMost fundamentals are updated every 3 months due to the fact that corporations release earnings reports every quarter, so traders are always speculating at what those earnings will say, and investors may change the size of their holdings based on those reports.  Expect a lot of volatility around earnings, but it usually doesn't matter if you're holding long term, but keep in mind the importance of earnings reports because a trend of declining earnings or a decline in some other fundamental will drive the stock down over the long term as well.\n\nSee the following word cloud and click through for the wiki:\n\n[Market Cap - Shares Outstanding - Volume - Dividend - EPS - P/E Ratio - EPS Q/Q - PEG - Sales Q/Q - Return on Assets (ROA) - Return on Equity (ROE) - BETA - SMA - quarterly earnings](https://www.reddit.com/r/stocks/wiki/fundamentals-themed-post)\n\nIf you have a basic question, for example \"what is EBITDA,\" then google \"investopedia EBITDA\" and click the Investopedia article on it; do this for everything until you have a more in depth question or just want to share what you learned.\n\nUseful links:\n\n* [Investopedia page](https://www.investopedia.com/fundamental-analysis-4689757/) on fundamental analysis including [Discounted Cash Flow](https://www.investopedia.com/university/dcf/) analysis; see [definition here](https://www.investopedia.com/terms/d/dcf.asp) and read [their PDF on the topic.](http://i.investopedia.com/inv/pdf/tutorials/fundamentalanalysis_intro.pdf)\n* [FINVIZ](https://finviz.com/quote.ashx?t=aapl) for fundamental data, charts, and aggregated news\n* [Earnings Whisper](https://www.earningswhispers.com/stocks/aapl) for earnings details\n\nSee our past [daily discussions here.](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+%22r%2Fstocks+daily+discussion%22&amp;restrict_sr=on&amp;sort=new&amp;t=all)  Also links for:  [Technicals](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+title%3Atechnicals&amp;restrict_sr=on&amp;include_over_18=on&amp;sort=new&amp;t=all) Tuesday, [Options Trading](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+title%3Aoptions&amp;restrict_sr=on&amp;include_over_18=on&amp;sort=new&amp;t=all) Thursday, and [Fundamentals](https://www.reddit.com/r/stocks/search?q=author%3Aautomoderator+title%3Afundamentals&amp;restrict_sr=on&amp;include_over_18=on&amp;sort=new&amp;t=all) Friday.";
+  scraper_body_test "post 7 in r/stocks hot" ~amount:7 "stocks-hot.json" "I was looking into how much I wanna have invested in stocks before I go part time somewhere in the future. I don't really spend a lot of money so most of my income just sits there, with some of it invested.\n\nI know I could easily live off 2k bucks a month, but obviously that takes quite the investment to get passively each month.\n\nWhat are you guys aiming for? What's your strategy to achieve your goal?";
+  scraper_body_test "post 2 in r/stocks new" ~amount:2 "stocks-new.json" "I know that as a general rule most people tend to save the majority of their money to cover their living expenses and only invest any spare capacity of money that they can afford to lose, but considering that I live at home with little to no living expenses, should I take more of a risk with my money and set aside a larger chunk of my savings for investments? I have never invested in the stock market, so my experience is limited and I'm still learning how to analyse trends and financial statements and all that, so I'm a little unsure of how much risk I should really take considering my inexperience. My budget is pretty low as well at just around 5,000 AUD, so in order to really make any worthwhile returns I probably need to invest around half of that. What do you guys think?";
+  scraper_body_test "post 1 in r/stocks rising" ~amount:1 "stocks-rising.json" "http://pdf.secdatabase.com/44/0001172661-21-001130.pdf\n\nSECURITIES AND EXCHANGE COMMISSION\n\nFORM 13F-HR\n\nInitial quarterly Form 13F holdings report filed by institutional managers\n\nFiling Date: 2021-05-14\nPeriod of Report: 2021-03-31 SEC Accession No. 0001172661-21-001130\n\nFILER:\n\nDYMON ASIA CAPITAL (SINGAPORE) PTE. LTD. CIK:1672142\n\nIRS No.: 000000000\nState of Incorp.:U0\nFiscal Year End: 1231\nType: 13F-HR\nAct: 34\nFile No.: 028-17414\nFilm No.: 21922569\n\nMailing Address:\n\nONE TEMASEK AVENUE #11-01 MILLENIA TOWER SINGAPORE U0 039192\n\nBusiness Address:\n\nONE TEMASEK AVENUE #11-01 MILLENIA TOWER SINGAPORE U0 039192 65-67051666";
+  scraper_body_test "post 2 in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" "Not sure about the other trading apps but Trading212 prevents people now from buying shares. Quote:\n\n- Warning! In the interest of mitigating risk for our clients, we have temporarily placed GameStop and AMC Entertainment in reduce-only mode as highly unusual volumes have led to an unprecedented market environment. New positions cannot be opened, existing ones can be reduced or closed. -\n\nNot sure if they are really concerned about their customers, or they've been lobbied by hedge funds to prevent ordinary people from destroying them. I don't care about GME and AMC, I have no position, but now I am angry for this decision. They always go against the poor individuals and let the billionaires save their asses. No one saves us when we go bankrupt by them.\n\nLet that sink in\n\nEdit: thank you for all the rewards and comments! What a great community we are!";
+  scraper_body_test "post 18 in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" "**Sign the petition here: https://www.change.org/sec-amend-13-f**\n\n\nRetail Investors demand more visibility into institutional trading and borrowing. Anyone investing over 1 billion dollars (i.e. hedge funds and other investment institutions) is required to disclose their holdings to promote transparency in our markets - it's called Form 13-F. **But did you know that they only need to disclose it 4 times a year? And did you know its published with a 1 month delay? And did you know that they don't need to disclose all of their positions?**\n\n\nWe the people are asking for a re-evaluation of transparency requirements for Institutional Investors. We have access to technology and data that gives us new sophistication - and are beginning to understand there is a tremendous disparity in access between retail and institutional investors, and are concerned that this access is being used against us, in ways that we genuinely worry could be in flagrant violation of Securities Laws. We believe that with better access to institutional trading data, retail investors can better participate in the market when making buying and selling decisions.\n\n\n**According to Form 13F (https://www.sec.gov/files/form13f.pdf), Institutional Investors only need to disclose their positions 4 times a year. Why?**\n\n\n*Filing of Form 13F. A Manager must file a Form 13F report with the Commission within 45 days after the end of each calendar year and each of the first three calendar quarters of each calendar year. As required by Section 13(f)(5) of the Exchange Act, a Manager which is a bank, the deposits of which are insured in accordance with the Federal Deposit Insurance Act, must file with the appropriate regulatory agency for the bank a copy of every Form 13F report filed with the Commission pursuant to this subsection by or with respect to such bank. Filers who file Form 13F electronically can satisfy their obligation to file with other regulatory agencies by sending (a) a paper copy of the EDGAR filing (provided the Manager removes or blanks out the confidential access codes); (b) the filing in electronic format, if the regulatory agency with which the filing is being made has made provisions to receive filings in electronic format;*\n\n\n**In your FAQ (https://www.sec.gov/divisions/investment/13ffaq.htm), it is clear Institutional Investors are not required to disclose short positions. Why?**\n\n\n*Question 41\nQ: What about short positions?\nA: You should not include short positions on Form 13F. You also should not subtract your short position(s) in a security from your long position(s) in that same security; report only the long position.*\n\n\n**Contact the SEC and let them know retail investors demand increased transparency (https://www.sec.gov/contact-information/sec-directory)**";
+  scraper_body_test "post 1 in r/stocks top today" ~amount:1 "stocks-top-today.json" "I don't get it.  What would be the incentive of investing in a company like IBM?  The stock price has been depreciating since 2013.\n\nI realize they have a nice 4.5% dividend, but does that make up for losing your principle investment?\n\nWhat am I failing to see?";
+  scraper_body_test "post 2 in r/stocks top today" ~amount:2 "stocks-top-today.json" "When I look at the graph of ICLN in the last 10 years, the there's been barely any growth in it until the pandemic hit and suddenly after April 2020, it started growing and kept growing until the beginning of January 2021.\n\nPerhaps this sudden growth is down to the optimism that Biden will promote renewable energy, along with the US government's cash injection to boost the economy during the pandemic.\n\nHowever, now that ICLN is back to its normal trend (4/2011 - 3/2020), do you reckon it will come back to north trending graph any time soon? I bought ICLN at the end of February and now it's more than 27% down. Do you reckon it will grow back any time soon? Or should I give up on it?";
+  scraper_body_test "post 1 in r/investing hot" ~amount:1 "investing-hot.json" "Have a general question?  Want to offer some commentary on markets?  Maybe you would just like to throw out a neat fact that doesn't warrant a self post?  Feel free to post here! \n\nThis thread is for: \n\n* General questions\n* Your personal commentary on markets\n* Opinion gathering on a given stock\n* Non advice beginner questions\n\nKeep in mind that this subreddit, and this thread, is not an appropriate venue for questions that should be directed towards your broker's customer support or google.  \n\nIf you would like to ask a question about your personal situation or if you are asking for advice please keep these posts in the daily advice thread as that thread is more well suited for those questions.\n\nAny posts that should be comments in this thread will likely be removed.";
+  scraper_body_test "post 2 in r/investing hot" ~amount:2 "investing-hot.json" "If your question is \"I have $10,000, what do I do?\" or other \"advice for my personal situation\" questions, you should include relevant information, such as the following:\n\n* How old are you? What country do you live in?  \n* Are you employed/making income? How much?  \n* What are your objectives with this money? (Buy a house? Retirement savings?)  \n* What is your time horizon? Do you need this money next month? Next 20yrs?  \n* What is your risk tolerance? (Do you mind risking it at blackjack or do you need to know its 100% safe?)  \n* What are you current holdings? (Do you already have exposure to specific funds and sectors? Any other assets?)  \n* Any big debts (include interest rate) or expenses?  \n* And any other relevant financial information will be useful to give you a proper answer.  \n\nPlease consider consulting our FAQ first - https://www.reddit.com/r/investing/wiki/faq\nAnd our [side bar](https://www.reddit.com/r/investing/about/sidebar) also has useful resources.  \n\nBe aware that these answers are just opinions of Redditors and should be used as a starting point for your research. You should strongly consider seeing a registered financial rep before making any financial decisions!";
+  scraper_body_test "post 20 in r/investing hot" ~amount:20 "investing-hot.json" "For example, how will a 3-fund or 4-fund portfolio weather the increased inflation we are starting to see?\n\nFor example, with the following vanguard etfs...\n\nvti vxus vnq bnd\n\nI would guess that vxus would do well purely from a US dollar inflation perspective since it is international and therefore priced on other currencies.\n\nI'd expect vnq to do well as well with a weakening dollar.\n\nWith vti, would it be the same? Or would investors move money elsewhere from the s&amp;p 500 companies?\n\nWith bnd, I'd expect it to struggle with inflation?\n\nAny recommendations for adjustment in a portfolio? I see varied opinions online about inflation protected investments and also vtv.";
+  scraper_body_test "post 1 in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" "Your daily trading discussion thread. Please keep the shitposting to a minimum. \n\n^Navigate ^WSB|^We ^recommend ^best ^daily ^DD\n:--|:--                                 \n**DD** | [All](https://reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3ADD) / [**Best Daily**](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ADD&amp;restrict_sr=on&amp;t=day) / [Best Weekly](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ADD&amp;restrict_sr=on&amp;t=week)\n**Discussion** | [All](https://reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3ADiscussion) / [**Best Daily**](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ADiscussion&amp;restrict_sr=on&amp;t=day) / [Best Weekly](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ADiscussion&amp;restrict_sr=on&amp;t=week)\n**YOLO** | [All](https://reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3AYOLO) / [**Best Daily**](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3AYOLO&amp;restrict_sr=on&amp;t=day) / [Best Weekly](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3AYOLO&amp;restrict_sr=on&amp;t=week)\n**Gain** | [All](https://reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3AGain) / [**Best Daily**](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3AGain&amp;restrict_sr=on&amp;t=day) / [Best Weekly](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3AGain&amp;restrict_sr=on&amp;t=week)\n**Loss** | [All](https://reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3ALoss) / [**Best Daily**](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ALoss&amp;restrict_sr=on&amp;t=day) / [Best Weekly](https://www.reddit.com/r/wallstreetbets/search?sort=top&amp;q=flair%3ALoss&amp;restrict_sr=on&amp;t=week)\n\n[Weekly Earnings Discussion Thread](https://www.reddit.com/r/wallstreetbets/search?sort=new&amp;restrict_sr=on&amp;q=flair%3A%22Earnings%20Thread%22)\n\n**Read the [rules](https://www.reddit.com/r/wallstreetbets/wiki/contentguide) and make sure other people follow them.**\n\nTry [No Meme Mode](https://www.reddit.com/r/wallstreetbets/search/?q=-flair%3AMeme%20-flair%3ASatire%20-flair%3AShitpost&amp;restrict_sr=1&amp;t=day&amp;sort=hot), also accessible through the top bar.\n\nFollow [@Official_WSB](https://twitter.com/Official_WSB) on Twitter, all other accounts are impersonators.";
+  scraper_body_test "post 2 in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" "";
+  scraper_score_test "post 1 in r/stocks hot" ~amount:1 "stocks-hot.json" 486;
+  scraper_score_test "post 2 in r/stocks hot" ~amount:2 "stocks-hot.json" 62;
+  scraper_score_test "post 7 in r/stocks hot" ~amount:7 "stocks-hot.json" 468;
+  scraper_score_test "post 1 in r/stocks new" ~amount:1 "stocks-new.json" 0;
+  scraper_score_test "post 2 in r/stocks new" ~amount:2 "stocks-new.json" 2;
+  scraper_score_test "post 11 in r/stocks new" ~amount:11 "stocks-new.json" 10;
+  scraper_score_test "post 1 in r/stocks rising" ~amount:1 "stocks-rising.json" 13;
+  scraper_score_test "post 2 in r/stocks rising" ~amount:2 "stocks-rising.json" 3;
+  scraper_score_test "post 15 in r/stocks rising" ~amount:15 "stocks-rising.json" 117;
+  scraper_score_test "post 1 in r/stocks top alltime" ~amount:1 "stocks-top-alltime.json" 101660;
+  scraper_score_test "post 2 in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" 88217;
+  scraper_score_test "post 18 in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" 17084;
+  scraper_score_test "post 1 in r/stocks top today" ~amount:1 "stocks-top-today.json" 906;
+  scraper_score_test "post 2 in r/stocks top today" ~amount:2 "stocks-top-today.json" 608;
+  scraper_score_test "post 9 in r/stocks top today" ~amount:9 "stocks-top-today.json" 36;
+  scraper_score_test "post 1 in r/investing hot" ~amount:1 "investing-hot.json" 13;
+  scraper_score_test "post 2 in r/investing hot" ~amount:2 "investing-hot.json" 10;
+  scraper_score_test "post 20 in r/investing hot" ~amount:20 "investing-hot.json" 40;
+  scraper_score_test "post 1 in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" 254;
+  scraper_score_test "post 2 in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" 17067;
+  scraper_score_test "post 14 in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" 321;
+  scraper_ratio_test "post 1 in r/stocks hot" ~amount:1 "stocks-hot.json" 0.99;
+  scraper_ratio_test "post 2 in r/stocks hot" ~amount:2 "stocks-hot.json" 0.92;
+  scraper_ratio_test "post 7 in r/stocks hot" ~amount:7 "stocks-hot.json" 0.94;
+  scraper_ratio_test "post 1 in r/stocks new" ~amount:1 "stocks-new.json" 0.5;
+  scraper_ratio_test "post 2 in r/stocks new" ~amount:2 "stocks-new.json" 1.0;
+  scraper_ratio_test "post 11 in r/stocks new" ~amount:11 "stocks-new.json" 0.86;
+  scraper_ratio_test "post 1 in r/stocks rising" ~amount:1 "stocks-rising.json" 0.84;
+  scraper_ratio_test "post 2 in r/stocks rising" ~amount:2 "stocks-rising.json" 0.8;
+  scraper_ratio_test "post 15 in r/stocks rising" ~amount:15 "stocks-rising.json" 0.81;
+  scraper_ratio_test "post 1 in r/stocks top alltime" ~amount:1 "stocks-top-alltime.json" 0.9;
+  scraper_ratio_test "post 2 in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" 0.94;
+  scraper_ratio_test "post 18 in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" 0.99;
+  scraper_ratio_test "post 1 in r/stocks top today" ~amount:1 "stocks-top-today.json" 0.94;
+  scraper_ratio_test "post 2 in r/stocks top today" ~amount:2 "stocks-top-today.json" 0.93;
+  scraper_ratio_test "post 9 in r/stocks top today" ~amount:9 "stocks-top-today.json" 0.83;
+  scraper_ratio_test "post 1 in r/investing hot" ~amount:1 "investing-hot.json" 0.79;
+  scraper_ratio_test "post 2 in r/investing hot" ~amount:2 "investing-hot.json" 0.82;
+  scraper_ratio_test "post 20 in r/investing hot" ~amount:20 "investing-hot.json" 0.79;
+  scraper_ratio_test "post 1 in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" 0.87;
+  scraper_ratio_test "post 2 in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" 0.96;
+  scraper_ratio_test "post 14 in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" 0.84;
+  scraper_excep_test "r/stocks hot" "stocks-hot.json";
+  scraper_excep_test "r/stocks hot with 50" ~amount:50 "stocks-hot.json";
+  scraper_excep_test "r/stocks hot with 100" ~amount:100 "stocks-hot.json";
+  scraper_excep_test "r/stocks new" "stocks-new.json";
+  scraper_excep_test "r/stocks rising" "stocks-rising.json";
+  scraper_excep_test "r/stocks top alltime" "stocks-top-alltime.json";
+  scraper_excep_test "r/stocks top today" "stocks-top-today.json";
+  scraper_excep_test "r/investing hot" "investing-hot.json";
+  scraper_excep_test "r/wallstreetbets hot" "wallstreetbets-hot.json";
+]
+
+let cashset_test ticker expec =
+  "cashset: " ^ ticker >:: fun _ -> 
+    assert_equal expec (Cashset.is_stock_name ticker) ~printer:string_of_bool
+
+let cashset_tests = [
+  cashset_test "AMC" true;
+  cashset_test "$AMC" true;
+  cashset_test "AMc" false;
+  cashset_test "AmC" false;
+  cashset_test "aMC" false;
+  cashset_test "amc" false;
+  cashset_test "$amc" false;
+  cashset_test "GME" true;
+  cashset_test "$GME" true;
+  cashset_test "AAPL" true;
+  cashset_test "AMZN" true;
+  cashset_test "MKC" true;
+  cashset_test "$ASO" true;
+  cashset_test "ZYXI" true;
+  cashset_test "SPRB" true;
+  cashset_test "OSTK" true;
+  cashset_test "LXFR" true;
+  cashset_test "HOLX" true;
+  cashset_test "HOME" true;
+  cashset_test "HOMB" true;
+  cashset_test "SPCE" true;
+  cashset_test "$RBLX" true;
+  cashset_test "RETA" true;
+  cashset_test "UPWK" true;
+  cashset_test "CVLT" true;
+  cashset_test "TDUP" true;
+  cashset_test "OSTK" true;
+  cashset_test "TSLA" true;
+  cashset_test "F" true;
+  cashset_test "GE" true;
+  cashset_test "DIS" true;
+  cashset_test "$MSFT" true;
+  cashset_test "NOK" true;
+  cashset_test "GPRO" true;
+  cashset_test "DAL" true;
+  cashset_test "I" false;
+  cashset_test "AND" false;
+  cashset_test "OR" false;
+  cashset_test "THE" false;
+  cashset_test "NOT" false;
+  cashset_test "WE" false;
+  cashset_test "OMG" false;
+  cashset_test "IF" false;
+  cashset_test "WHAT" false;
+  cashset_test "TIL" false;
+]
+
+let parser_stocks_test name ?(amount = 24) json_file expec_stocks = 
+  let subreddit = scrape_json ~amount ("testing_files/" ^ json_file) in
+  let stocks = List.sort String.compare (stock_names @@ parse subreddit) in
+  let sort_expec = List.sort String.compare expec_stocks in
+  "parser stocks: " ^ name >:: fun _ -> 
+    assert_equal sort_expec stocks ~printer:(pp_list pp_string)
+
+type conn = POS | NEG | NEU
+
+let parser_conn_test name str expec_conn = 
+  let conn = connotation_str str in
+  let conn_range = match expec_conn with
+  | POS -> conn >= 0.05 
+  | NEG -> conn <= -0.05
+  | NEU -> conn > -0.05 && conn < 0.05
+  in
+  "parser connotation: " ^ name >:: fun _ -> 
+    assert_bool "Connotation does not match expected range" conn_range
+
+let parser_tests = [
+  (* parser_stocks_test "1 post in r/stocks hot" ~amount:1 "stocks-hot.json" [];
+  parser_stocks_test "2 posts in r/stocks hot" ~amount:2 "stocks-hot.json" ["PEG"];
+  parser_stocks_test "7 posts in r/stocks hot" ~amount:7 "stocks-hot.json" ["PEG"];
+  parser_stocks_test "24 posts in r/stocks hot" ~amount:24 "stocks-hot.json" ["ABBV"; "ALTO"; "ATI"; "CTXR"; "CVX"; "GO"; "NIO"; "PEG"; "REGN"; "RH"; "SPG"; "T"; "TOO"];
+  parser_stocks_test "1 post in r/stocks new" ~amount:1 "stocks-new.json" [];
+  parser_stocks_test "2 posts in r/stocks new" ~amount:2 "stocks-new.json" [];
+  parser_stocks_test "11 posts in r/stocks new" ~amount:11 "stocks-new.json" ["ATI"; "TOO"];
+  parser_stocks_test "24 posts in r/stocks new" ~amount:24 "stocks-new.json" ["ABBV"; "ALTO"; "ATI"; "B"; "CTXR"; "CVX"; "DISCA"; "DISCB"; "DISCK"; "K"; "NIO"; "PLAY"; "REGN"; "RH"; "SPG"; "SPLK"; "SUMO"; "TOO"; "TSE"];
+  parser_stocks_test "1 post in r/stocks rising" ~amount:1 "stocks-rising.json" [];
+  parser_stocks_test "2 posts in r/stocks rising" ~amount:2 "stocks-rising.json" [];
+  parser_stocks_test "15 posts in r/stocks rising" ~amount:15 "stocks-rising.json" ["ABBV"; "CVX"; "GO"; "REGN"; "RH"; "T"];
+  parser_stocks_test "24 posts in r/stocks rising" ~amount:24 "stocks-rising.json" ["ABBV"; "ALTO"; "CTXR"; "CVX"; "GO"; "NIO"; "RDFN"; "REGN"; "RH"; "T"; "UK"; "YETI"];
+  parser_stocks_test "1 post in r/stocks top alltime" ~amount:1 "stocks-top-alltime.json" [];
+  parser_stocks_test "2 posts in r/stocks top alltime" ~amount:2 "stocks-top-alltime.json" ["AMC"; "GME"];
+  parser_stocks_test "18 posts in r/stocks top alltime" ~amount:18 "stocks-top-alltime.json" ["AMC"; "ATH"; "CTO"; "DATA"; "DD"; "EV"; "GME"; "L"; "MORE"; "MY"; "RH"; "TD"; "VERY"; "WELL"];
+  parser_stocks_test "24 posts in r/stocks top alltime" ~amount:24 "stocks-top-alltime.json" ["AMC"; "ATH"; "B"; "C"; "CTO"; "DATA"; "DD"; "DM"; "EV"; "GME"; "L"; "MORE"; "MY"; "RH"; "TD"; "TV"; "VERY"; "WELL"];
+  parser_stocks_test "1 post in r/stocks top today" ~amount:1 "stocks-top-today.json" [];
+  parser_stocks_test "2 posts in r/stocks top today" ~amount:2 "stocks-top-today.json" [];
+  parser_stocks_test "9 posts in r/stocks top today" ~amount:9 "stocks-top-today.json" ["GO"; "T"];
+  parser_stocks_test "24 posts in r/stocks top today" ~amount:24 "stocks-top-today.json" ["ABBV"; "ALTO"; "ATI"; "CVX"; "DD"; "GO"; "RDFN"; "REGN"; "RH"; "SPG"; "T"; "TOO"; "TV"; "UK"; "YETI"];
+  parser_stocks_test "1 post in r/investing hot" ~amount:1 "investing-hot.json" [];
+  parser_stocks_test "2 posts in r/investing hot" ~amount:2 "investing-hot.json" [];
+  parser_stocks_test "20 posts in r/investing hot" ~amount:20 "investing-hot.json" ["AI"; "AMC"; "BABA"; "CTV"; "DCA"; "DCF"; "DD"; "DISH"; "FUND"; "GME"; "GOOGL"; "ID"; "JD"; "LMT"; "M"; "MSCI"; "NIO"; "ONE"; "Q"; "RTX"; "T"; "TKC"; "TTD"; "TV"; "UBER"; "UPS"];
+  parser_stocks_test "24 posts in r/investing hot" ~amount:24 "investing-hot.json" ["AI"; "AMC"; "BABA"; "CTV"; "DCA"; "DCF"; "DD"; "DISH"; "FUND"; "GME"; "GOOGL"; "HUGE"; "ID"; "JD"; "LMT"; "M"; "MSCI"; "NIO"; "ONE"; "Q"; "RTX"; "T"; "TKC"; "TTD"; "TV"; "UBER"; "UPS"; "X"];
+  parser_stocks_test "1 post in r/wallstreetbets hot" ~amount:1 "wallstreetbets-hot.json" [];
+  parser_stocks_test "2 posts in r/wallstreetbets hot" ~amount:2 "wallstreetbets-hot.json" [];
+  parser_stocks_test "14 posts in r/wallstreetbets hot" ~amount:14 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "OC"; "ONE"; "PE"; "PLTR"; "SE"; "UWMC"];
+  parser_stocks_test "24 posts in r/wallstreetbets hot" ~amount:24 "wallstreetbets-hot.json" ["AMC"; "ANY"; "API"; "DD"; "DIS"; "GDP"; "HD"; "OC"; "ONE"; "PE"; "PLTR"; "RIOT"; "SE"; "UWMC"]; *)
+  parser_conn_test "postive" "VADER is smart, handsome, and funny." POS;
+  parser_conn_test "postive punctuation" "VADER is smart, handsome, and funny!" POS;
+  parser_conn_test "postive enhancer" "VADER is very smart, handsome, and funny." POS;
+  parser_conn_test "postive captials" "VADER is VERY SMART, handsome, and FUNNY." POS;
+  parser_conn_test "postive capitals and punctuation" "VADER is VERY SMART, handsome, and FUNNY!!!" POS;
+  parser_conn_test "postive emphasis" "VADER is VERY SMART, uber handsome, and FRIGGIN FUNNY!!!" POS;
+  parser_conn_test "positive negation" "VADER is not smart, handsome, nor funny." NEG;
+  parser_conn_test "positive simple" "The book was good." POS;
+  parser_conn_test "complex positive" "At least it isn't a horrible book." POS;
+  parser_conn_test "postive diminisher" "The book was only kind of good." POS;
+  parser_conn_test "longer sentence" "The plot was good, but the characters are uncompelling and the dialog is not great." NEG;
+  parser_conn_test "negative mispelling" "Today SUX!" NEG;
+  parser_conn_test "social media slang" "Today only kinda sux! But I'll get by, lol" POS;
+  parser_conn_test "emoticons" "Make sure you :) or :D today!" POS;
+  parser_conn_test "negative negation" "Not bad at all" POS;
+  parser_conn_test "random positive" "the dog is very cute and fluffy" POS;
+  parser_conn_test "random positive" "last week's book was very interesting and profound" POS;
+  parser_conn_test "random positive" "Superman is so cool because he saves people" POS;
+  parser_conn_test "random positive" "I saw your mom yesterday and she was very nice to me" POS;
+  parser_conn_test "random positive" "This orange is not sour at all, yummy and tasy and sweet" POS;
+  parser_conn_test "random positive" "food tastes delicious when eaten" POS;
+  parser_conn_test "random negative" "eww that lunch was gross and yucky" NEG;
+  parser_conn_test "random negative" "my house is super ugly and messy right now" NEG;
+  parser_conn_test "random negative" "I hate when people brush their teeth while walking" NEG;
+  parser_conn_test "random negative" "today was a very bad no good dady" NEG;
+  parser_conn_test "random negative" "water splashed all over me, not cool, very unfortunate, super unhappy and mad!!!" NEG;
+  parser_conn_test "random negative" "I do not like the cat that scratched me and attacked me" NEG;
+  parser_conn_test "random neutral" "I exist" NEU;
+  parser_conn_test "random neutral" "that thing" NEU;
+]
+
+let portfolio_ticker_test name portfolio expec_tickers = 
+  "portfolio tickers: " ^ name >:: fun _ -> 
+    assert_equal expec_tickers (list_of_tickers portfolio)
     ~printer:(pp_list pp_string)
 
-let check_post_props name post exp_upvote_ratio exp_upvote_score =
-  let correct_uvr = Parser.upvote_ratio post = exp_upvote_ratio in
-  let correct_uvs = Parser.upvote_score post = exp_upvote_score in
-  name >:: fun _ -> assert_equal (correct_uvr && correct_uvs) true
+let portfolio_stocks_test name portfolio expec_tickers = 
+  "portfolio tickers: " ^ name >:: fun _ -> 
+    assert_equal expec_tickers (list_of_stocks portfolio)
 
-let parser_tests =
-  let subreddit_1 =
-    Scraper.scrape_json "testing_files/stocksnew.json" ~amount:1
-  in
-  let stocks_1 = Parser.parse subreddit_1 in
-  let subreddit_10 =
-    Scraper.scrape_json "testing_files/stocksnew.json" ~amount:10
-  in
-  let stocks_10 = Parser.parse subreddit_10 in
-  [
-    check_stock_names "Stock Names for 1 post"
-      (Parser.stock_names stocks_1)
-      [ "NP"; "TIL" ];
-    check_post_props "1st Post of stock \"NP\""
-      (List.hd (snd (Parser.data stocks_1 "NP")))
-      1. 3;
-    check_stock_names "Stock Names for 10 posts"
-      (Parser.stock_names stocks_10)
-      [
-        "UWMC";
-        "NP";
-        "TIL";
-        "VIAC";
-        "SI";
-        "AM";
-        "PE";
-        "SEE";
-        "ANY";
-        "GME";
-        "SO";
-        "AMC";
-        "CBS";
-        "DD";
-      ];
-    check_post_props "Third Post of stock \"GME\""
-      (List.hd (snd (Parser.data stocks_10 "GME")))
-      1. 1;
-  ]
+let portfolio_worth_test name portfolio expec_worth = 
+  "portfolio worth: " ^ name >:: fun _ -> 
+    assert_equal expec_worth (net_worth portfolio)
+    ~printer:string_of_float
 
-let cashset_tests =
-  [
-    function_test_bool "Common words fail" (Cashset.is_stock_name "I") false;
-    function_test_bool "Common words fail" (Cashset.is_stock_name "AND") false;
-    function_test_bool "Common words fail" (Cashset.is_stock_name "OR") false;
-    function_test_bool "Stock Names return true GME"
-      (Cashset.is_stock_name "GME")
-      true;
-    function_test_bool "Stock Names return true AMC"
-      (Cashset.is_stock_name "AMC")
-      true;
-    function_test_bool "Stock Names return true MKC"
-      (Cashset.is_stock_name "MKC")
-      true;
-    function_test_bool "Stock Namxes return true $ASO"
-      (Cashset.is_stock_name "$ASO")
-      true;
-    function_test_bool "$Stock Names return true $GME"
-      (Cashset.is_stock_name "$GME")
-      true;
-    function_test_bool "$Stock Names return true $AMC"
-      (Cashset.is_stock_name "$AMC")
-      true;
-    function_test_bool "$Stock Names return true $MKC"
-      (Cashset.is_stock_name "$MKC")
-      true;
-    function_test_bool "7000 Stock Names return true ZYXI"
-      (Cashset.is_stock_name "ZYXI")
-      true;
-    function_test_bool "6000 Stock Names return true SPRB"
-      (Cashset.is_stock_name "SPRB")
-      true;
-    function_test_bool "5000 Stock Names return true OSTK"
-      (Cashset.is_stock_name "OSTK")
-      true;
-    function_test_bool "4000 Stock Names return true LXFR"
-      (Cashset.is_stock_name "LXFR")
-      true;
-    function_test_bool "3234 Stock Names return true HOLX"
-      (Cashset.is_stock_name "HOLX")
-      true;
-    function_test_bool "3235 Stock Names return true HOMB"
-      (Cashset.is_stock_name "HOMB")
-      true;
-    function_test_bool "3236 Stock Names return true HOME"
-      (Cashset.is_stock_name "HOME")
-      true;
-  ]
+let portfolio_liquidity_test name portfolio expec_liq = 
+  "portfolio worth: " ^ name >:: fun _ -> 
+    assert_equal expec_liq (liquidity portfolio)
+    ~printer:string_of_float
+
+let portfolio_equal_test name portfolio expec_portfolio = 
+  "portfolio equal: " ^ name >:: fun _ -> 
+    assert_equal 0 (compare expec_portfolio portfolio)
+    ~printer:string_of_int
+
+let portfolio_tests = [
+  portfolio_ticker_test "empty portfolio has no tickers" empty_portfolio [];
+  portfolio_stocks_test "empty portfolio has no stocks" empty_portfolio [];
+  portfolio_worth_test "empty portfolio has no worth" empty_portfolio 0.;
+  portfolio_liquidity_test "empty portfolio has no liquidity" empty_portfolio 0.;
+  portfolio_equal_test "empty portfolio is still empty when sold" empty_portfolio (refresh empty_portfolio);
+  portfolio_equal_test "empty portfolio is still empty when copied" empty_portfolio (copy empty_portfolio);
+  portfolio_equal_test "empty portfolio is still empty when sold" empty_portfolio (sell_all empty_portfolio);
+]
 
 let suite =
-  "DEFINITELY NOT A COPY OF A2 (CamelStonks Test Suite)"
-  >::: List.flatten [ parser_tests; scraper_tests; cashset_tests ]
+  "CamelStonks Test Suite"
+  >::: List.flatten [ scraper_tests; cashset_tests; parser_tests; portfolio_tests; ]
 
 let _ = run_test_tt_main suite
