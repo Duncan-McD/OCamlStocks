@@ -14,7 +14,8 @@ val empty_portfolio : t
 (** [empty_portfolio] is an initial empty portfolio*)
 
 val portfolio_gain_loss : t -> float
-(** [portfolio_gain_loss p] is the net gain or loss in the portfolio [p] since last refresh*)
+(** [portfolio_gain_loss p] is the net gain or loss in the portfolio [p] since
+ last refresh*)
 
 val net_worth : t -> float
 (** [net_worth p] is the net worth of stock portfolio [p]*)
@@ -23,7 +24,8 @@ val liquidity : t -> float
 (** [liquidity p] is the amount of free liquidity the portfolio [p] has*)
 
 val change_liquidity : t -> float -> t
-(** [change_liquidity p f] is portfolio p with f added to your current liquidity*)
+(** [change_liquidity p f] is portfolio p with f added to your current 
+liquidity*)
 
 (** {2 Stock Functions}*)
 
@@ -34,7 +36,8 @@ val ticker : stock -> string
 (** [ticker s] is the stock ticker of stock [s]*)
 
 val stock_gain_loss : stock -> float
-(** [stock_gain_loss s] is the net gain or loss of a stock [s] since last refresh*)
+(** [stock_gain_loss s] is the net gain or loss of a stock [s] since last
+ refresh*)
 
 (** {2 Getter Functions}*)
 
@@ -85,7 +88,8 @@ val compare : t -> t -> int
     and 0 if they have the same net worth*)
 
 val vars : t -> float * float * float * float
-(**[vars p] is the tuple of constants used by algorithm to generate this portfolio*)
+(**[vars p] is the tuple of constants used by algorithm to generate 
+this portfolio*)
 
 val portfolio_of_json : Yojson.Basic.t -> t
 

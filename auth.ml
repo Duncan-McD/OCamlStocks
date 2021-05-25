@@ -67,7 +67,7 @@ and (* [login prompt] is the user email once they have logged in *)
        Invalid login credentials. Type anything (e.g. \"back\") to go back, or \
        press enter to try again.\n";
 
-    correct_input Login )
+    correct_input Login)
   else (
     print_string "\nName: ";
 
@@ -86,7 +86,7 @@ and (* [login prompt] is the user email once they have logged in *)
             | password ->
                 if auth_user (email, password) then
                   (Login, Saveload.load_user email)
-                else login Invalid_Input ) ) )
+                else login Invalid_Input)))
 
 and (* [signup prompt] is the user email once they have signed up *)
     signup prompt =
@@ -120,7 +120,7 @@ and (* [signup prompt] is the user email once they have signed up *)
             | password ->
                 if Bool.not (auth_user (email, password)) then
                   (Signup, User.create email name password)
-                else login Already_Taken ) ) )
+                else login Already_Taken)))
 
 (** [correct_input login_or_signup] brings the user back to the login/signup 
     menu or re prompts them for their user name and password through the login 

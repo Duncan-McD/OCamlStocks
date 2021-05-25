@@ -91,7 +91,7 @@ let string_of_subreddit_ordering (ordering : Scraper.subreddit_ordering) =
       | ThisWeek -> "ThisWeek"
       | ThisMonth -> "ThisMonth"
       | ThisYear -> "ThisYear"
-      | AllTime -> "AllTime" )
+      | AllTime -> "AllTime")
 
 (**[fst4 t] is the first element in 4-tuple [t]*)
 let fst4 (quad : float * float * float * float) =

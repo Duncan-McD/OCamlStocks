@@ -20,7 +20,8 @@ exception SubredditNotFound of string
 (** Raised when a subreddit is not found matching the url *)
 
 exception TooManyPostsRequested of int
-(** Raised when a user requests to parse more posts than there is in the subreddit*)
+(** Raised when a user requests to parse more posts than there is in 
+the subreddit*)
 
 exception ExitLoop of int
 (** Raised when a user exits the while loop*)

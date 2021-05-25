@@ -1,18 +1,24 @@
-(** [cashtable] is the hashtable that stores the hashed names of stocks as keys with value 0 *)
+(** [cashtable] is the hashtable that stores the hashed names of stocks as 
+keys with value 0 *)
 let cashtable_size = 10624
 
 let cashtable = Hashtbl.create cashtable_size
 
-(** [word_hashtable] is the hashtable that stores the hashed names of common words that may be the same as a stock ticker 0 *)
+(** [word_hashtable_size] is the size of word_hashtable *)
 let word_hashtbl_size = 53
 
+(** [word_hashtable] is the hashtable that stores the hashed names of common 
+words that may be the same as a stock ticker 0 *)
 let word_hashtbl = Hashtbl.create word_hashtbl_size
 
+(** [stock_file] is the csv file with stock tickers*)
 let stock_file = "stocks.csv"
 
+(** [words_file] is the csv file with common words used by redditers*)
 let words_file = "commonwords.csv"
 
-(** [parse_line str] is the string that occurs before the ',' in a given string *)
+(** [parse_line str] is the string that occurs before the ',' in a given 
+string *)
 let rec parse_line str =
   let endat = String.index str ',' in
   String.sub str 0 endat
@@ -21,7 +27,8 @@ let rec parse_line str =
 let build_word_hashtable (csv_line : string) =
   Hashtbl.add word_hashtbl (Hashtbl.hash csv_line) 0
 
-(** [add_to_stock_hashtbl csv_line] adds [csv_line] to [cashtable] and adds ($ ^ [csv_line]) to [cashtable] if [csv_line] is not in [word_hashtl] *)
+(** [add_to_stock_hashtbl csv_line] adds [csv_line] to [cashtable] and adds 
+($ ^ [csv_line]) to [cashtable] if [csv_line] is not in [word_hashtl] *)
 let add_to_stock_hashtbl (csv_line : string) =
   if Hashtbl.mem word_hashtbl (Hashtbl.hash csv_line) = false then
     Hashtbl.add cashtable (Hashtbl.hash csv_line) 0;
@@ -50,5 +57,6 @@ let () =
   done;
   close_in ic
 
-(** [is_stock_name s] is true if [s] is the name of a stock on the stock market *)
+(** [is_stock_name s] is true if [s] is the name of a stock on the stock 
+  market *)
 let is_stock_name (name : string) = Hashtbl.mem cashtable (Hashtbl.hash name)
