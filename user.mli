@@ -61,7 +61,8 @@ val set_last_daily_task_timestamp : t -> float -> t
 
 val last_daily_task_timestamp : t -> float
 (** [last_daily_task_timestamp u] is the last time the user u did daily
-    tasks. This time is the amount of seconds since 00:00:00 GMT, Jan. 1, 1970*)
+    tasks. This time is the amount of seconds since 00:00:00 GMT, Jan. 1,
+     1970*)
 
 val time_for_daily_tasks : t -> float -> bool
 (** [time_for_daily_tasks u t] is true if it has been at least a day since the 

@@ -107,7 +107,8 @@ let set_last_daily_task_timestamp user timestamp =
 
 open Yojson.Basic.Util
 
-(**[portfolio_list_to_json j acc] is the json representation of portfolio list [j]*)
+(**[portfolio_list_to_json j acc] is the json representation of portfolio
+ list [j]*)
 
 let rec portfolio_list_to_json (portfolio_list : Portfolio.t list) acc =
   match portfolio_list with

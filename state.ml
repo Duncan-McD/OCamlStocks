@@ -7,7 +7,8 @@ type action =
   | Refresh_and_Show
   | Logout
   | Quit
-  | Optimize (* print time since last optimize, are you sure u'd like to optimize?*)
+  | Optimize (* print time since last optimize, are you sure u'd like to
+                optimize?*)
   | Configure
   | Configure_SR_Subreddits
   | Configure_OP_Consts
@@ -26,7 +27,8 @@ type action =
   | Account_Delete
 
 (* when performing any actions on user portfolio that return a new portfolio,
-    save old portfolio to past_portfolios and set returned portfolio as current *)
+    save old portfolio to past_portfolios and set returned portfolio 
+    as current *)
 (* when going into configure specific settings | print current settings  *)
 type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 
@@ -177,7 +179,7 @@ let action_of_string state s =
       try action_of_string_configure state s'
       with InvalidAction s -> (
         try action_of_string_graph state s'
-        with InvalidAction s -> action_of_string_account state s' ) )
+        with InvalidAction s -> action_of_string_account state s'))
   in
   if is_valid_action state.state result then result
   else raise (InapplicableAction (s, string_of_action state.state))
@@ -191,12 +193,12 @@ let menu ?(initial = false) state =
       "\nOStocker Actions Menu:\n\n"
   else if state.auth = Login then
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ( "\nWelcome back " ^ User.name state.user
-      ^ "! In case you forgot, here are your options:\n\n" )
+      ("\nWelcome back " ^ User.name state.user
+     ^ "! In case you forgot, here are your options:\n\n")
   else
     ANSITerminal.print_string [ ANSITerminal.magenta ]
-      ( "\nWelcome, " ^ User.name state.user
-      ^ "! Below you can see all of the options available to you.\n\n" );
+      ("\nWelcome, " ^ User.name state.user
+     ^ "! Below you can see all of the options available to you.\n\n");
   print_endline ("Email: " ^ User.email state.user);
   print_endline
     "\"help\" : walk you through how I works and how to use me\n\
@@ -415,7 +417,7 @@ let rec configure_liquidity state =
       state.user <- new_user
     with Failure f ->
       print_endline "Not a Float - Please Try again";
-      configure_liquidity state )
+      configure_liquidity state)
   else if String.length input > 7 && String.sub input 0 6 = "remove" then (
     try
       let f = float_of_string (String.sub input 7 (String.length input - 7)) in
@@ -424,10 +426,10 @@ let rec configure_liquidity state =
       state.user <- new_user
     with Failure f ->
       print_endline "Not a Float - Please Try again";
-      configure_liquidity state )
+      configure_liquidity state)
   else (
     print_endline "Invalid input";
-    configure_liquidity state )
+    configure_liquidity state)
 
 (** [convert_seconds_days seconds] is seconds to days *)
 let convert_seconds_days s = s /. (24. *. 60. *. 60.)
@@ -469,9 +471,9 @@ let rec optimize state =
   let time_since = Unix.time () -. User.last_daily_task_timestamp state.user in
   let time_since = convert_seconds_days time_since in
   ANSITerminal.print_string [ ANSITerminal.blue ]
-    ( "\nIt has been "
+    ("\nIt has been "
     ^ get_friendly_time time_since
-    ^ " since you last optimized..." );
+    ^ " since you last optimized...");
   print_endline
     "\n\
      It is reccomended that you wait around a day before optimization cycles \
@@ -485,7 +487,7 @@ let rec optimize state =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    optimize state )
+    optimize state)
 
 (** [change_username state] prompts the user to change their username and 
     updates [state] accordingly*)
@@ -501,12 +503,12 @@ let rec change_username state =
     print_string "> ";
     let new_username = read_line () in
     let new_user = User.set_username state.user new_username in
-    state.user <- new_user )
+    state.user <- new_user)
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_username state )
+    change_username state)
 
 (** [change_email state] prompts the user to change their email and updates 
     [state] accordingly *)
@@ -522,12 +524,12 @@ let rec change_email state =
     print_string "> ";
     let new_email = read_line () in
     let new_user = User.set_email state.user new_email in
-    state.user <- new_user )
+    state.user <- new_user)
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_email state )
+    change_email state)
 
 (** [change_password state] prompts the user to change their password and 
     updates [state] accordingly *)
@@ -543,12 +545,12 @@ let rec change_password state =
     print_string "> ";
     let new_password = read_line () in
     let new_user = User.set_password state.user new_password in
-    state.user <- new_user )
+    state.user <- new_user)
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "\n Invalid Input use Y or N...\n";
-    change_username state )
+    change_username state)
 
 (** [do_delete state] prompts the user to delete their account and updates 
     [state] accordingly *)
@@ -561,12 +563,12 @@ let rec do_delete state =
   let result = read_line () in
   if result = "Y" then (
     Saveload.delete_user state.user;
-    raise (LogoutAction "delete") )
+    raise (LogoutAction "delete"))
   else if result = "N" then ()
   else (
     ANSITerminal.print_string [ ANSITerminal.yellow ]
       "\n Invalid Input use Y or N...\n";
-    do_delete state )
+    do_delete state)
 
 (** [do_graph_networth state] graphs the user;s networth *)
 let do_graph_networth state = Grapher.graph_net_worth state.user
@@ -598,7 +600,7 @@ let rec do_graph_stock state =
   else (
     ANSITerminal.print_string [ ANSITerminal.yellow ]
       "\n Invalid Input use Y or N...\n";
-    do_graph_stock state )
+    do_graph_stock state)
 
 (** [do_configure_tests state] prompts the user to configure the number of 
     uniform distribution tests *)
@@ -647,7 +649,7 @@ let rec ask_for_const message =
     if var <= 0.0 || var > 1.0 then (
       ANSITerminal.print_string [ ANSITerminal.red ]
         "Invalid Input: Out of Bounds. Try again...";
-      ask_for_const message )
+      ask_for_const message)
     else var
   with Failure f ->
     ANSITerminal.print_string [ ANSITerminal.red ]
@@ -723,7 +725,7 @@ let rec ask_for_ordering () =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: that was not an option. Try again...";
-    ask_for_ordering () )
+    ask_for_ordering ())
 
 (** [ask_for_name ()] prompts the user to enter a subreddit name *)
 let rec ask_for_name () =
@@ -767,7 +769,7 @@ let rec remove_subreddit state =
   if List.length subreddit_strings = 0 then (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "There is no subreddits add one first before removing";
-    () )
+    ())
   else if List.mem result subreddit_strings then
     let new_subreddits = remove_sub subreddits result [] in
     let new_config = Config.set_subreddits config new_subreddits in
@@ -776,7 +778,7 @@ let rec remove_subreddit state =
   else (
     ANSITerminal.print_string [ ANSITerminal.red ]
       "Invalid Input: that stock was not an option. Try again...";
-    remove_subreddit state )
+    remove_subreddit state)
 
 (** [add_subreddit state] prompts the user to input subreddit data and updates 
     [state] accordingly *)
@@ -821,7 +823,8 @@ let do_configure_subreddits state = ask_for_change state
 
 let update state action =
   match action with
-  (* time_for_daily_tasks will return true if call optizimer function or not in alg *)
+  (* time_for_daily_tasks will return true if call optizimer function or not
+     in alg *)
   | Help -> help ()
   | Menu_Initial -> menu state ~initial:true
   | Menu -> menu state

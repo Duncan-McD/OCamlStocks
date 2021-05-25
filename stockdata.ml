@@ -59,7 +59,8 @@ let rating_selector = "body > div + div + script"
 (* [does_not_exist_selector] is the css selector to indicate stock existence *)
 let does_not_exist_selector = "#lookup-page > section > div > h2 > span"
 
-(* [does_not_exist_selector2] is a secondary css selector to indicate stock existence *)
+(* [does_not_exist_selector2] is a secondary css selector to indicate 
+stock existence *)
 let does_not_exist_selector2 =
   "#quote-summary > \
    div.D\\(ib\\).W\\(1\\/2\\).Bxz\\(bb\\).Pend\\(12px\\).Va\\(t\\).ie-7_D\\(i\\).smartphone_D\\(b\\).smartphone_W\\(100\\%\\).smartphone_Pend\\(0px\\).smartphone_BdY.smartphone_Bdc\\(\\$seperatorColor\\) \

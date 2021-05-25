@@ -1,4 +1,6 @@
-(*test different values of [x], [y], [w1], and [w2] on the output of algorithm to see which one results in the "best" weighted list*)
+(*Uniform_tesing will test different values of [x], [y], [w1], and [w2] 
+on the output of algorithm to see which one results in the
+ "best" weighted list*)
 
 val initialize_testing_portfolios : User.t -> User.t
 (**[initialize_testing_portfolios u] is the user with 

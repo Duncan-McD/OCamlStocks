@@ -18,10 +18,12 @@ val parse : Scraper.subreddit -> stocks
 (** {2 Functions on stocks type} *)
 
 val stock_names : stocks -> string list
-(** [stock_names stocks] is the list of stock ticker symbols of all stocks in [stocks] *)
+(** [stock_names stocks] is the list of stock ticker symbols of all stocks
+ in [stocks] *)
 
 val data : stocks -> string -> float * post list
-(** [data stocks_data stock_name] is the relevant data associated with [stock_name] in [stock_data]*)
+(** [data stocks_data stock_name] is the relevant data associated with
+ [stock_name] in [stock_data]*)
 
 val join_stocks : stocks list -> stocks
 (** [join_stocks stocks_list] is a type [stocks] created by joining the data 

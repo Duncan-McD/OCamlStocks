@@ -52,9 +52,9 @@ let optimized_constants (user : User.t) : float * float * float * float =
   let users_portfolios = User.test_portfolios user in
   match users_portfolios with
   | [] -> user |> User.config |> Config.consts
-  | _ -> 
-    let tbl = Hashtbl.create 128 in
-    Portfolio.vars
-      (List.hd
-        (List.sort Portfolio.compare
-            (List.map (Portfolio.refresh_some tbl) (users_portfolios))))
+  | _ ->
+      let tbl = Hashtbl.create 128 in
+      Portfolio.vars
+        (List.hd
+           (List.sort Portfolio.compare
+              (List.map (Portfolio.refresh_some tbl) users_portfolios)))

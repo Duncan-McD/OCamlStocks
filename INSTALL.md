@@ -38,7 +38,6 @@ _If for some reason the second step fails, follow the steps below:_
 pv
 openssl
 libssl-dev
-w3m
 libplplot-dev
 libshp-dev
 liblapacke-dev

@@ -238,7 +238,8 @@ let change_vars (portfolio : t) (x, y, w1, w2) =
     timestamp = Unix.time ();
   }
 
-(**[portfolio_swap_first p] is the portfolio whose first is the opposite of [p]*)
+(**[portfolio_swap_first p] is the portfolio whose first is the opposite 
+of [p]*)
 let portfolio_swap_first portfolio =
   {
     liquidity = portfolio.liquidity;
@@ -276,7 +277,8 @@ let refresh portfolio =
   portfolio |> copy |> portfolio_swap_first
   |> rec_refresh_portfolio (list_of_tickers portfolio)
 
-(**[refresh_stock_some p t m tbl] is the portfolio with stock of ticker [t] updated*)
+(**[refresh_stock_some p t m tbl] is the portfolio with stock of ticker
+ [t] updated*)
 let refresh_stock_some (portfolio : t) (ticker : string) (money : float)
     (tbl : (string, float) Hashtbl.t) : t =
   let cost_per_share =
@@ -289,7 +291,8 @@ let refresh_stock_some (portfolio : t) (ticker : string) (money : float)
   let shares = money /. cost_per_share in
   change_ticker_shares portfolio ticker shares cost_per_share
 
-(**[rec_refresh_portfolio_some tbl t p] is the portfolio with each stock in [t] updated*)
+(**[rec_refresh_portfolio_some tbl t p] is the portfolio with each stock
+ in [t] updated*)
 let rec rec_refresh_portfolio_some tbl ticker_names portfolio =
   match ticker_names with
   | [] -> portfolio

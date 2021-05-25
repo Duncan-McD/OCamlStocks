@@ -25,11 +25,11 @@ let connotation_post post =
   connotation_str postText
 
 let history_score stock_data =
-  match stock_data with 
-  | Some sd -> let rating = Stockdata.rating sd in
-    Some (-1. *. tan (Float.pi /. 4. *. (rating -. 3.)))
+  match stock_data with
+  | Some sd ->
+      let rating = Stockdata.rating sd in
+      Some (-1. *. tan (Float.pi /. 4. *. (rating -. 3.)))
   | None -> None
-  
 
 (* [convert_to_ticker stock_ticker] is [stock_ticker] if [stock_ticker] 
     begins with "$" else it is $ ^ [stock_ticker] *)
@@ -39,15 +39,16 @@ let convert_to_ticker s =
 (*  [update_one_stock stock_name post stocks] is [stocks] with the new post data 
     added to the stock [stock_name] *)
 let update_one_stock stock_name post stocks =
-  if Hashtbl.mem stocks stock_name then
-    let data = Hashtbl.find stocks stock_name in
-    match data with h, p -> Hashtbl.replace stocks stock_name (h, post :: p)
-  else begin
-    let hist_score = history_score (stock_name |> Stockdata.stockdata_from_ticker) in
+  (if Hashtbl.mem stocks stock_name then
+   let data = Hashtbl.find stocks stock_name in
+   match data with h, p -> Hashtbl.replace stocks stock_name (h, post :: p)
+  else
+    let hist_score =
+      history_score (stock_name |> Stockdata.stockdata_from_ticker)
+    in
     match hist_score with
     | Some score -> Hashtbl.add stocks stock_name (score, [ post ])
-    | None -> ()
-  end;
+    | None -> ());
   stocks
 
 (*  [update_stocks text post stocks_seen stocks] is [stocks] 
@@ -68,7 +69,8 @@ let rec update_stocks text post stocks_seen stocks =
         update_stocks t post (convert_to_ticker w :: stocks_seen) stocks'
       else update_stocks t post stocks_seen stocks
 
-(* [populate_stocks] is the [stocks] hashtable created from the data in [posts] *)
+(* [populate_stocks] is the [stocks] hashtable created from the data 
+in [posts] *)
 let rec populate_stocks posts stocks =
   match posts with
   | [] -> stocks
