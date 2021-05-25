@@ -33,7 +33,10 @@ let initialize_testing_portfolios (user : User.t) =
               hist_const' scraped_list
           in
           testing_portfolio_list :=
-            Portfolio.process Portfolio.empty_portfolio algoed
+            Portfolio.process
+              (User.current_portfolio user)
+              (score_con', con_const', num_posts_const', hist_const')
+              algoed
             :: !testing_portfolio_list
         done
       done
@@ -42,10 +45,12 @@ let initialize_testing_portfolios (user : User.t) =
   User.change_test_portfolios user !testing_portfolio_list
 
 let optimized_constants (user : User.t) : float * float * float * float =
-  (*THIS IS A BAD SOLUTION!! TODO: set up hashtable to store stock data from yahoo finance to save time
-    TODO: figure out where to send constants
-      SetOptimizer constants *)
-  Portfolio.vars
-    (List.hd
-       (List.sort Portfolio.compare
-          (List.map Portfolio.refresh (User.test_portfolios user))))
+  let users_portfolios = User.test_portfolios user in
+  match users_portfolios with
+  | [] -> user |> User.config |> Config.consts
+  | _ -> 
+    let tbl = Hashtbl.create 128 in
+    Portfolio.vars
+      (List.hd
+        (List.sort Portfolio.compare
+            (List.map (Portfolio.refresh_some tbl) (users_portfolios))))

@@ -41,6 +41,18 @@ val stock_gain_loss : stock -> float
 val list_of_tickers : t -> string list
 (** [list_of_tickers p] is a list of stock tickers in portfolio [p]*)
 
+val list_of_shares : t -> float list
+(** [list_of_shares p] is a list of stock shares in portfolio [p]*)
+
+val list_of_ppss : t -> float list
+(** [list_of_ppss p] is a list of stock price per shares in portfolio [p]*)
+
+val list_of_values : t -> float list
+(** [list_of_values p] is a list of stock values in portfolio [p]*)
+
+val list_of_changes : t -> float list
+(** [list_of_changes p] is a list of stock changes in portfolio [p]*)
+
 val list_of_stocks : t -> stock list
 (** [list_of_stocks p] is a list of stocks in portfolio [p]*)
 
@@ -51,11 +63,17 @@ val stock_from_ticker : t -> string -> stock option
 (** {2 Actions}*)
 
 val refresh : t -> t
-(** [refresh p] is the portfolio p but with refreshed data based on newer stock data*)
+(** [refresh p] is the portfolio p but with refreshed data based on newer stock
+    data*)
 
-val process : t -> (string * float) list * string list -> t
-(** [process p l] is the portfolio p but with the stocks in l processed 
-    - l is the output of Algorithm.ml*)
+val refresh_some : (string, float) Hashtbl.t -> t -> t
+(** [refresh p tbl] is the portfolio p but with refreshed data based on newer
+    stock data only if that data is not already found in tbl *)
+
+val process :
+  t -> float * float * float * float -> (string * float) list * string list -> t
+(** [process p l v] is the portfolio [p] but with the stocks in [l] processed 
+    with from vars [v] - [l] is the output of Algorithm.ml*)
 
 val copy : t -> t
 (** [copy p] is a copy of portfolio p with different references for the values 
@@ -73,7 +91,7 @@ val portfolio_of_json : Yojson.Basic.t -> t
 
 (**[portfolio_of_json j] is the portfolio representation of json [j]*)
 
-val to_json_string : t -> string
+val to_json : t -> Yojson.Basic.t
 
 (**[to_json_string t] is the string in json format of portfolio [t]*)
 val sell_all : t -> t

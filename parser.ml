@@ -103,7 +103,7 @@ let rec join_two_stocks stocks_1 stocks_2 = function
           stocks_1
       | None ->
           Hashtbl.add stocks_1 s s2_s_data;
-          stocks_1 )
+          stocks_1)
 
 (* [join_stocks_helper joined_stocks remaining_stocks_list] is [joined_stocks] 
   where [joined_stocks] is the combined data from [joined_stocks] and 
