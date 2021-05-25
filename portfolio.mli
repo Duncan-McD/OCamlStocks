@@ -8,7 +8,7 @@ type t
 type stock
 (** The abstract data type for a stock in a portfolio*)
 
-(** {2 Portfolio Functions}*)
+(** {5 Portfolio Functions}*)
 
 val empty_portfolio : t
 (** [empty_portfolio] is an initial empty portfolio*)

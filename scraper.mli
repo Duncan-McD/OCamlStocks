@@ -22,6 +22,9 @@ exception SubredditNotFound of string
 exception TooManyPostsRequested of int
 (** Raised when a user requests to parse more posts than there is in the subreddit*)
 
+exception ExitLoop of int
+(** Raised when a user exits the while loop*)
+
 (** {2 Subreddit Constructors }*)
 
 val scrape : ?amount:int -> ?ordering:subreddit_ordering -> string -> subreddit

@@ -19,6 +19,7 @@ let connotation_str str =
   Py.finalize ();
   result
 
+(**[connotation_post p] is the connotation of post [p]*)
 let connotation_post post =
   let postText = Scraper.title post ^ "\n" ^ Scraper.body post in
   connotation_str postText

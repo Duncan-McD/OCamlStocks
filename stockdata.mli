@@ -1,22 +1,22 @@
 (** Represents the most current data of any stock pulled from Yahoo Finance *)
 
-(** {2 Types} *)
+(** {1 Type} *)
 
 type t
 (** the abstract type representation of stock data *)
 
-(** {2 Exceptions} *)
+(** {1 Exception} *)
 
 exception StockNotFound of string
 (** Raised when a stock is not found on Yahoo Finance *)
 
-(** {2 Constructor } *)
+(** {1 Constructor } *)
 
 val stockdata_from_ticker : string -> t option
 (** [stockdata_from_ticker t] is Some the current stock data of stock ticker [t] 
     otherwise None if not found on Yahoo Finance *)
 
-(** {2 Getter Functions }*)
+(** {5 Getter Functions }*)
 
 val value : t -> float
 (** [value sd] is the current value of the stock represented by [sd] *)

@@ -42,7 +42,7 @@ val connotation : post -> float
 val history_score : Stockdata.t option -> float
 (** [history-score stockdata]*)
 
-(** {2 Alternate function forms} *)
+(** {1 Alternate function form} *)
 
 val connotation_str : string -> float
 (** [connotation str] is the connotation of string [str] 

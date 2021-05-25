@@ -1,9 +1,13 @@
+(**[p n x max] is the [x]th float out of [n] parts where the difference 
+between 0. and [max] is split into n parts,*)
 let p n x max =
   match n with
   | 0 -> 0.
   | 1 -> float_of_int x
   | i -> float_of_int x *. (max /. float_of_int (n - 1))
 
+(**[get_scraped_list s acc] is the list of scraped subreddits scraped
+ from subreddit list [s]*)
 let rec get_scraped_list
     (sub_list : (int * Scraper.subreddit_ordering * string) list)
     (acc : Scraper.subreddit list) =

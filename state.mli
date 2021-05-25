@@ -3,6 +3,7 @@
 (** {2 Types}*)
 
 type action
+(**The abstract data type for an action in State*)
 
 type t = { auth : Auth.auth; mutable user : User.t; mutable state : action }
 (** The abstract data type for a state *)

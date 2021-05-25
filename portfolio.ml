@@ -20,6 +20,7 @@ type t = {
   timestamp : float;
 }
 
+(**[current_cost t] is the current cost of ticker [t]*)
 let current_cost ticker =
   ticker |> Stockdata.stockdata_from_ticker |> Stockdata.require ticker
   |> Stockdata.value
@@ -79,19 +80,19 @@ let stock_from_ticker (portfolio : t) (ticker : string) : stock option =
   if Bool.not (Hashtbl.mem portfolio.stocks ticker) then None
   else Some (Hashtbl.find portfolio.stocks ticker)
 
+(**[buy_shares p t s c] is the portfolio after purchasing [s] shares of the
+ stock of stock ticker [t] at a cost of [c]*)
+
+(*TODO: Break function*)
 let buy_shares portfolio ticker shares cost =
   let liquidity = portfolio.liquidity in
   let cost_per_share = cost in
   let diff = (cost_per_share *. shares) -. liquidity in
   let new_liquidity = if diff > 0. then 0. else -1. *. diff in
   let new_shares = if diff > 0. then liquidity /. cost_per_share else shares in
-
-  (*let change_stock_shares (portfolio : t) (stock : stock) (shares : int)
-    (liquidity : float) : t = failwith "unimplemented"*)
   let stock_exists = Hashtbl.mem portfolio.stocks ticker in
   if stock_exists then (
     let past_stock = Hashtbl.find portfolio.stocks ticker in
-
     let new_shares = past_stock.shares +. new_shares in
     let value = cost_per_share *. new_shares in
     let recent_change = value -. past_stock.value in
@@ -151,6 +152,10 @@ let buy_shares portfolio ticker shares cost =
     in
     new_portfolio
 
+(*TODO: Break function*)
+
+(**[sell_shares p t s c] is the portfolio after selling [s] shares of the
+ stock of stock ticker [t] at a cost of [c]*)
 let sell_shares portfolio ticker shares cost =
   let liquidity = portfolio.liquidity in
   let cost_per_share = cost in
@@ -206,17 +211,22 @@ let sell_shares portfolio ticker shares cost =
     in
     new_portfolio
 
+(**[change_ticker_shares p t s c] is the changing the amount [s] shares of the
+ stock of stock ticker [t] at a cost of [c]*)
 let change_ticker_shares (portfolio : t) (ticker : string) (shares : float)
     (cost : float) : t =
   if shares > 0. then buy_shares portfolio ticker shares cost
   else if shares < 0. then sell_shares portfolio ticker (-1. *. shares) cost
   else buy_shares portfolio ticker 0. cost
 
+(**[change_ticker_money p t s c] is the change [s] shares of the
+ stock of stock ticker [t] at a cost of [c] to a new ticker money*)
 let change_ticker_money (portfolio : t) (ticker : string) (money : float) : t =
   let cost_per_share = current_cost ticker in
   let shares = money /. cost_per_share in
   change_ticker_shares portfolio ticker shares cost_per_share
 
+(**[change_vars p (x,y,w1,w2)] is the portfolio whose vars are now (x,y,w1,w2)*)
 let change_vars (portfolio : t) (x, y, w1, w2) =
   {
     liquidity = portfolio.liquidity;
@@ -228,6 +238,7 @@ let change_vars (portfolio : t) (x, y, w1, w2) =
     timestamp = Unix.time ();
   }
 
+(**[portfolio_swap_first p] is the portfolio whose first is the opposite of [p]*)
 let portfolio_swap_first portfolio =
   {
     liquidity = portfolio.liquidity;
@@ -239,8 +250,12 @@ let portfolio_swap_first portfolio =
     timestamp = Unix.time ();
   }
 
+(**[refresh_stock p t] is the portfolio with the stock of ticker [t] 
+updated with its current worth*)
 let refresh_stock portfolio ticker = change_ticker_money portfolio ticker 0.
 
+(**[rec_refresh_portfolio t p] is the portfolio with each stock 
+updated with its current worth*)
 let rec rec_refresh_portfolio ticker_names portfolio =
   match ticker_names with
   | [] -> portfolio
@@ -261,6 +276,7 @@ let refresh portfolio =
   portfolio |> copy |> portfolio_swap_first
   |> rec_refresh_portfolio (list_of_tickers portfolio)
 
+(**[rec_sell t p] is the portfolio with each stock sold*)
 let rec rec_sell ticker_names portfolio =
   match ticker_names with
   | [] -> portfolio
@@ -272,15 +288,18 @@ let rec rec_sell ticker_names portfolio =
          | Some s ->
              change_ticker_shares portfolio h (-1. *. s.shares) (current_cost h))
 
+(**[sell_stocks p s] is the portfolio with each stock sold*)
 let sell_stocks portfolio stocks =
   portfolio |> portfolio_swap_first |> rec_sell stocks
 
+(**[rec_buy t p l] is the portfolio with each stock in [t] bought*)
 let rec rec_buy ticker_names portfolio liquidity =
   match ticker_names with
   | [] -> if portfolio.first then portfolio_swap_first portfolio else portfolio
   | (s, f) :: t ->
       rec_buy t (change_ticker_money portfolio s (liquidity *. f)) liquidity
 
+(**[buy_stocks p s] is the portfolio with each stock in [s] bought*)
 let buy_stocks portfolio stocks =
   let initial_liquidity = portfolio.liquidity in
   rec_buy stocks portfolio initial_liquidity
@@ -310,7 +329,7 @@ let change_liquidity portfolio liquid =
 
 let vars portfolio = portfolio.vars
 
-(**[string_of_stock s] is the string in json format of stock [s]*)
+(**[stock_to_json s] is the json of stock [s]*)
 let stock_to_json (stock : stock) =
   `Assoc
     [
@@ -340,7 +359,7 @@ let trd4 (quad : float * float * float * float) =
 let fth4 (quad : float * float * float * float) =
   match quad with a, b, c, d -> d
 
-(**[string_of_vars t] is the string in json format of vars [t]*)
+(**[vars_to_json t] is json of vars [t]*)
 let vars_to_json (portfolio : t) =
   `Assoc
     [
@@ -350,6 +369,7 @@ let vars_to_json (portfolio : t) =
       ("w2", `Float (fth4 portfolio.vars));
     ]
 
+(**[stock_list_to_json t] is json of stock list [t]*)
 let rec stock_list_to_json (stock_list : stock list) acc =
   match stock_list with
   | [] -> `List acc
@@ -368,7 +388,6 @@ let to_json t =
     ]
 
 (**[stock_of_json j] is the stock representation of json [j]*)
-
 let stock_of_json j =
   {
     ticker = to_string (member "ticker" j);
