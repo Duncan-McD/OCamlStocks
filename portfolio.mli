@@ -65,9 +65,10 @@ val stock_from_ticker : t -> string -> stock option
 val refresh : t -> t
 (** [refresh p] is the portfolio p but with refreshed data based on newer stock data*)
 
-val process : t -> (string * float) list * string list -> t
-(** [process p l] is the portfolio p but with the stocks in l processed 
-    - l is the output of Algorithm.ml*)
+val process :
+  t -> float * float * float * float -> (string * float) list * string list -> t
+(** [process p l v] is the portfolio [p] but with the stocks in [l] processed 
+    with from vars [v] - [l] is the output of Algorithm.ml*)
 
 val copy : t -> t
 (** [copy p] is a copy of portfolio p with different references for the values 
