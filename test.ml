@@ -1,16 +1,24 @@
 (** Test Plan:
+      User (manual)
+        - Manually tested the user functinoality marginally
       Scraper (OUnit + manual)
         - OUnit testing ran on JSON snapshots of subreddits
         - General scraping tests developed using glass box testing
         - Functions on post types developed with black box testing
         - Manual testing used for live scraping from web and different orderings
+      Grapher (manual)
+        - Manually tested the grapher functinoality marginally
       Cashset (OUnit)
         - OUnit testing ran on stock tickers
         - Tested both real and fake ticker names
         - Tested common words factored out
+      Main (manual)
+        - Manually tested the main functinoality marginally
       Stockdata (manual)
         - Manually tested retrieval of stock data since stockdata is all present
         based values that change constantly
+      State (manual)
+        - Manually tested the state functinoality marginally
       Parser (OUnit + manual)
         - General parsing tests developed using black box testing
         - Connotation tests developed with glass box and randomized testing
@@ -18,14 +26,18 @@
         - DISCLAIMER: tests commented out by default due to the large amount of
         time required to complete tests; recommended that you run a maximum of
         half of the tests so there are no issues with timing out
-      Grapher (manual)
-        - Manually tested the grapher functinoality marginally
+      Auth (manual)
+        - Manually tested the auth functinoality marginally
       Algorithm (manual)
         - Manually tested due to changing history score over time
         - Checked calculations done with various different constants
+      Saveload (manual)
+        - Manually tested the saveload functinoality marginally
       Portfolio (OUnit + manual)
         - OUnit testing ran on simple portfolios
         - Manual testing used on time sensitive functions
+      Config (manual)
+        - Manually tested the config functinoality marginally
 
     This testing approach aimed to rigorously test all aspects of the system
     that were possible to test. The tests used maneuvered around the system's
