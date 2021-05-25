@@ -24,7 +24,6 @@ let connotation_post post =
   connotation_str postText
 
 let history_score stock_data =
-  print_string "#";
   let rating =
     match stock_data with Some sd -> Stockdata.rating sd | None -> 3.
   in

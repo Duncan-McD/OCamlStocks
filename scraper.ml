@@ -137,7 +137,6 @@ let build_post post =
 let rec scrape_posts (subreddit : string) (amount : int)
     (after_parameter : string) (current_posts : post list)
     (json_post_list : Yojson.Basic.t list) : post list =
-  print_string "#";
   match json_post_list with
   | h :: t ->
       let post = build_post h in
