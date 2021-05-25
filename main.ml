@@ -33,10 +33,6 @@ let rec main prompt =
           if input <> "" then
             try
               let action = State.action_of_string state input in
-<<<<<<< HEAD
-              print_endline "HI";
-=======
->>>>>>> main
               State.update state action
             with
             | State.InvalidAction (s, string_state) ->
@@ -47,22 +43,13 @@ let rec main prompt =
                 ANSITerminal.print_string [ ANSITerminal.red ]
                   ("\n\"" ^ s ^ "\" cannot be used here. You can type \""
                  ^ string_state ^ "\" to see your options.\n")
-<<<<<<< HEAD
-            | State.LogoutAction ->
-                save user state;
-=======
             | State.LogoutAction s ->
                 if s <> "delete" then save state else ();
->>>>>>> main
                 main Auth.Logged_Out
             | State.QuitAction -> quit_loop := true)
     done;
 
-<<<<<<< HEAD
-    save user state;
-=======
     save state;
->>>>>>> main
     ANSITerminal.print_string [ ANSITerminal.blue ]
       "\n\
        Thanks for using OCamlStocks! I look forward to working with you again.\n"
