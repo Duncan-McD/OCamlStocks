@@ -12,13 +12,13 @@ default: bot
 utop: build
 
 build:
-	$(OCAMLBUILD) $(OBJECTS) -tag thread
+	$(OCAMLBUILD) -I src $(OBJECTS) -tag thread
 
 bot: 
-	$(OCAMLBUILD) -tag 'debug' -tag thread $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
+	$(OCAMLBUILD) -I src -tag 'debug' -tag thread $(MAIN) && OCAMLRUNPARAM=b ./$(MAIN)
 
 test:
-	$(OCAMLBUILD) -tag thread -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
+	$(OCAMLBUILD) -I testing_files -tag thread -tag 'debug' $(TEST) && ./$(TEST) -runner sequential
 
 zip:
 	zip src.zip  README.md INSTALL.md *.csv *.ml* *.json *.sh _tags .merlin .ocamlformat *.png .ocamlinit ocamlstocks.opam testing_files testing_files/*.json .gitignore LICENSE Makefile	

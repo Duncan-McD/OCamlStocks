@@ -19,15 +19,17 @@ _build
 *~
 \#*\#
 .DS_Store
+
+# python
 get-pip.py
-*.txt 
-*.json
-!testing_files/*.json
 venv
 env
+
+# misc.
+*.txt 
 *.png
 *.jpeg
 *.jpg
 *.pdf
-!algorithm.png
-!history_score.png
+!resources/algorithm.png
+!resources/history_score.png

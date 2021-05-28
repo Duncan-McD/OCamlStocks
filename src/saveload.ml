@@ -1,6 +1,6 @@
 open Yojson.Basic.Util
 
-let file = "data.json"
+let file = "src/user_data/data.json"
 
 (**[write_empty_file ()] replaces the saving and loading file with
  an empty file*)
@@ -25,7 +25,7 @@ let rec update_user_json_list (user : User.t)
   | [] -> User.to_json user :: acc
   | (h : Yojson.Basic.t) :: (t : Yojson.Basic.t list) ->
       if to_string (member "name" h) = User.name user then
-        (User.to_json user :: acc) @ t
+        User.to_json user :: acc @ t
       else update_user_json_list user t (h :: acc)
 
 (**[update_user_json_list u l acc] is the json list of users with the

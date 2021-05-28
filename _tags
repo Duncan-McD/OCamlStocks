@@ -1,3 +1,4 @@
 true: package(ounit2), package(mechaml), package(yojson), package(csv), package(pyml), package(owl), package(owl-plplot), package(graphics), package(camlimages.graphics), package(camlimages.png), package(ANSITerminal)
 true: -traverse
-<demo_files>: traverse
+<src>: traverse
+"src": include
