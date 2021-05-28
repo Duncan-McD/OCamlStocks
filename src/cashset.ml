@@ -12,10 +12,10 @@ words that may be the same as a stock ticker 0 *)
 let word_hashtbl = Hashtbl.create word_hashtbl_size
 
 (** [stock_file] is the csv file with stock tickers*)
-let stock_file = "stocks.csv"
+let stock_file = "src/stocks/stocks.csv"
 
 (** [words_file] is the csv file with common words used by redditers*)
-let words_file = "commonwords.csv"
+let words_file = "src/stocks/commonwords.csv"
 
 (** [parse_line str] is the string that occurs before the ',' in a given 
 string *)

@@ -1,4 +1,4 @@
-B _build
+B _build/src
 PKG ounit2
 PKG mechaml
 PKG yojson
