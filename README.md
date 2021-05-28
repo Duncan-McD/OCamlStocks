@@ -12,7 +12,7 @@ Welcome to OCamlStocks! This program aims to enable the user to research the eff
 
  - Stock Algorithm: Our algorithm aims to combine various features about a subreddit post and Yahoo's recommendation rating. 
 
- <img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/algorithm.png">
+ <img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/algorithm.png" height="100">
 
 The above equation is our algorithm. 
  - s is the Reddit Score of a post containing a stock, 
@@ -20,7 +20,7 @@ The above equation is our algorithm.
  - n is the number of reddit posts containg this particular stock
  - h is the history score which is calculated from the Yahoo Reccomendation Rating with the falling equation where r is the recommendation rating
 
-<img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/history_score.png">
+<img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/history_score.png" height="100">
 
  - x,y, w1, and w2 are constants to weight the effects of each of the variables
 
