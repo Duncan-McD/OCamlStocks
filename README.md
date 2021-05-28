@@ -12,6 +12,7 @@ Welcome to OCamlStocks! This program aims to enable the user to research the eff
 
  - Stock Algorithm: Our algorithm aims to combine various features about a subreddit post and Yahoo's recommendation rating. 
 
+
  <img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/algorithm.png" height="100">
 
 The above equation is our algorithm. 
