@@ -2,6 +2,11 @@
 
 Duncan McDonald, Peter Bell, Miguel Roberts, Matthew Chan
 
+Table of Contents
+
+1. [Overview](#ocamlstocks-overview)
+2. [Install and Run](#how-to-run)
+
 ## OCamlStocks Overview
 
 Welcome to OCamlStocks! This program aims to enable the user to research the effectiveness of Reddit as an Investment Advisor. This is built through multiple different steps:
@@ -19,7 +24,7 @@ The above equation is our algorithm.
  - s is the Reddit Score of a post containing a stock, 
  - c is the connotation of that post (This is calculated using the VaderSentiment)
  - n is the number of reddit posts containg this particular stock
- - h is the history score which is calculated from the Yahoo Reccomendation Rating with the falling equation where r is the recommendation rating
+ - h is the history score, which is calculated from the Yahoo Reccomendation Rating with the following equation where r is the recommendation rating:
 
 <img src="https://github.com/Duncan-McD/OCamlStocks/blob/main/resources/history_score.png" height="100">
 
